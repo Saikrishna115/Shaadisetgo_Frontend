@@ -1,0 +1,94 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './VendorList.css';
+
+const VendorList = () => {
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/vendors');
+      setVendors(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch vendors');
+      setLoading(false);
+    }
+  };
+
+  const filteredVendors = vendors.filter(vendor => {
+    const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || vendor.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) return <div className="loading">Loading...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  return (
+    <div className="vendor-list-container">
+      <div className="vendor-list-header">
+        <h1>Find Your Perfect Vendor</h1>
+        <div className="search-filters">
+          <input
+            type="text"
+            placeholder="Search vendors..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="category-select"
+          >
+            <option value="all">All Categories</option>
+            <option value="venue">Venue</option>
+            <option value="catering">Catering</option>
+            <option value="photography">Photography</option>
+            <option value="decoration">Decoration</option>
+            <option value="music">Music</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="vendor-grid">
+        {filteredVendors.map(vendor => (
+          <div key={vendor._id} className="vendor-card">
+            {vendor.image && (
+              <div className="vendor-image">
+                <img src={`http://localhost:5000${vendor.image}`} alt={vendor.name} />
+              </div>
+            )}
+            <div className="vendor-info">
+              <h3>{vendor.name}</h3>
+              <p className="vendor-category">{vendor.category}</p>
+              <p className="vendor-description">{vendor.description}</p>
+              <div className="vendor-footer">
+                <span className="vendor-price">Starting from ₹{vendor.price}</span>
+                <button className="book-btn" onClick={() => navigate(`/vendors/${vendor._id}`)}>View Details</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filteredVendors.length === 0 && (
+        <div className="no-results">
+          <p>No vendors found matching your criteria</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default VendorList;

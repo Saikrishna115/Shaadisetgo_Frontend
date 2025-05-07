@@ -1,0 +1,6 @@
+# .gitignore (shaadisetgo-client)
+node_modules
+build
+.env
+.DS_Store
+npm-debug.log
