@@ -1,6 +1,6 @@
 // AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 import UserCard from '../components/UserCard/UserCard';
 import VendorCard from '../components/VendorCard/VendorCard';
 import BookingCard from '../components/BookingCard/BookingCard';
@@ -31,9 +31,9 @@ const AdminDashboard = () => {
         };
 
         const [usersResponse, vendorsResponse, bookingsResponse] = await Promise.all([
-          axios.get('http://localhost:5000/api/admin/users', config),
-          axios.get('http://localhost:5000/api/admin/vendors', config),
-          axios.get('http://localhost:5000/api/admin/bookings', config)
+          axios.get('/admin/users', config),
+          axios.get('/admin/vendors', config),
+          axios.get('/admin/bookings', config)
         ]);
 
         setUsers(usersResponse.data);
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      await axios.put(`http://localhost:5000/api/admin/users/${userId}/status`, { status }, config);
+      await axios.put(`/admin/users/${userId}/status`, { status }, config);
       setUsers(users.map(user => user._id === userId ? { ...user, status } : user));
       setSuccessMessage('User status updated successfully');
     } catch (err) {
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      await axios.put(`http://localhost:5000/api/admin/vendors/${vendorId}/status`, { status }, config);
+      await axios.put(`/admin/vendors/${vendorId}/status`, { status }, config);
       setVendors(vendors.map(vendor => vendor._id === vendorId ? { ...vendor, status } : vendor));
       setSuccessMessage('Vendor status updated successfully');
     } catch (err) {
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      await axios.put(`http://localhost:5000/api/admin/bookings/${bookingId}/status`, { status }, config);
+      await axios.put(`/admin/bookings/${bookingId}/status`, { status }, config);
       setBookings(bookings.map(booking => booking._id === bookingId ? { ...booking, status } : booking));
       setSuccessMessage('Booking status updated successfully');
     } catch (err) {
