@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Grid, Avatar, Divider } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Avatar, Divider, CircularProgress, Alert } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 
 const UserProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Fetch user profile data
@@ -15,17 +17,26 @@ const UserProfile = () => {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile data');
+        }
         const data = await response.json();
         setProfile(data);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchProfile();
   }, []);
 
-  if (!profile) return <div>Loading...</div>;
+  if (isLoading) return <CircularProgress />; // Loading spinner
+  
+  if (error) {
+    return <Alert severity="error">{error}</Alert>; // Error handling
+  }
 
   return (
     <Box sx={{ p: 3 }}>

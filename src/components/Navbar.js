@@ -4,11 +4,15 @@ import './Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem('token');
+  const isLoggedIn = localStorage.getItem('token') ? true : false;
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    try {
+      localStorage.removeItem('token');
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (

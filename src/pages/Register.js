@@ -23,16 +23,19 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(''); // Reset error before new submission
 
+    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
     try {
-      const { confirmPassword, ...registerData } = formData;
-      const response = await axios.post('http://localhost:5000/api/auth/register', registerData);
+      const { confirmPassword, ...registerData } = formData; // Exclude confirmPassword
+      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/register', registerData);
+      
+      // Store token and navigate to dashboard
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (err) {

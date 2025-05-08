@@ -1,5 +1,9 @@
+// AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import UserCard from './UserCard';
+import VendorCard from './VendorCard';
+import BookingCard from './BookingCard';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -37,8 +41,7 @@ const AdminDashboard = () => {
         setBookings(bookingsResponse.data);
         setLoading(false);
       } catch (err) {
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to load admin data';
-        setError(errorMessage);
+        setError('Failed to load admin data');
         setLoading(false);
       }
     };
@@ -90,30 +93,7 @@ const AdminDashboard = () => {
       <h2>User Management</h2>
       <div className="admin-grid">
         {users.map(user => (
-          <div key={user._id} className="admin-card">
-            <div className="admin-card-header">
-              <h3>{user.name}</h3>
-              <span className={`status status-${user.status.toLowerCase()}`}>
-                {user.status}
-              </span>
-            </div>
-            <div className="admin-card-details">
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Role:</strong> {user.role}</p>
-              <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
-            </div>
-            <div className="admin-card-actions">
-              <select
-                value={user.status}
-                onChange={(e) => handleUserStatusUpdate(user._id, e.target.value)}
-                className="status-select"
-              >
-                <option value="ACTIVE">Active</option>
-                <option value="SUSPENDED">Suspended</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
-          </div>
+          <UserCard key={user._id} user={user} handleStatusUpdate={handleUserStatusUpdate} />
         ))}
       </div>
     </div>
@@ -124,30 +104,7 @@ const AdminDashboard = () => {
       <h2>Vendor Management</h2>
       <div className="admin-grid">
         {vendors.map(vendor => (
-          <div key={vendor._id} className="admin-card">
-            <div className="admin-card-header">
-              <h3>{vendor.businessName}</h3>
-              <span className={`status status-${vendor.status.toLowerCase()}`}>
-                {vendor.status}
-              </span>
-            </div>
-            <div className="admin-card-details">
-              <p><strong>Service Type:</strong> {vendor.serviceType}</p>
-              <p><strong>Location:</strong> {vendor.location}</p>
-              <p><strong>Contact:</strong> {vendor.contact}</p>
-            </div>
-            <div className="admin-card-actions">
-              <select
-                value={vendor.status}
-                onChange={(e) => handleVendorStatusUpdate(vendor._id, e.target.value)}
-                className="status-select"
-              >
-                <option value="ACTIVE">Active</option>
-                <option value="PENDING">Pending</option>
-                <option value="SUSPENDED">Suspended</option>
-              </select>
-            </div>
-          </div>
+          <VendorCard key={vendor._id} vendor={vendor} handleStatusUpdate={handleVendorStatusUpdate} />
         ))}
       </div>
     </div>
@@ -158,33 +115,7 @@ const AdminDashboard = () => {
       <h2>Booking Management</h2>
       <div className="admin-grid">
         {bookings.map(booking => (
-          <div key={booking._id} className="admin-card">
-            <div className="admin-card-header">
-              <h3>Booking #{booking._id.slice(-6)}</h3>
-              <span className={`status status-${booking.status.toLowerCase()}`}>
-                {booking.status}
-              </span>
-            </div>
-            <div className="admin-card-details">
-              <p><strong>Customer:</strong> {booking.customerName}</p>
-              <p><strong>Vendor:</strong> {booking.vendorName}</p>
-              <p><strong>Service:</strong> {booking.service}</p>
-              <p><strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}</p>
-              <p><strong>Amount:</strong> ₹{booking.amount}</p>
-            </div>
-            <div className="admin-card-actions">
-              <select
-                value={booking.status}
-                onChange={(e) => handleBookingStatusUpdate(booking._id, e.target.value)}
-                className="status-select"
-              >
-                <option value="CONFIRMED">Confirmed</option>
-                <option value="PENDING">Pending</option>
-                <option value="CANCELLED">Cancelled</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
-            </div>
-          </div>
+          <BookingCard key={booking._id} booking={booking} handleStatusUpdate={handleBookingStatusUpdate} />
         ))}
       </div>
     </div>

@@ -1,31 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Grid, Avatar, Divider, ImageList, ImageListItem } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Avatar, Divider, ImageList, ImageListItem, CircularProgress } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 
 const VendorProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Fetch vendor profile data
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch(`/api/vendor/${user._id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
-        setProfile(data);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
+    // Ensure user is available before making the request
+    if (user && user._id) {
+      const fetchProfile = async () => {
+        try {
+          setLoading(true);
+          setError('');
+          const response = await fetch(`/api/vendor/${user._id}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
 
-    fetchProfile();
+          if (!response.ok) {
+            throw new Error('Failed to fetch profile');
+          }
+
+          const data = await response.json();
+          setProfile(data);
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          setError('Failed to load vendor profile');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchProfile();
+    }
   }, [user._id]);
 
-  if (!profile) return <div>Loading...</div>;
+  if (loading) return <CircularProgress sx={{ display: 'block', margin: 'auto', marginTop: 5 }} />;
+  if (error) return <div>{error}</div>;
 
   return (
     <Box sx={{ p: 3 }}>

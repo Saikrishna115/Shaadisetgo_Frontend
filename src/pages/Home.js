@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHeart, FaSearch, FaCalendar } from 'react-icons/fa';
-import heroBg from '../assets/hero-bg.jpg';
+import heroBg from '../assets/hero-bg.jpg';  // Ensure the image path is correct
 import './Home.css';
 
 const Home = () => {
@@ -51,6 +51,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
+      {/* Hero Section */}
       <section className="hero-section" style={{ backgroundImage: `url(${heroBg})` }}>
         <div className="hero-content">
           <h1 className="hero-title">Plan Your Perfect Wedding</h1>
@@ -59,6 +60,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Features Section */}
       <section className="features-section">
         <div className="features-grid">
           {features.map((feature, index) => (
@@ -71,6 +73,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Categories Section */}
       <section className="categories-section">
         <h2>Browse by Category</h2>
         <div className="categories-grid">
@@ -83,6 +86,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
       <section className="testimonials-section">
         <h2>What Couples Say</h2>
         <div className="testimonials-grid">
@@ -95,6 +99,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Newsletter Section */}
       <section className="newsletter-section">
         <h2>Stay Updated</h2>
         <p>Subscribe to receive wedding planning tips and vendor recommendations</p>

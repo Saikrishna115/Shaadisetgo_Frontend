@@ -13,27 +13,27 @@ const Footer = () => {
         
         <div className="footer-section">
           <h4>Quick Links</h4>
-          <Link to="/vendors">Find Vendors</Link>
-          <Link to="/register">Become a Vendor</Link>
-          <Link to="/contact">Contact Us</Link>
+          <Link to="/vendors" aria-label="Find Vendors">Find Vendors</Link>
+          <Link to="/register" aria-label="Become a Vendor">Become a Vendor</Link>
+          <Link to="/contact" aria-label="Contact Us">Contact Us</Link>
         </div>
 
         <div className="footer-section">
           <h4>Legal</h4>
-          <Link to="/privacy">Privacy Policy</Link>
-          <Link to="/terms">Terms of Service</Link>
+          <Link to="/privacy" aria-label="Privacy Policy">Privacy Policy</Link>
+          <Link to="/terms" aria-label="Terms of Service">Terms of Service</Link>
         </div>
 
         <div className="footer-section">
           <h4>Connect With Us</h4>
           <div className="social-links">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <i className="fab fa-facebook"></i>
             </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <i className="fab fa-instagram"></i>
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
               <i className="fab fa-twitter"></i>
             </a>
           </div>

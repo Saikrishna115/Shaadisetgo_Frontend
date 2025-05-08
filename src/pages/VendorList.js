@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import axios from '../utils/axios'; // Use centralized axios instance
 import './VendorList.css';
 
 const VendorList = () => {
@@ -8,6 +9,7 @@ const VendorList = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchVendors();
@@ -15,18 +17,18 @@ const VendorList = () => {
 
   const fetchVendors = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/vendors');
+      const response = await axios.get('/vendors'); // uses baseURL from axios instance
       setVendors(response.data);
-      setLoading(false);
     } catch (err) {
       setError('Failed to fetch vendors');
+    } finally {
       setLoading(false);
     }
   };
 
   const filteredVendors = vendors.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
+                          vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || vendor.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -66,7 +68,7 @@ const VendorList = () => {
           <div key={vendor._id} className="vendor-card">
             {vendor.image && (
               <div className="vendor-image">
-                <img src={`http://localhost:5000${vendor.image}`} alt={vendor.name} />
+                <img src={`https://shaadisetgo-backend.onrender.com${vendor.image}`} alt={vendor.name} />
               </div>
             )}
             <div className="vendor-info">

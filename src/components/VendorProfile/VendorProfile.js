@@ -9,7 +9,8 @@ import {
   Grid,
   Container,
   MenuItem,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 
 const serviceTypes = [
@@ -30,7 +31,8 @@ const VendorProfile = ({
   handleProfileUpdate,
   setIsEditing,
   error,
-  successMessage
+  successMessage,
+  isLoading
 }) => {
   return (
     <Container maxWidth="md">
@@ -136,13 +138,15 @@ const VendorProfile = ({
                     variant="contained"
                     color="primary"
                     onClick={handleProfileUpdate}
+                    disabled={isLoading} // Disable while loading
                   >
-                    Save Changes
+                    {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'}
                   </Button>
                   <Button
                     variant="outlined"
                     color="secondary"
                     onClick={() => setIsEditing(false)}
+                    disabled={isLoading} // Disable while loading
                   >
                     Cancel
                   </Button>
@@ -205,6 +209,7 @@ const VendorProfile = ({
                     variant="contained"
                     color="primary"
                     onClick={() => setIsEditing(true)}
+                    disabled={isLoading} // Disable while loading
                   >
                     Edit Profile
                   </Button>

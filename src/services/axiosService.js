@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://shaadisetgo-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Include if your API uses cookies or needs credentials
 });
 
 export default instance;

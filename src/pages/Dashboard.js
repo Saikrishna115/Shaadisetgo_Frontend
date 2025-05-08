@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import VendorProfile from '../components/VendorProfile/VendorProfile';
-import UserProfile from '../components/UserProfile/UserProfile';
+import VendorProfileForm from '../components/VendorProfileForm';
+import UserProfileForm from '../components/UserProfileForm';
 import {
   Container,
   Box,
   Typography,
   Tabs,
   Tab,
-  Paper,
   Grid,
   Card,
   CardContent,
   Chip,
-  Button
+  Button,
+  Paper
 } from '@mui/material';
 
 const initialProfileState = {
@@ -29,7 +29,6 @@ const initialProfileState = {
   eventDate: null,
   budget: '',
   guestCount: '',
-  // Vendor specific fields
   businessName: '',
   serviceType: '',
   location: '',
@@ -45,10 +44,11 @@ const Dashboard = () => {
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(initialProfileState);
-  const [services, setServices] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [activeTab, setActiveTab] = useState('profile');
   const [userInfo, setUserInfo] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -61,6 +61,7 @@ const Dashboard = () => {
 
     const fetchDashboardData = async () => {
       try {
+        setProfileLoading(true);
         const config = {
           headers: { Authorization: `Bearer ${token}` },
           validateStatus: status => status < 500
@@ -69,24 +70,14 @@ const Dashboard = () => {
         const [userResponse, bookingsResponse] = await Promise.all([
           axios.get('http://localhost:5000/api/auth/me', config),
           axios.get('http://localhost:5000/api/bookings', config)
-        ]).catch(error => {
-          if (error.response?.status === 401) {
-            localStorage.clear();
-            throw new Error('Session expired. Please login again.');
-          }
-          throw error;
-        });
+        ]);
 
         const bookingsData = Array.isArray(bookingsResponse.data) ? bookingsResponse.data : [];
         let userData = userResponse.data;
 
         if (userData.role === 'vendor') {
-          try {
-            const vendorResponse = await axios.get(`http://localhost:5000/api/vendors/user/${userData._id}`, config);
-            userData = { ...userData, vendorInfo: vendorResponse.data };
-          } catch (vendorError) {
-            console.error('Error fetching vendor data:', vendorError);
-          }
+          const vendorResponse = await axios.get(`http://localhost:5000/api/vendors/user/${userData._id}`, config);
+          userData = { ...userData, vendorInfo: vendorResponse.data };
         }
 
         setUserInfo(userData);
@@ -103,7 +94,6 @@ const Dashboard = () => {
           eventDate: userData.eventDate ? new Date(userData.eventDate) : null,
           budget: userData.budget || '',
           guestCount: userData.guestCount || '',
-          // Vendor specific fields
           businessName: userData.vendorInfo?.businessName || '',
           serviceType: userData.vendorInfo?.serviceType || '',
           location: userData.vendorInfo?.location || '',
@@ -112,17 +102,21 @@ const Dashboard = () => {
           description: userData.vendorInfo?.description || ''
         });
         setLoading(false);
+        setProfileLoading(false);
+        setBookingsLoading(false);
       } catch (err) {
         const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
         setError(errorMessage);
         setLoading(false);
+        setProfileLoading(false);
+        setBookingsLoading(false);
       }
     };
 
     fetchDashboardData();
   }, []);
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading || profileLoading || bookingsLoading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
   const handleProfileUpdate = async () => {
@@ -133,18 +127,11 @@ const Dashboard = () => {
         return;
       }
 
-      if (!userInfo || !userInfo._id) {
-        localStorage.clear();
-        setError('Invalid user data. Please log out and log in again.');
-        return;
-      }
-
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      // Validate required fields
-      const requiredFields = userInfo.role === 'vendor' 
+      const requiredFields = userInfo?.role === 'vendor'
         ? ['businessName', 'serviceType', 'location', 'contact']
         : ['name'];
 
@@ -157,27 +144,18 @@ const Dashboard = () => {
       let response;
       if (userInfo.role === 'vendor') {
         if (userInfo.vendorInfo) {
-          response = await axios.put(
-            `http://localhost:5000/api/vendors/${userInfo.vendorInfo._id}`,
-            profileData,
-            config
-          );
+          response = await axios.put(`http://localhost:5000/api/vendors/${userInfo.vendorInfo._id}`, profileData, config);
         } else {
           response = await axios.post('http://localhost:5000/api/vendors', profileData, config);
         }
       } else {
-        response = await axios.put(
-          `http://localhost:5000/api/users/${userInfo._id}`,
-          profileData,
-          config
-        );
+        response = await axios.put(`http://localhost:5000/api/users/${userInfo._id}`, profileData, config);
       }
 
       if (response.data) {
         setSuccessMessage('Profile updated successfully!');
         setError('');
         setIsEditing(false);
-        // Use the response data to update the state instead of reloading
         const updatedData = response.data;
         if (userInfo.role === 'vendor') {
           setUserInfo(prev => ({
@@ -206,86 +184,29 @@ const Dashboard = () => {
     }));
   };
 
-
-
   const renderProfileSection = () => (
     <div className="profile-section">
       <h2>{userInfo?.role === 'vendor' ? 'Vendor Profile' : 'Your Profile'}</h2>
       {isEditing ? (
-        <div className="edit-profile-form">
-          {userInfo?.role === 'vendor' ? (
-            <>
-              <input
-                type="text"
-                name="businessName"
-                value={profileData.businessName}
-                onChange={handleInputChange}
-                placeholder="Business Name"
-                required
-              />
-              <input
-                type="text"
-                name="serviceType"
-                value={profileData.serviceType}
-                onChange={handleInputChange}
-                placeholder="Service Type"
-                required
-              />
-              <input
-                type="text"
-                name="location"
-                value={profileData.location}
-                onChange={handleInputChange}
-                placeholder="Location"
-                required
-              />
-              <input
-                type="text"
-                name="contact"
-                value={profileData.contact}
-                onChange={handleInputChange}
-                placeholder="Contact"
-                required
-              />
-              <input
-                type="text"
-                name="priceRange"
-                value={profileData.priceRange}
-                onChange={handleInputChange}
-                placeholder="Price Range"
-              />
-              <textarea
-                name="description"
-                value={profileData.description}
-                onChange={handleInputChange}
-                placeholder="Description"
-              />
-            </>
-          ) : (
-            <>
-              <input
-                type="text"
-                name="name"
-                value={profileData.name}
-                onChange={handleInputChange}
-                placeholder="Name"
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                value={profileData.email}
-                onChange={handleInputChange}
-                placeholder="Email"
-                disabled
-              />
-            </>
-          )}
-          <div className="form-actions">
-            <button onClick={handleProfileUpdate} className="save-btn">Save Changes</button>
-            <button onClick={() => setIsEditing(false)} className="cancel-btn">Cancel</button>
-          </div>
-        </div>
+        userInfo?.role === 'vendor' ? (
+          <VendorProfileForm
+            profileData={profileData}
+            handleInputChange={handleInputChange}
+            handleProfileUpdate={handleProfileUpdate}
+            setIsEditing={setIsEditing}
+            error={error}
+            successMessage={successMessage}
+          />
+        ) : (
+          <UserProfileForm
+            profileData={profileData}
+            handleInputChange={handleInputChange}
+            handleProfileUpdate={handleProfileUpdate}
+            setIsEditing={setIsEditing}
+            error={error}
+            successMessage={successMessage}
+          />
+        )
       ) : (
         <div className={userInfo?.role === 'vendor' ? 'vendor-info' : 'customer-info'}>
           {userInfo?.role === 'vendor' ? (
@@ -332,9 +253,7 @@ const Dashboard = () => {
                     </Typography>
                     <Chip
                       label={booking.status}
-                      color={booking.status === 'PENDING' ? 'warning' : 
-                             booking.status === 'CONFIRMED' ? 'success' : 
-                             booking.status === 'CANCELLED' ? 'error' : 'default'}
+                      color={booking.status === 'PENDING' ? 'warning' : booking.status === 'CONFIRMED' ? 'success' : 'error'}
                       size="small"
                     />
                   </Box>
@@ -349,11 +268,7 @@ const Dashboard = () => {
                   </Typography>
                   {userInfo?.role !== 'vendor' && booking.status === 'PENDING' && (
                     <Box sx={{ mt: 2 }}>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        fullWidth
-                      >
+                      <Button variant="outlined" color="error" fullWidth>
                         Cancel Booking
                       </Button>
                     </Box>
@@ -386,41 +301,14 @@ const Dashboard = () => {
         </Typography>
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs 
-            value={activeTab === 'profile' ? 0 : 1}
-            onChange={(e, newValue) => setActiveTab(newValue === 0 ? 'profile' : 'bookings')}
-          >
+          <Tabs value={activeTab === 'profile' ? 0 : 1} onChange={(e, newValue) => setActiveTab(newValue === 0 ? 'profile' : 'bookings')}>
             <Tab label="Profile" />
             <Tab label="Bookings" />
           </Tabs>
         </Box>
 
         <Box sx={{ mt: 3 }}>
-          {activeTab === 'profile' ? (
-            userInfo?.role === 'vendor' ? (
-              <VendorProfile
-                profileData={profileData}
-                isEditing={isEditing}
-                handleInputChange={handleInputChange}
-                handleProfileUpdate={handleProfileUpdate}
-                setIsEditing={setIsEditing}
-                error={error}
-                successMessage={successMessage}
-              />
-            ) : (
-              <UserProfile
-                profileData={profileData}
-                isEditing={isEditing}
-                handleInputChange={handleInputChange}
-                handleProfileUpdate={handleProfileUpdate}
-                setIsEditing={setIsEditing}
-                error={error}
-                successMessage={successMessage}
-              />
-            )
-          ) : (
-            renderBookingsSection()
-          )}
+          {activeTab === 'profile' ? renderProfileSection() : renderBookingsSection()}
         </Box>
       </Box>
     </Container>

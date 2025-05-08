@@ -23,10 +23,14 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      // Updated the URL to use the backend deployed on Render
+      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', formData);
+      
+      // Store the token and navigate to the dashboard
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (err) {
+      // Show error message if login fails
       setError(err.response?.data?.error || 'Login failed');
     }
   };
