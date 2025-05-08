@@ -16,9 +16,9 @@ const BookingCard = ({ booking, handleStatusUpdate }) => {
     <div className="booking-card">
       <div className="booking-info">
         <h3>Booking #{booking._id}</h3>
-        <p className="booking-user">User: {booking.user?.name}</p>
-        <p className="booking-vendor">Vendor: {booking.vendor?.businessName}</p>
-        <p className="booking-service">Service: {booking.vendor?.serviceType}</p>
+        <p className="booking-user">User: {booking.user ? booking.user.name : 'N/A'}</p>
+        <p className="booking-vendor">Vendor: {booking.vendor ? booking.vendor.businessName : 'N/A'}</p>
+        <p className="booking-service">Service: {booking.vendor ? booking.vendor.serviceType : 'N/A'}</p>
         <p className="booking-date">Event Date: {new Date(booking.eventDate).toLocaleDateString()}</p>
         <p className="booking-guests">Guests: {booking.guestCount}</p>
         <p className="booking-budget">Budget: ₹{booking.budget}</p>
