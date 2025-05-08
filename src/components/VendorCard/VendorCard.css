@@ -1,0 +1,50 @@
+.vendor-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.vendor-info {
+  flex: 1;
+}
+
+.vendor-info h3 {
+  margin: 0 0 0.5rem;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.vendor-type,
+.vendor-location,
+.vendor-contact,
+.vendor-price {
+  margin: 0.25rem 0;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.vendor-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.status-select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #4a90e2;
+}

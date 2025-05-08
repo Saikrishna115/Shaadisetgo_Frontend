@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import UserCard from '../components/UserCard/UserCard';
-import VendorCard from './VendorCard';
+import VendorCard from '../components/VendorCard/VendorCard';
 import BookingCard from './BookingCard';
 import './AdminDashboard.css';
 
