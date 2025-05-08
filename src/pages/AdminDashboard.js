@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import UserCard from '../components/UserCard/UserCard';
 import VendorCard from '../components/VendorCard/VendorCard';
-import BookingCard from './BookingCard';
+import BookingCard from '../components/BookingCard/BookingCard';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {

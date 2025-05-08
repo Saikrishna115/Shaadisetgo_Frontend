@@ -1,0 +1,79 @@
+.booking-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.booking-info {
+  flex: 1;
+}
+
+.booking-info h3 {
+  margin: 0 0 10px;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.booking-info p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.booking-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-confirmed {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-pending {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-cancelled {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.status-completed {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
