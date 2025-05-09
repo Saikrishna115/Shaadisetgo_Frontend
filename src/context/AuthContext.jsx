@@ -21,18 +21,23 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const userRole = localStorage.getItem('userRole');
+      if (!token || !userRole) {
         setLoading(false);
+        logout();
         return;
       }
 
       const response = await axios.get('/auth/me');
       if (response.data) {
+        if (response.data.role !== userRole) {
+          throw new Error('User role mismatch');
+        }
         setUser(response.data);
       }
     } catch (err) {
       console.error('Auth status check failed:', err);
-      localStorage.removeItem('token');
+      logout();
     } finally {
       setLoading(false);
     }
@@ -45,6 +50,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data.token && response.data.user) {
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userRole', response.data.user.role);
         setUser(response.data.user);
         return true;
       }
@@ -57,6 +63,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
     setUser(null);
   };
 
