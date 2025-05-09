@@ -20,21 +20,56 @@ const Login = () => {
     });
   };
 
+  const validateForm = () => {
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    if (!formData.password) {
+      setError('Password is required');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Updated the URL to use the backend deployed on Render
-      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', formData);
+      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // Store the token and navigate to the dashboard
-      localStorage.setItem('token', response.data.token);
-      navigate('/dashboard');
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        navigate('/dashboard');
+      } else {
+        setError('Login successful but no token received');
+      }
     } catch (err) {
-      // Show error message if login fails
-      setError(err.response?.data?.error || 'Login failed');
+      console.error('Login error:', err.response?.data || err.message);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          (err.response?.status === 400 ? 'Invalid login credentials. Please check your email and password.' : err.message) || 
+                          'Login failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
