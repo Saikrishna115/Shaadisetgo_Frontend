@@ -32,11 +32,11 @@ const Login = () => {
       // Store the token and navigate to the dashboard
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
-    } finally {
-      setLoading(false);
     } catch (err) {
       // Show error message if login fails
       setError(err.response?.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
