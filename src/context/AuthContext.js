@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
+      setLoading(true);
       const response = await axios.post('/auth/login', {
         email,
         password
@@ -56,12 +57,14 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userRole', response.data.user.role);
         setUser({ ...response.data.user, role: response.data.user.role });
-        return true;
+        return response.data.user;
       }
-      return false;
+      throw new Error('Invalid response from server');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-      return false;
+      setError(err.response?.data?.message || err.message || 'Login failed');
+      return null;
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -22,7 +22,13 @@ const Login = () => {
 
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/dashboard');
+      if (user.role === 'vendor') {
+        navigate('/vendor/dashboard');
+      } else if (user.role === 'customer') {
+        navigate('/customer/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [user, navigate, authLoading]);
 
@@ -32,18 +38,8 @@ const Login = () => {
     setError('');
 
     try {
-      const userData = await login(email, password);
-      if (userData) {
-        if (userData.role === 'vendor') {
-          navigate('/vendor/dashboard');
-        } else if (userData.role === 'customer') {
-          navigate('/customer/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
-      } else {
-        setError(authError || 'Login failed. Please try again.');
-      }
+      await login(email, password);
+      // Navigation will be handled by useEffect when user state updates
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
