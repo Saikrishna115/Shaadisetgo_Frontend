@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const AuthContext = createContext();
 
@@ -28,10 +28,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No token found');
       }
 
-      const response = await axios.get('https://shaadisetgo-backend.onrender.com/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 10000 // 10 second timeout
-      });
+      const response = await axios.get('/auth/me');
 
       setUser(response.data);
       setError(null);
@@ -60,11 +57,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password
-      }, {
-        timeout: 10000 // 10 second timeout
       });
 
       const { token, user: userData } = response.data;
@@ -87,9 +82,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/register', userData, {
-        timeout: 10000 // 10 second timeout
-      });
+      const response = await axios.post('/auth/register', userData);
       const { token, user: newUser } = response.data;
       localStorage.setItem('token', token);
       setUser(newUser);
