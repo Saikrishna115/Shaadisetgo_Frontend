@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from '../utils/axios';
+import axios from '../utils/axios'; // Axios with interceptors
 
 const AuthContext = createContext(null);
 
@@ -30,8 +30,8 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get('/auth/me');
       setUser(response.data);
     } catch (err) {
-      console.error('Auth check failed:', err);
-      logout(); // clear token & reset user
+      console.error('Auth check failed:', err.response?.data || err.message);
+      logout();
     } finally {
       setLoading(false);
     }
@@ -44,9 +44,7 @@ export const AuthProvider = ({ children }) => {
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
-      localStorage.setItem('userRole', user.role);
       setUser(user);
-
       return true;
     } catch (err) {
       console.error('Login error:', err.response?.data?.message || err.message);

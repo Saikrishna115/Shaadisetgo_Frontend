@@ -20,17 +20,18 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
       if (user.role === 'vendor') {
         navigate('/vendor/dashboard');
+      } else if (user.role === 'admin') {
+        navigate('/admin');
       } else if (user.role === 'customer') {
-        navigate('/customer/dashboard');
-      } else {
         navigate('/dashboard');
       }
     }
-  }, [user, navigate, authLoading]);
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,9 +40,9 @@ const Login = () => {
 
     try {
       await login(email, password);
-      // Navigation will be handled by useEffect when user state updates
+      // Navigation is handled inside useEffect when user updates
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      setError('Login failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -51,7 +52,7 @@ const Login = () => {
     <Container maxWidth="sm">
       <Box sx={{ mt: 8, mb: 4 }}>
         <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
+          <Typography variant="h4" align="center" gutterBottom>
             Login
           </Typography>
 
@@ -71,8 +72,6 @@ const Login = () => {
               margin="normal"
               required
               autoComplete="username"
-              id="email"
-              name="email"
             />
             <TextField
               fullWidth
@@ -83,8 +82,6 @@ const Login = () => {
               margin="normal"
               required
               autoComplete="current-password"
-              id="password"
-              name="password"
             />
             <Button
               type="submit"
@@ -101,10 +98,7 @@ const Login = () => {
           <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="body2">
               Don't have an account?{' '}
-              <Button
-                onClick={() => navigate('/register')}
-                color="primary"
-              >
+              <Button onClick={() => navigate('/register')} color="primary">
                 Register
               </Button>
             </Typography>
