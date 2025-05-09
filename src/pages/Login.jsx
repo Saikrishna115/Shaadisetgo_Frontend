@@ -32,9 +32,15 @@ const Login = () => {
     setError('');
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigate('/dashboard');
+      const userData = await login(email, password);
+      if (userData) {
+        if (userData.role === 'vendor') {
+          navigate('/vendor/dashboard');
+        } else if (userData.role === 'customer') {
+          navigate('/customer/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         setError(authError || 'Login failed. Please try again.');
       }

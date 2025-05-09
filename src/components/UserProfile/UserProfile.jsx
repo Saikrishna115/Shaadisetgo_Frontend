@@ -12,7 +12,7 @@ const UserProfile = () => {
     // Fetch user profile data
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/auth/me', {
+        const response = await fetch('https://shaadisetgo-backend.onrender.com/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

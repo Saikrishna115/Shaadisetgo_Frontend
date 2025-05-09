@@ -1,43 +1,41 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { useAuth } from './context/AuthContext';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import PrivateRoute from './PrivateRoute';
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  return children;
-};
+import LoginPage from './pages/LoginPage';
+import CustomerDashboard from './pages/customer/Dashboard';
+import VendorDashboard from './pages/vendor/Dashboard';
+import HomePage from './pages/HomePage';
 
 const App = () => {
   return (
-    <Router>
-      <AuthProvider>
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+
           <Route
-            path="/dashboard"
+            path="/customer/dashboard"
             element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
+              <PrivateRoute role="customer">
+                <CustomerDashboard />
+              </PrivateRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+
+          <Route
+            path="/vendor/dashboard"
+            element={
+              <PrivateRoute role="vendor">
+                <VendorDashboard />
+              </PrivateRoute>
+            }
+          />
         </Routes>
-      </AuthProvider>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 };
 
