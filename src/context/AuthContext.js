@@ -5,9 +5,7 @@ const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
@@ -21,24 +19,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuthStatus = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('token');
-      const userRole = localStorage.getItem('userRole');
-      
-      if (!token || !userRole) {
-        setLoading(false);
-        return;
-      }
-
       const response = await axios.get('/auth/me');
-
-      if (response.data) {
-        setUser({ ...response.data, role: userRole });
-      }
+      setUser(response.data);
     } catch (err) {
-      console.error('Auth status check failed:', err);
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
+      console.error('Auth check failed:', err);
+      logout(); // clear token & reset user
     } finally {
       setLoading(false);
     }
@@ -47,44 +40,28 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      setLoading(true);
-      const response = await axios.post('/auth/login', {
-        email,
-        password
-      });
+      const response = await axios.post('/auth/login', { email, password });
+      const { token, user } = response.data;
 
-      if (response.data.token && response.data.user) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userRole', response.data.user.role);
-        setUser({ ...response.data.user, role: response.data.user.role });
-        return response.data.user;
-      }
-      throw new Error('Invalid response from server');
+      localStorage.setItem('token', token);
+      localStorage.setItem('userRole', user.role);
+      setUser(user);
+
+      return true;
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Login failed');
-      return null;
-    } finally {
-      setLoading(false);
+      console.error('Login error:', err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || 'Login failed');
+      return false;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
+    localStorage.clear();
     setUser(null);
   };
 
-  const value = {
-    user,
-    loading,
-    error,
-    login,
-    logout,
-    checkAuthStatus
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
