@@ -14,22 +14,21 @@ import {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, user, loading, error: authError } = useAuth();
+  const { login, user, loading: authLoading, error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Redirect if user is already logged in
-    if (user && !loading) {
+    if (user && !authLoading) {
       navigate('/dashboard');
     }
-  }, [user, navigate, loading]);
+  }, [user, navigate, authLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
     setError('');
 
     try {
@@ -42,7 +41,7 @@ const Login = () => {
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -87,9 +86,9 @@ const Login = () => {
               variant="contained"
               size="large"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
+              disabled={isSubmitting || authLoading}
             >
-              {loading ? <CircularProgress size={24} /> : 'Login'}
+              {isSubmitting ? <CircularProgress size={24} /> : 'Login'}
             </Button>
           </form>
 
