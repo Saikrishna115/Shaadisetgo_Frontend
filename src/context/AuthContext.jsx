@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No token found');
       }
 
-      const response = await axios.get('/api/auth/me');
+      const response = await axios.get('/auth/me');
 
       setUser(response.data);
       setError(null);
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password
       });
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await axios.post('/auth/register', userData);
       const { token, user: newUser } = response.data;
       localStorage.setItem('token', token);
       setUser(newUser);
