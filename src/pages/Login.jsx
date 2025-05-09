@@ -14,7 +14,7 @@ import {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, user, error: authError } = useAuth();
+  const { login, user, loading, error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,10 +22,10 @@ const Login = () => {
 
   useEffect(() => {
     // Redirect if user is already logged in
-    if (user) {
+    if (user && !loading) {
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, navigate, loading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
