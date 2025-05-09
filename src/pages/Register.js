@@ -76,9 +76,30 @@ const Register = () => {
       
       if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
-        navigate('/dashboard');
+        localStorage.setItem('userRole', formData.role);
+        setError('');
+        // Attempt to log in automatically after successful registration
+        try {
+          const loginResponse = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', {
+            email: formData.email,
+            password: formData.password
+          });
+          if (loginResponse.data && loginResponse.data.token) {
+            localStorage.setItem('token', loginResponse.data.token);
+            // Redirect based on user role
+            if (formData.role === 'vendor') {
+              navigate('/vendor/dashboard');
+            } else {
+              navigate('/dashboard');
+            }
+          }
+        } catch (loginErr) {
+          console.error('Auto-login failed:', loginErr);
+          navigate('/login');
+        }
       } else {
-        setError('Registration successful but no token received');
+        setError('Registration successful! Please log in.');
+        navigate('/login');
       }
     } catch (err) {
       console.error('Registration error:', err.response?.data || err.message);

@@ -23,7 +23,9 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const userRole = localStorage.getItem('userRole');
+      
+      if (!token || !userRole) {
         setLoading(false);
         return;
       }
@@ -31,11 +33,12 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get('/auth/me');
 
       if (response.data) {
-        setUser(response.data);
+        setUser({ ...response.data, role: userRole });
       }
     } catch (err) {
       console.error('Auth status check failed:', err);
       localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
     } finally {
       setLoading(false);
     }
@@ -63,6 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
     setUser(null);
   };
 

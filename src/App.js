@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import VendorList from './pages/VendorList';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import VendorDashboard from './pages/VendorDashboard';
 import NotFound from './pages/NotFound'; // Optional but recommended
 
 // Private route wrapper
@@ -43,8 +44,16 @@ function App() {
                 <Route
                   path="/dashboard"
                   element={
-                    <PrivateRoute roles={['customer', 'vendor']}>
+                    <PrivateRoute roles={['customer']}>
                       <Dashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/vendor/dashboard"
+                  element={
+                    <PrivateRoute roles={['vendor']}>
+                      <VendorDashboard />
                     </PrivateRoute>
                   }
                 />

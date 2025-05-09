@@ -57,11 +57,24 @@ const Login = () => {
         }
       });
       
-      if (response.data && response.data.token) {
+      if (response.data && response.data.token && response.data.user) {
         localStorage.setItem('token', response.data.token);
-        navigate('/dashboard');
+        localStorage.setItem('userRole', response.data.user.role);
+
+        // Role-based redirection
+        switch (response.data.user.role) {
+          case 'vendor':
+            navigate('/vendor/dashboard');
+            break;
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'customer':
+          default:
+            navigate('/dashboard');
+        }
       } else {
-        setError('Login successful but no token received');
+        setError('Login successful but no token or user data received');
       }
     } catch (err) {
       console.error('Login error:', err.response?.data || err.message);
@@ -103,6 +116,7 @@ const Login = () => {
             value={formData.password}
             onChange={handleChange}
             required
+            autoComplete="current-password"
           />
         </div>
 
