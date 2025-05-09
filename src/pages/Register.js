@@ -7,7 +7,7 @@ import { CircularProgress } from '@mui/material';
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     phone: '',
     password: '',
@@ -57,12 +57,12 @@ const Register = () => {
         {error && <div className="error-message">{error}</div>}
         
         <div className="form-group">
-          <label htmlFor="name">Full Name</label>
+          <label htmlFor="fullName">Full Name</label>
           <input
             type="text"
-            id="name"
-            name="name"
-            value={formData.name}
+            id="fullName"
+            name="fullName"
+            value={formData.fullName}
             onChange={handleChange}
             required
           />
