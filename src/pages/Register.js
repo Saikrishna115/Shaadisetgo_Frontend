@@ -24,26 +24,69 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(''); // Reset error before new submission
-    setLoading(true);
-
-    // Check if passwords match
+  const validateForm = () => {
+    if (!formData.fullName.trim()) {
+      setError('Full name is required');
+      return false;
+    }
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    if (!formData.phone.trim()) {
+      setError('Phone number is required');
+      return false;
+    }
+    if (!/^\d{10}$/.test(formData.phone.replace(/[^0-9]/g, ''))) {
+      setError('Please enter a valid 10-digit phone number');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (!validateForm()) {
+      setLoading(false);
       return;
     }
 
     try {
-      const { confirmPassword, ...registerData } = formData; // Exclude confirmPassword
-      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/register', registerData);
+      const { confirmPassword, ...registerData } = formData;
+      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/register', registerData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // Store token and navigate to dashboard
-      localStorage.setItem('token', response.data.token);
-      navigate('/dashboard');
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        navigate('/dashboard');
+      } else {
+        setError('Registration successful but no token received');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      console.error('Registration error:', err.response?.data || err.message);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          (err.response?.status === 400 ? 'Invalid registration data. Please check your input.' : err.message) || 
+                          'Registration failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
