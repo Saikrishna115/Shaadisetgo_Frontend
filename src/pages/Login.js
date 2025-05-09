@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
+import { CircularProgress } from '@mui/material';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,6 +23,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       // Updated the URL to use the backend deployed on Render
@@ -29,6 +32,8 @@ const Login = () => {
       // Store the token and navigate to the dashboard
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
+    } finally {
+      setLoading(false);
     } catch (err) {
       // Show error message if login fails
       setError(err.response?.data?.error || 'Login failed');
@@ -66,7 +71,9 @@ const Login = () => {
           />
         </div>
 
-        <button type="submit" className="submit-btn">Login</button>
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+        </button>
       </form>
     </div>
   );

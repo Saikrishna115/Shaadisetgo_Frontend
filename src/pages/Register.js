@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Register.css';
+import { CircularProgress } from '@mui/material';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Register = () => {
     role: 'customer'
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -25,6 +27,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Reset error before new submission
+    setLoading(true);
 
     // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
@@ -41,6 +44,8 @@ const Register = () => {
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,7 +131,9 @@ const Register = () => {
           </select>
         </div>
 
-        <button type="submit" className="submit-btn">Register</button>
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+        </button>
       </form>
     </div>
   );
