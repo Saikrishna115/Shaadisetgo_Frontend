@@ -52,9 +52,10 @@ export const AuthProvider = ({ children }) => {
         password
       });
 
-      if (response.data.token) {
+      if (response.data.token && response.data.user) {
         localStorage.setItem('token', response.data.token);
-        setUser(response.data.user);
+        localStorage.setItem('userRole', response.data.user.role);
+        setUser({ ...response.data.user, role: response.data.user.role });
         return true;
       }
       return false;
