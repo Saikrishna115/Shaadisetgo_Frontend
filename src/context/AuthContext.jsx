@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No token found');
       }
 
-      const response = await axios.get('/auth/me');
+      const response = await axios.get('/api/auth/me');
 
       setUser(response.data);
       setError(null);
