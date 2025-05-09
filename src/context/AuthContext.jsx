@@ -21,34 +21,50 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = async (retryCount = 0) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No token found');
       }
 
-      const response = await axios.get('http://localhost:5000/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get('https://shaadisetgo-backend.onrender.com/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000 // 10 second timeout
       });
 
       setUser(response.data);
       setError(null);
     } catch (err) {
       console.error('Auth check failed:', err);
-      setError('Authentication failed');
+      
+      // Handle network errors with retry logic
+      if (err.code === 'ERR_NETWORK' && retryCount < 3) {
+        console.log(`Retrying auth check... Attempt ${retryCount + 1}`);
+        setTimeout(() => checkAuthStatus(retryCount + 1), 2000 * (retryCount + 1));
+        return;
+      }
+
+      // Set appropriate error message based on error type
+      const errorMessage = err.code === 'ERR_NETWORK'
+        ? 'Network error. Please check your internet connection.'
+        : err.response?.data?.message || 'Authentication failed';
+
+      setError(errorMessage);
       localStorage.removeItem('token');
       setUser(null);
     } finally {
-      setLoading(false);
+      if (retryCount === 0) setLoading(false);
     }
   };
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', {
         email,
         password
+      }, {
+        timeout: 10000 // 10 second timeout
       });
 
       const { token, user: userData } = response.data;
@@ -71,7 +87,9 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', userData);
+      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/register', userData, {
+        timeout: 10000 // 10 second timeout
+      });
       const { token, user: newUser } = response.data;
       localStorage.setItem('token', token);
       setUser(newUser);
