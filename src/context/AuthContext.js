@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const AuthContext = createContext(null);
 
@@ -28,9 +28,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      const response = await axios.get('https://shaadisetgo-backend.onrender.com/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/auth/me');
 
       if (response.data) {
         setUser(response.data);
@@ -46,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password
       });
