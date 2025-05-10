@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Clear all auth-related state
-      localStorage.clear();
+      localStorage.removeItem('token');
       setUser(null);
       setError(null);
       
@@ -71,14 +71,14 @@ export const AuthProvider = ({ children }) => {
         console.warn('Server logout failed:', err.message);
       }
 
-      // Force reload the page to clear any cached state
-      window.location.href = '/login';
+      // Use navigate for client-side routing instead of force reload
+      return true;
     } catch (err) {
       console.error('Logout error:', err);
       // Ensure user is logged out locally even if there's an error
-      localStorage.clear();
+      localStorage.removeItem('token');
       setUser(null);
-      window.location.href = '/login';
+      return false;
     }
   };
 

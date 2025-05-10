@@ -50,7 +50,23 @@ const Login = () => {
 
     try {
       await login(email, password);
-      // Navigation is handled inside useEffect when user updates
+      // Get updated user data after login
+      const currentUser = user;
+      if (currentUser) {
+        switch (currentUser.role) {
+          case 'vendor':
+            navigate('/vendor/dashboard');
+            break;
+          case 'customer':
+            navigate('/customer/dashboard');
+            break;
+          case 'admin':
+            navigate('/admin/dashboard');
+            break;
+          default:
+            navigate('/');
+        }
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials and try again.');
     } finally {

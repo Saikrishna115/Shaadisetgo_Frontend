@@ -48,14 +48,14 @@ const VendorDashboard = () => {
     const userRole = localStorage.getItem('userRole');
 
     if (!token || userRole !== 'vendor') {
-      navigate('/login');
+      navigate('/login', { replace: true });
       return;
     }
 
-    if (user) {
+    if (user && !userInfo) {
       fetchDashboardData();
     }
-  }, [navigate, user]);
+  }, [user, userInfo]);
 
   const fetchDashboardData = async () => {
     try {
@@ -67,15 +67,14 @@ const VendorDashboard = () => {
       const userResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/auth/profile', config);
       let userData = userResponse.data;
 
-      // Fetch vendor-specific information
       const vendorResponse = await axios.get(`https://shaadisetgo-backend.onrender.com/api/vendors/user/${userData._id}`, config);
       userData = { ...userData, vendorInfo: vendorResponse.data };
 
-      // Fetch vendor's bookings
       const bookingsResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/bookings/vendor', config);
-      
+
       setUserInfo(userData);
       setBookings(bookingsResponse.data);
+
       if (userData.vendorInfo) {
         setProfileData({
           businessName: userData.vendorInfo.businessName || '',
@@ -86,6 +85,7 @@ const VendorDashboard = () => {
           description: userData.vendorInfo.description || ''
         });
       }
+
       setLoading(false);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
@@ -121,7 +121,7 @@ const VendorDashboard = () => {
         vendorInfo: response.data
       });
       setIsProfileDialogOpen(false);
-      fetchDashboardData(); // Refresh data
+      fetchDashboardData();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
     }
@@ -153,7 +153,6 @@ const VendorDashboard = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {/* Quick Actions */}
           <Grid item xs={12}>
             <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
               <Typography variant="h6" gutterBottom>Quick Actions</Typography>
@@ -184,7 +183,6 @@ const VendorDashboard = () => {
             </Paper>
           </Grid>
 
-          {/* Business Profile */}
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent>
@@ -192,24 +190,12 @@ const VendorDashboard = () => {
                 <Divider sx={{ mb: 2 }} />
                 {userInfo?.vendorInfo ? (
                   <List>
-                    <ListItem>
-                      <ListItemText primary="Business Name" secondary={userInfo.vendorInfo.businessName} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Service Type" secondary={userInfo.vendorInfo.serviceType} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Location" secondary={userInfo.vendorInfo.location} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Contact" secondary={userInfo.vendorInfo.contact} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Price Range" secondary={userInfo.vendorInfo.priceRange} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Description" secondary={userInfo.vendorInfo.description} />
-                    </ListItem>
+                    <ListItem><ListItemText primary="Business Name" secondary={userInfo.vendorInfo.businessName} /></ListItem>
+                    <ListItem><ListItemText primary="Service Type" secondary={userInfo.vendorInfo.serviceType} /></ListItem>
+                    <ListItem><ListItemText primary="Location" secondary={userInfo.vendorInfo.location} /></ListItem>
+                    <ListItem><ListItemText primary="Contact" secondary={userInfo.vendorInfo.contact} /></ListItem>
+                    <ListItem><ListItemText primary="Price Range" secondary={userInfo.vendorInfo.priceRange} /></ListItem>
+                    <ListItem><ListItemText primary="Description" secondary={userInfo.vendorInfo.description} /></ListItem>
                   </List>
                 ) : (
                   <Typography variant="body2" color="textSecondary">
@@ -220,7 +206,6 @@ const VendorDashboard = () => {
             </Card>
           </Grid>
 
-          {/* Recent Bookings */}
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent>
@@ -255,62 +240,21 @@ const VendorDashboard = () => {
         </Grid>
       </Box>
 
-      {/* Profile Edit Dialog */}
       <Dialog open={isProfileDialogOpen} onClose={() => setIsProfileDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{userInfo?.vendorInfo ? 'Update Business Profile' : 'Create Business Profile'}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Business Name"
-              value={profileData.businessName}
-              onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Service Type"
-              value={profileData.serviceType}
-              onChange={(e) => setProfileData({ ...profileData, serviceType: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Location"
-              value={profileData.location}
-              onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Contact"
-              value={profileData.contact}
-              onChange={(e) => setProfileData({ ...profileData, contact: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Price Range"
-              value={profileData.priceRange}
-              onChange={(e) => setProfileData({ ...profileData, priceRange: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={profileData.description}
-              onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
-              margin="normal"
-              multiline
-              rows={4}
-            />
+            <TextField fullWidth label="Business Name" value={profileData.businessName} onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })} margin="normal" />
+            <TextField fullWidth label="Service Type" value={profileData.serviceType} onChange={(e) => setProfileData({ ...profileData, serviceType: e.target.value })} margin="normal" />
+            <TextField fullWidth label="Location" value={profileData.location} onChange={(e) => setProfileData({ ...profileData, location: e.target.value })} margin="normal" />
+            <TextField fullWidth label="Contact" value={profileData.contact} onChange={(e) => setProfileData({ ...profileData, contact: e.target.value })} margin="normal" />
+            <TextField fullWidth label="Price Range" value={profileData.priceRange} onChange={(e) => setProfileData({ ...profileData, priceRange: e.target.value })} margin="normal" />
+            <TextField fullWidth label="Description" value={profileData.description} onChange={(e) => setProfileData({ ...profileData, description: e.target.value })} margin="normal" multiline rows={4} />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsProfileDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleProfileUpdate} variant="contained" color="primary">
-            Save
-          </Button>
+          <Button onClick={handleProfileUpdate} variant="contained" color="primary">Save</Button>
         </DialogActions>
       </Dialog>
     </Container>
