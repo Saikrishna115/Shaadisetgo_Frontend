@@ -35,6 +35,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setError('');
 
@@ -42,7 +43,7 @@ const Login = () => {
       await login(email, password);
       // Navigation is handled inside useEffect when user updates
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,7 +90,7 @@ const Login = () => {
               variant="contained"
               size="large"
               sx={{ mt: 3, mb: 2 }}
-              enable={isSubmitting || authLoading}
+              disabled={isSubmitting || authLoading}
             >
               {isSubmitting ? <CircularProgress size={24} /> : 'Login'}
             </Button>

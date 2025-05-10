@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
+      setLoading(true);
       const response = await axios.post('/auth/login', { email, password });
       const { token, user } = response.data;
 
@@ -49,7 +50,9 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Login error:', err.response?.data?.message || err.message);
       setError(err.response?.data?.message || 'Login failed');
-      return false;
+      throw err; // Propagate error to handle in component
+    } finally {
+      setLoading(false);
     }
   };
 
