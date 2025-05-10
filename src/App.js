@@ -15,6 +15,10 @@ import VendorList from './pages/VendorList.js';
 import Dashboard from './pages/Dashboard.js';
 import AdminDashboard from './pages/AdminDashboard.js';
 import VendorDashboard from './pages/VendorDashboard.js';
+import ContactUs from './pages/ContactUs';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import ConnectWithUs from './pages/ConnectWithUs';
 import NotFound from './pages/NotFound.js';
 
 const App = () => {
@@ -29,6 +33,10 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/vendors" element={<VendorList />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/connect-with-us" element={<ConnectWithUs />} />
               <Route
                 path="/dashboard"
                 element={
