@@ -1,17 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import VendorProfileForm from '../components/VendorProfileForm/VendorProfileForm';
-import { CircularProgress } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  CircularProgress,
+  Divider,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import { useAuth } from '../context/AuthContext';
+import { Edit as EditIcon, Event as EventIcon, Business as BusinessIcon } from '@mui/icons-material';
 import './Dashboard.css';
 
 const VendorDashboard = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [editMode, setEditMode] = useState(false);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    businessName: '',
+    serviceType: '',
+    location: '',
+    contact: '',
+    priceRange: '',
+    description: ''
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -44,6 +74,16 @@ const VendorDashboard = () => {
       
       setUserInfo(userData);
       setBookings(bookingsResponse.data);
+      if (userData.vendorInfo) {
+        setProfileData({
+          businessName: userData.vendorInfo.businessName || '',
+          serviceType: userData.vendorInfo.serviceType || '',
+          location: userData.vendorInfo.location || '',
+          contact: userData.vendorInfo.contact || '',
+          priceRange: userData.vendorInfo.priceRange || '',
+          description: userData.vendorInfo.description || ''
+        });
+      }
       setLoading(false);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
@@ -52,7 +92,7 @@ const VendorDashboard = () => {
     }
   };
 
-  const handleProfileUpdate = async (profileData) => {
+  const handleProfileUpdate = async () => {
     try {
       const token = localStorage.getItem('token');
       const config = {
@@ -78,7 +118,8 @@ const VendorDashboard = () => {
         ...userInfo,
         vendorInfo: response.data
       });
-      setEditMode(false);
+      setIsProfileDialogOpen(false);
+      fetchDashboardData(); // Refresh data
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
     }
@@ -86,94 +127,191 @@ const VendorDashboard = () => {
 
   if (loading) {
     return (
-      <div className="dashboard-container">
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <CircularProgress />
-      </div>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <div className="dashboard-container">
-        <div className="error-message">{error}</div>
-      </div>
+      <Container>
+        <Box sx={{ mt: 4 }}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      </Container>
     );
   }
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Vendor Dashboard</h1>
-      </div>
+    <Container maxWidth="lg">
+      <Box sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Welcome, {userInfo?.vendorInfo?.businessName || user?.name || 'Vendor'}
+        </Typography>
 
-      <div className="dashboard-content">
-        <section className="profile-section">
-          <h2>Business Profile</h2>
-          {editMode ? (
-            <VendorProfileForm
-              initialData={{
-                businessName: userInfo.vendorInfo?.businessName || '',
-                serviceType: userInfo.vendorInfo?.serviceType || '',
-                location: userInfo.vendorInfo?.location || '',
-                contact: userInfo.vendorInfo?.contact || '',
-                priceRange: userInfo.vendorInfo?.priceRange || '',
-                description: userInfo.vendorInfo?.description || ''
-              }}
-              onSubmit={handleProfileUpdate}
+        <Grid container spacing={3}>
+          {/* Quick Actions */}
+          <Grid item xs={12}>
+            <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
+              <Typography variant="h6" gutterBottom>Quick Actions</Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setIsProfileDialogOpen(true)}
+                  startIcon={<BusinessIcon />}
+                >
+                  {userInfo?.vendorInfo ? 'Update Business Profile' : 'Create Business Profile'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/profile')}
+                  startIcon={<EditIcon />}
+                >
+                  Edit Personal Profile
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/calendar')}
+                  startIcon={<EventIcon />}
+                >
+                  View Calendar
+                </Button>
+              </Box>
+            </Paper>
+          </Grid>
+
+          {/* Business Profile */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Business Profile</Typography>
+                <Divider sx={{ mb: 2 }} />
+                {userInfo?.vendorInfo ? (
+                  <List>
+                    <ListItem>
+                      <ListItemText primary="Business Name" secondary={userInfo.vendorInfo.businessName} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary="Service Type" secondary={userInfo.vendorInfo.serviceType} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary="Location" secondary={userInfo.vendorInfo.location} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary="Contact" secondary={userInfo.vendorInfo.contact} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary="Price Range" secondary={userInfo.vendorInfo.priceRange} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText primary="Description" secondary={userInfo.vendorInfo.description} />
+                    </ListItem>
+                  </List>
+                ) : (
+                  <Typography variant="body2" color="textSecondary">
+                    Please create your business profile to start receiving bookings
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Recent Bookings */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Recent Bookings</Typography>
+                <Divider sx={{ mb: 2 }} />
+                <List>
+                  {bookings.length > 0 ? (
+                    bookings.map((booking) => (
+                      <ListItem
+                        key={booking._id}
+                        secondaryAction={
+                          <IconButton edge="end" onClick={() => navigate(`/bookings/${booking._id}`)}>
+                            <EditIcon />
+                          </IconButton>
+                        }
+                      >
+                        <ListItemText
+                          primary={`${booking.customerName} - ${booking.serviceType}`}
+                          secondary={`Status: ${booking.status} | Date: ${new Date(booking.eventDate).toLocaleDateString()}`}
+                        />
+                      </ListItem>
+                    ))
+                  ) : (
+                    <Typography variant="body2" color="textSecondary">
+                      No bookings yet
+                    </Typography>
+                  )}
+                </List>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Profile Edit Dialog */}
+      <Dialog open={isProfileDialogOpen} onClose={() => setIsProfileDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{userInfo?.vendorInfo ? 'Update Business Profile' : 'Create Business Profile'}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Business Name"
+              value={profileData.businessName}
+              onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })}
+              margin="normal"
             />
-          ) : (
-            <div className="vendor-info">
-              {userInfo.vendorInfo ? (
-                <>
-                  <p><strong>Business Name:</strong> {userInfo.vendorInfo.businessName}</p>
-                  <p><strong>Service Type:</strong> {userInfo.vendorInfo.serviceType}</p>
-                  <p><strong>Location:</strong> {userInfo.vendorInfo.location}</p>
-                  <p><strong>Contact:</strong> {userInfo.vendorInfo.contact}</p>
-                  <p><strong>Price Range:</strong> {userInfo.vendorInfo.priceRange}</p>
-                  <p><strong>Description:</strong> {userInfo.vendorInfo.description}</p>
-                  <button onClick={() => setEditMode(true)} className="edit-btn">
-                    Edit Profile
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p>Please complete your vendor profile to start receiving bookings.</p>
-                  <button onClick={() => setEditMode(true)} className="edit-btn">
-                    Create Profile
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </section>
-
-        <section className="bookings-section">
-          <h2>Booking Requests</h2>
-          {bookings.length > 0 ? (
-            <div className="bookings-list">
-              {bookings.map((booking) => (
-                <div key={booking._id} className="booking-card">
-                  <div className="booking-header">
-                    <h3>Booking #{booking._id.slice(-6)}</h3>
-                    <span className={`status ${booking.status.toLowerCase()}`}>
-                      {booking.status}
-                    </span>
-                  </div>
-                  <div className="booking-details">
-                    <p><strong>Customer:</strong> {booking.customerName}</p>
-                    <p><strong>Date:</strong> {new Date(booking.eventDate).toLocaleDateString()}</p>
-                    <p><strong>Service:</strong> {booking.serviceType}</p>
-                    <p><strong>Status:</strong> {booking.status}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="no-bookings">You haven't received any bookings yet.</p>
-          )}
-        </section>
-      </div>
-    </div>
+            <TextField
+              fullWidth
+              label="Service Type"
+              value={profileData.serviceType}
+              onChange={(e) => setProfileData({ ...profileData, serviceType: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Location"
+              value={profileData.location}
+              onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Contact"
+              value={profileData.contact}
+              onChange={(e) => setProfileData({ ...profileData, contact: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Price Range"
+              value={profileData.priceRange}
+              onChange={(e) => setProfileData({ ...profileData, priceRange: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={profileData.description}
+              onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+              margin="normal"
+              multiline
+              rows={4}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsProfileDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleProfileUpdate} variant="contained" color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 
