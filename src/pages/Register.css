@@ -4,7 +4,7 @@
   background-color: #ffffff;
 }
 
-.register-image-section {
+//*.register-image-section {
   flex: 1;
   background-image: url('../assets/wedding-bg.jpg');
   background-size: cover;
@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-}
+}*//
 
 .register-image-section::after {
   content: '';
