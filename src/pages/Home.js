@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHeart, FaSearch, FaCalendar } from 'react-icons/fa';
-import heroBg from '../assets/hero-bg.jpg';
+import heroBg from '../assets/hero-bg.jpg';  // Ensure the image path is correct
 import './Home.css';
 
 const Home = () => {
@@ -52,13 +52,11 @@ const Home = () => {
   return (
     <div className="home-container">
       {/* Hero Section */}
-      <section className="hero-section" style={{ backgroundImage: `url(${heroBg})` }}>
+      <section className="hero-section" style={{ backgroundImage: url(${heroBg}) }}>
         <div className="hero-content">
           <h1 className="hero-title">Plan Your Perfect Wedding</h1>
           <p className="hero-subtitle">Find and book the best wedding vendors all in one place</p>
-          <button className="cta-button" onClick={() => navigate('/vendors')}>
-            Find Your Wedding Vendor
-          </button>
+          <button className="cta-button" onClick={() => navigate('/vendors')}>Find Your Wedding Vendor</button>
         </div>
       </section>
 
@@ -120,3 +118,5 @@ const Home = () => {
 };
 
 export default Home;
+
+
