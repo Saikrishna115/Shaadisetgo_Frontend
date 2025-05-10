@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { CircularProgress, Container } from '@mui/material';
 
-const PrivateRoute = ({ children, allowedRoles }) => {
+const PrivateRoute = ({ children, roles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -18,14 +18,17 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (roles && !roles.includes(user.role)) {
     // Redirect to appropriate dashboard based on user's role
-    if (user.role === 'vendor') {
-      return <Navigate to="/vendor/dashboard" replace />;
-    } else if (user.role === 'customer') {
-      return <Navigate to="/customer/dashboard" replace />;
-    } else {
-      return <Navigate to="/dashboard" replace />;
+    switch (user.role) {
+      case 'vendor':
+        return <Navigate to="/vendor/dashboard" replace />;
+      case 'customer':
+        return <Navigate to="/dashboard" replace />;
+      case 'admin':
+        return <Navigate to="/admin" replace />;
+      default:
+        return <Navigate to="/" replace />;
     }
   }
 

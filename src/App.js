@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import PrivateRoute from './routes/PrivateRoute';
+import PrivateRoute from './components/PrivateRoute';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer/Footer';
