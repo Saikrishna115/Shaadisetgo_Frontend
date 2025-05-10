@@ -43,15 +43,15 @@ const VendorDashboard = () => {
     description: ''
   });
 
+  const token = localStorage.getItem('token');
+  const userRole = localStorage.getItem('userRole');
+
+  if (!token || userRole !== 'vendor') {
+    navigate('/login', { replace: true });
+    return null;
+  }
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole');
-
-    if (!token || userRole !== 'vendor') {
-      navigate('/login', { replace: true });
-      return;
-    }
-
     if (user && !userInfo) {
       fetchDashboardData();
     }
@@ -59,7 +59,6 @@ const VendorDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
@@ -85,7 +84,6 @@ const VendorDashboard = () => {
           description: userData.vendorInfo.description || ''
         });
       }
-
       setLoading(false);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
@@ -96,7 +94,6 @@ const VendorDashboard = () => {
 
   const handleProfileUpdate = async () => {
     try {
-      const token = localStorage.getItem('token');
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
