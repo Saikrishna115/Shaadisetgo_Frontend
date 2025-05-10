@@ -89,7 +89,7 @@ const Login = () => {
               variant="contained"
               size="large"
               sx={{ mt: 3, mb: 2 }}
-              disabled={isSubmitting || authLoading}
+              enable={isSubmitting || authLoading}
             >
               {isSubmitting ? <CircularProgress size={24} /> : 'Login'}
             </Button>
