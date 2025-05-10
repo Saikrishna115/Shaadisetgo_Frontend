@@ -26,13 +26,13 @@ const Login = () => {
       // Ensure proper role-based navigation
       switch (user.role) {
         case 'vendor':
-          navigate('/pages/VendorDashboard', { replace: true });
+          navigate('/VendorDashboard', { replace: true });
           break;
         case 'admin':
           navigate('/admin', { replace: true });
           break;
         case 'customer':
-          navigate('/pages/CustomerDashboard', { replace: true });
+          navigate('/CustomerDashboard', { replace: true });
           break;
         default:
           // Handle unknown role
