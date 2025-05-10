@@ -23,12 +23,21 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
-      if (user.role === 'vendor') {
-        navigate('/vendor/dashboard');
-      } else if (user.role === 'admin') {
-        navigate('/admin');
-      } else if (user.role === 'customer') {
-        navigate('/dashboard');
+      // Ensure proper role-based navigation
+      switch (user.role) {
+        case 'vendor':
+          navigate('/vendor/dashboard', { replace: true });
+          break;
+        case 'admin':
+          navigate('/admin', { replace: true });
+          break;
+        case 'customer':
+          navigate('/dashboard', { replace: true });
+          break;
+        default:
+          // Handle unknown role
+          console.error('Unknown user role:', user.role);
+          navigate('/');
       }
     }
   }, [user, authLoading, navigate]);
