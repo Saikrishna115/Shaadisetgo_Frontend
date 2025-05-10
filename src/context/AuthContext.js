@@ -56,9 +56,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.clear();
-    setUser(null);
+  const logout = async () => {
+    try {
+      // Clear all auth-related state
+      localStorage.clear();
+      setUser(null);
+      setError(null);
+      
+      // Attempt to notify the server about logout
+      try {
+        await axios.post('/auth/logout');
+      } catch (err) {
+        // Silently handle server logout failure
+        console.warn('Server logout failed:', err.message);
+      }
+
+      // Force reload the page to clear any cached state
+      window.location.href = '/login';
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Ensure user is logged out locally even if there's an error
+      localStorage.clear();
+      setUser(null);
+      window.location.href = '/login';
+    }
   };
 
   return (

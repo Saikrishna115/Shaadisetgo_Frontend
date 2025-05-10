@@ -22,9 +22,9 @@ const PrivateRoute = ({ children, roles }) => {
     // Redirect to appropriate dashboard based on user's role
     switch (user.role) {
       case 'vendor':
-        return <Navigate to="/vendor/dashboard" replace />;
+        return <Navigate to="/pages/VendorDashboard" replace />;
       case 'customer':
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/pages/CustomerDashboard" replace />;
       case 'admin':
         return <Navigate to="/admin" replace />;
       default:
