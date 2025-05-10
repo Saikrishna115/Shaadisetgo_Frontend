@@ -1,11 +1,12 @@
 .register-container {
   display: flex;
+  flex-direction: column;
   min-height: 60vh;
   background-color: #ffffff;
 }
 
 .register-image-section {
-  flex: 1;
+  height: 200px;
   background-image: url('../assets/wedding-bg.jpg');
   background-size: cover;
   background-position: center;
@@ -26,13 +27,13 @@
 }
 
 .register-form {
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 4rem;
-  max-width: 275px;
+  padding: 2rem;
+  max-width: 400px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .register-form h2 {

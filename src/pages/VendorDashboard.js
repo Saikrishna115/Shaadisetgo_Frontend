@@ -52,8 +52,10 @@ const VendorDashboard = () => {
       return;
     }
 
-    fetchDashboardData();
-  }, [navigate]);
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [navigate, user]);
 
   const fetchDashboardData = async () => {
     try {
