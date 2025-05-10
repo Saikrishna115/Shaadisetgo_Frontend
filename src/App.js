@@ -9,13 +9,13 @@ import Footer from './components/Footer/Footer';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VendorList from './pages/VendorList';
-import Dashboard from './pages/Dashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import VendorDashboard from './pages/VendorDashboard';
-import NotFound from './pages/NotFound';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.js';
+import VendorList from './pages/VendorList.js';
+import Dashboard from './pages/Dashboard.js';
+import AdminDashboard from './pages/AdminDashboard.js';
+import VendorDashboard from './pages/VendorDashboard.js';
+import NotFound from './pages/NotFound.js';
 
 const App = () => {
   return (
