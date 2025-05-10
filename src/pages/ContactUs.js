@@ -76,8 +76,8 @@ const ContactUs = () => {
               <FaMapMarkerAlt />
             </div>
             <h3>Visit Us</h3>
-            <p>123 Wedding Street</p>
-            <p>Celebration City, India 500001</p>
+            <p>tirupati</p>
+            <p>Tirupati City, Andhra Pradesh, India 517501</p>
           </div>
         </div>
       </section>

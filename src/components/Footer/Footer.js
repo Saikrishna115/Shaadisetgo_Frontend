@@ -15,17 +15,22 @@ const Footer = () => {
           <h4>Quick Links</h4>
           <Link to="/vendors" aria-label="Find Vendors">Find Vendors</Link>
           <Link to="/register" aria-label="Become a Vendor">Become a Vendor</Link>
-          <Link to="/contact" aria-label="Contact Us">Contact Us</Link>
+        </div>
+
+        <div className="footer-section">
+          <h4>Support</h4>
+          <Link to="/contact-us" aria-label="Contact Us">Contact Us</Link>
+          <Link to="/connect-with-us" aria-label="Connect With Us">Connect With Us</Link>
         </div>
 
         <div className="footer-section">
           <h4>Legal</h4>
-          <Link to="/privacy" aria-label="Privacy Policy">Privacy Policy</Link>
-          <Link to="/terms" aria-label="Terms of Service">Terms of Service</Link>
+          <Link to="/privacy-policy" aria-label="Privacy Policy">Privacy Policy</Link>
+          <Link to="/terms-of-service" aria-label="Terms of Service">Terms of Service</Link>
         </div>
 
         <div className="footer-section">
-          <h4>Connect With Us</h4>
+          <h4>Social Media</h4>
           <div className="social-links">
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <i className="fab fa-facebook"></i>
