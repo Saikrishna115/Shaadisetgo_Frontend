@@ -102,7 +102,7 @@ const VendorDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      const userResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/auth/profile', config);
+      const userResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/vendors/profile', config);
       let userData = userResponse.data;
 
       const vendorResponse = await axios.get(`https://shaadisetgo-backend.onrender.com/api/vendors/user/${userData._id}`, config);
