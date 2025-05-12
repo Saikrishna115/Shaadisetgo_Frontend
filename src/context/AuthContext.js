@@ -56,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
+      localStorage.setItem('userRole', user.role); // Store user role for persistent role checks
       setUser(user);
       return true;
     } catch (err) {
@@ -81,6 +82,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Clear all auth-related state
       localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
       setUser(null);
       setError(null);
       
