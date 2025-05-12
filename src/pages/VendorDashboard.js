@@ -36,7 +36,6 @@ import {
   Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import './Dashboard.css';
-import './Dashboard.css';
 
 const VendorDashboard = () => {
   const { user } = useAuth();
