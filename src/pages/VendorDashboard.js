@@ -36,8 +36,6 @@ import {
   Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import './Dashboard.css';
-import { useAuth } from '../context/AuthContext';
-import { Edit as EditIcon, Event as EventIcon, Business as BusinessIcon } from '@mui/icons-material';
 import './Dashboard.css';
 
 const VendorDashboard = () => {
