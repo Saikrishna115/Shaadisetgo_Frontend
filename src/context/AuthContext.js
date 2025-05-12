@@ -31,6 +31,17 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
     } catch (err) {
       console.error('Auth check failed:', err.response?.data || err.message);
+      let errorMessage = 'Authentication failed';
+      
+      if (!err.response) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (err.response.status === 401) {
+        errorMessage = 'Session expired. Please login again.';
+      } else if (err.response.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      setError(errorMessage);
       logout();
     } finally {
       setLoading(false);
@@ -49,7 +60,17 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (err) {
       console.error('Login error:', err.response?.data?.message || err.message);
-      setError(err.response?.data?.message || 'Login failed');
+      let errorMessage = 'Login failed';
+      
+      if (!err.response) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (err.response.status === 401) {
+        errorMessage = 'Invalid email or password';
+      } else if (err.response.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      setError(errorMessage);
       throw err; // Propagate error to handle in component
     } finally {
       setLoading(false);
