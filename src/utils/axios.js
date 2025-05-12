@@ -2,7 +2,9 @@ import axios from 'axios';
 
 const instance = axios.create({
   baseURL: 'https://shaadisetgo-backend.onrender.com/api',
-  timeout: 10000, // 10 second timeout
+  timeout: 15000, // 15 second timeout
+  retries: 2, // Number of retry attempts
+  retryDelay: 1000 // Delay between retries in milliseconds
 });
 
 // Automatically attach the token from localStorage to every request
@@ -17,25 +19,56 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add response interceptor for error handling
+// Add response interceptor for error handling and retry logic
 instance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const { config } = error;
+    
+    // Skip retry for specific status codes or methods
+    if (error.response && (error.response.status === 401 || error.response.status === 404)) {
+      if (error.response.status === 401) {
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+
+    // Initialize retry count
+    config.retryCount = config.retryCount || 0;
+
+    // Check if we should retry the request
+    if (config.retryCount < instance.defaults.retries && (!error.response || error.response.status >= 500)) {
+      config.retryCount += 1;
+
+      // Delay before retrying
+      await new Promise(resolve => setTimeout(resolve, instance.defaults.retryDelay));
+      
+      try {
+        return await instance(config);
+      } catch (retryError) {
+        if (config.retryCount === instance.defaults.retries) {
+          return Promise.reject({
+            response: {
+              data: {
+                message: 'Network error. Please check your internet connection and try again later.'
+              }
+            }
+          });
+        }
+        throw retryError;
+      }
+    }
+
     // Handle network errors
     if (!error.response) {
       return Promise.reject({
         response: {
           data: {
-            message: 'Network error. Please check your internet connection.'
+            message: 'Network error. Please check your internet connection and try again later.'
           }
         }
       });
-    }
-
-    // Handle token expiration
-    if (error.response.status === 401) {
-      localStorage.clear();
-      window.location.href = '/login';
     }
 
     return Promise.reject(error);
