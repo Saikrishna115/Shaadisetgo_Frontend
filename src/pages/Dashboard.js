@@ -68,15 +68,15 @@ const Dashboard = () => {
         };
 
         const [userResponse, bookingsResponse] = await Promise.all([
-          axios.get('http://localhost:5000/api/auth/me', config),
-          axios.get('http://localhost:5000/api/bookings', config)
+          axios.get('/auth/me', config),
+          axios.get('/bookings', config)
         ]);
 
         const bookingsData = Array.isArray(bookingsResponse.data) ? bookingsResponse.data : [];
         let userData = userResponse.data;
 
         if (userData.role === 'vendor') {
-          const vendorResponse = await axios.get(`http://localhost:5000/api/vendors/user/${userData._id}`, config);
+          const vendorResponse = await axios.get(`/vendors/user/${userData._id}`, config);
           userData = { ...userData, vendorInfo: vendorResponse.data };
         }
 
@@ -144,12 +144,12 @@ const Dashboard = () => {
       let response;
       if (userInfo.role === 'vendor') {
         if (userInfo.vendorInfo) {
-          response = await axios.put(`http://localhost:5000/api/vendors/${userInfo.vendorInfo._id}`, profileData, config);
+          response = await axios.put(`/vendors/${userInfo.vendorInfo._id}`, profileData, config);
         } else {
-          response = await axios.post('http://localhost:5000/api/vendors', profileData, config);
+          response = await axios.post('/vendors', profileData, config);
         }
       } else {
-        response = await axios.put(`http://localhost:5000/api/users/${userInfo._id}`, profileData, config);
+        response = await axios.put(`/users/${userInfo._id}`, profileData, config);
       }
 
       if (response.data) {
