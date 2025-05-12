@@ -29,10 +29,10 @@ const Login = () => {
           navigate('/vendor/dashboard', { replace: true });
           break;
         case 'admin':
-          navigate('/admin/dashboard', { replace: true });
+          navigate('/admin', { replace: true });
           break;
         case 'customer':
-          navigate('/customer/dashboard', { replace: true });
+          navigate('/dashboard', { replace: true });
           break;
         default:
           // Handle unknown role
