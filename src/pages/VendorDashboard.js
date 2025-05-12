@@ -21,7 +21,21 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Chip,
+  Avatar,
+  Tooltip,
 } from '@mui/material';
+import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
+import { useAuth } from '../context/AuthContext';
+import {
+  Edit as EditIcon,
+  Event as EventIcon,
+  Business as BusinessIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon,
+} from '@mui/icons-material';
+import './Dashboard.css';
 import { useAuth } from '../context/AuthContext';
 import { Edit as EditIcon, Event as EventIcon, Business as BusinessIcon } from '@mui/icons-material';
 import './Dashboard.css';
@@ -31,6 +45,14 @@ const VendorDashboard = () => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [analytics, setAnalytics] = useState({
+    totalBookings: 0,
+    revenue: 0,
+    rating: 0,
+    activeCustomers: 0,
+    bookingGrowth: 0,
+    revenueGrowth: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
@@ -58,6 +80,26 @@ const VendorDashboard = () => {
   }, [user, userInfo]);
 
   const fetchDashboardData = async () => {
+    const calculateAnalytics = (bookings) => {
+      const totalBookings = bookings.length;
+      const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
+      const completedBookings = bookings.filter(b => b.status === 'completed');
+      const rating = completedBookings.reduce((sum, b) => sum + (b.rating || 0), 0) / (completedBookings.length || 1);
+      const uniqueCustomers = new Set(bookings.map(b => b.customerId)).size;
+      
+      // Calculate growth (mock data - replace with actual calculations)
+      const bookingGrowth = 15;
+      const revenueGrowth = 20;
+
+      return {
+        totalBookings,
+        revenue,
+        rating,
+        activeCustomers: uniqueCustomers,
+        bookingGrowth,
+        revenueGrowth,
+      };
+    };
     try {
       const config = {
         headers: { Authorization: `Bearer ${token}` }
@@ -72,7 +114,9 @@ const VendorDashboard = () => {
       const bookingsResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/bookings/vendor', config);
 
       setUserInfo(userData);
-      setBookings(bookingsResponse.data);
+      const bookingsData = bookingsResponse.data;
+      setBookings(bookingsData);
+      setAnalytics(calculateAnalytics(bookingsData));
 
       if (userData.vendorInfo) {
         setProfileData({
@@ -142,12 +186,37 @@ const VendorDashboard = () => {
     );
   }
 
+  const getStatusChip = (status) => {
+    const statusConfig = {
+      pending: { color: 'warning', icon: <ScheduleIcon />, label: 'Pending' },
+      confirmed: { color: 'success', icon: <CheckCircleIcon />, label: 'Confirmed' },
+      cancelled: { color: 'error', icon: <CancelIcon />, label: 'Cancelled' },
+      completed: { color: 'info', icon: <CheckCircleIcon />, label: 'Completed' },
+    };
+
+    const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+
+    return (
+      <Chip
+        icon={config.icon}
+        label={config.label}
+        color={config.color}
+        size="small"
+        sx={{ ml: 1 }}
+      />
+    );
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Welcome, {userInfo?.vendorInfo?.businessName || user?.name || 'Vendor'}
         </Typography>
+
+        <Box sx={{ mb: 4 }}>
+          <DashboardAnalytics stats={analytics} userType="vendor" />
+        </Box>
 
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -213,16 +282,50 @@ const VendorDashboard = () => {
                     bookings.map((booking) => (
                       <ListItem
                         key={booking._id}
-                        secondaryAction={
-                          <IconButton edge="end" onClick={() => navigate(`/bookings/${booking._id}`)}>
+                        sx={{
+                          bgcolor: 'background.paper',
+                          borderRadius: 1,
+                          mb: 1,
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      >
+                        <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                          {booking.customerName?.charAt(0) || 'C'}
+                        </Avatar>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Typography variant="subtitle1">
+                                {booking.customerName}
+                              </Typography>
+                              {getStatusChip(booking.status)}
+                            </Box>
+                          }
+                          secondary={
+                            <>
+                              <Typography variant="body2" color="text.secondary">
+                                Service: {booking.serviceType}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Date: {new Date(booking.eventDate).toLocaleDateString()}
+                              </Typography>
+                              {booking.amount && (
+                                <Typography variant="body2" color="primary">
+                                  Amount: ₹{booking.amount}
+                                </Typography>
+                              )}
+                            </>
+                          }
+                        />
+                        <Tooltip title="View Details">
+                          <IconButton
+                            edge="end"
+                            onClick={() => navigate(`/bookings/${booking._id}`)}
+                            sx={{ ml: 2 }}
+                          >
                             <EditIcon />
                           </IconButton>
-                        }
-                      >
-                        <ListItemText
-                          primary={`${booking.customerName} - ${booking.serviceType}`}
-                          secondary={`Status: ${booking.status} | Date: ${new Date(booking.eventDate).toLocaleDateString()}`}
-                        />
+                        </Tooltip>
                       </ListItem>
                     ))
                   ) : (

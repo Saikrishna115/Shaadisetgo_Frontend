@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const isLoggedIn = localStorage.getItem('token') ? true : false;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      localStorage.removeItem('token');
-      navigate('/login');
+      await logout(navigate);
     } catch (error) {
       console.error("Logout failed:", error);
     }

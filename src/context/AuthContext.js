@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (navigate) => {
     try {
       // Clear all auth-related state
       localStorage.removeItem('token');
@@ -71,13 +71,19 @@ export const AuthProvider = ({ children }) => {
         console.warn('Server logout failed:', err.message);
       }
 
-      // Use navigate for client-side routing instead of force reload
+      // Navigate to login page
+      if (navigate) {
+        navigate('/login');
+      }
       return true;
     } catch (err) {
       console.error('Logout error:', err);
       // Ensure user is logged out locally even if there's an error
       localStorage.removeItem('token');
       setUser(null);
+      if (navigate) {
+        navigate('/login');
+      }
       return false;
     }
   };

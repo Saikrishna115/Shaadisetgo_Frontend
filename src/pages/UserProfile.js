@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, CircularProgress } from '@mui/material';
 import UserProfileForm from '../components/UserProfileForm/UserProfileForm';
 import { useNavigate } from 'react-router-dom';
+import axios from '../utils/axios'; // Import centralized axios instance
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
@@ -20,16 +21,8 @@ const UserProfile = () => {
         return;
       }
 
-      const response = await fetch('/api/users/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch profile');
-
-      const data = await response.json();
-      setUserData(data);
+      const response = await axios.get('/users/profile');
+      setUserData(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -39,21 +32,9 @@ const UserProfile = () => {
 
   const handleProfileUpdate = async (formData) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) throw new Error('Failed to update profile');
-
-      const updatedData = await response.json();
-      setUserData(updatedData);
-      return updatedData;
+      const response = await axios.put('/users/profile', formData);
+      setUserData(response.data);
+      return response.data;
     } catch (error) {
       console.error('Error updating profile:', error);
       throw error;

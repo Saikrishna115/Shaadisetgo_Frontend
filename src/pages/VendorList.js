@@ -27,9 +27,9 @@ const VendorList = () => {
   };
 
   const filteredVendors = vendors.filter(vendor => {
-    const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || vendor.category === selectedCategory;
+    const matchesSearch = vendor.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || vendor.serviceType === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -54,11 +54,11 @@ const VendorList = () => {
             className="category-select"
           >
             <option value="all">All Categories</option>
-            <option value="venue">Venue</option>
-            <option value="catering">Catering</option>
-            <option value="photography">Photography</option>
-            <option value="decoration">Decoration</option>
-            <option value="music">Music</option>
+            <option value="Venue">Venue</option>
+            <option value="Catering">Catering</option>
+            <option value="Photography">Photography</option>
+            <option value="Decoration">Decoration</option>
+            <option value="Music">Music</option>
           </select>
         </div>
       </div>
@@ -66,17 +66,17 @@ const VendorList = () => {
       <div className="vendor-grid">
         {filteredVendors.map(vendor => (
           <div key={vendor._id} className="vendor-card">
-            {vendor.image && (
+            {vendor.images && vendor.images.length > 0 && (
               <div className="vendor-image">
-                <img src={`https://shaadisetgo-backend.onrender.com${vendor.image}`} alt={vendor.name} />
+                <img src={vendor.images[0]} alt={vendor.businessName} />
               </div>
             )}
             <div className="vendor-info">
-              <h3>{vendor.name}</h3>
-              <p className="vendor-category">{vendor.category}</p>
+              <h3>{vendor.businessName}</h3>
+              <p className="vendor-category">{vendor.serviceType}</p>
               <p className="vendor-description">{vendor.description}</p>
               <div className="vendor-footer">
-                <span className="vendor-price">Starting from ₹{vendor.price}</span>
+                <span className="vendor-price">{vendor.priceRange}</span>
                 <button className="book-btn" onClick={() => navigate(`/vendors/${vendor._id}`)}>View Details</button>
               </div>
             </div>

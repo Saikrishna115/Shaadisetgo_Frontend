@@ -1,125 +1,69 @@
 // AdminDashboard.js
-import React, { useState, useEffect } from 'react';
-import axios from '../utils/axios';
+import React, { useState, useCallback, memo } from 'react';
 import UserCard from '../components/UserCard/UserCard';
 import VendorCard from '../components/VendorCard/VendorCard';
 import BookingCard from '../components/BookingCard/BookingCard';
+import useAdminData from '../hooks/useAdminData';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('users');
   const [successMessage, setSuccessMessage] = useState('');
+  const { data, loading, error, updateUserStatus, updateVendorStatus, updateBookingStatus } = useAdminData();
+  const { users, vendors, bookings } = data;
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Please login as admin to view dashboard');
-      setLoading(false);
-      return;
-    }
+  const handleUserStatusUpdate = useCallback(async (userId, status) => {
+    const result = await updateUserStatus(userId, status);
+    setSuccessMessage(result.message);
+  }, [updateUserStatus]);
 
-    const fetchAdminData = async () => {
-      try {
-        const config = {
-          headers: { Authorization: `Bearer ${token}` },
-          validateStatus: status => status < 500
-        };
+  const handleVendorStatusUpdate = useCallback(async (vendorId, status) => {
+    const result = await updateVendorStatus(vendorId, status);
+    setSuccessMessage(result.message);
+  }, [updateVendorStatus]);
 
-        const [usersResponse, vendorsResponse, bookingsResponse] = await Promise.all([
-          axios.get('/admin/users', config),
-          axios.get('/admin/vendors', config),
-          axios.get('/admin/bookings', config)
-        ]);
+  const handleBookingStatusUpdate = useCallback(async (bookingId, status) => {
+    const result = await updateBookingStatus(bookingId, status);
+    setSuccessMessage(result.message);
+  }, [updateBookingStatus]);
 
-        setUsers(usersResponse.data);
-        setVendors(vendorsResponse.data);
-        setBookings(bookingsResponse.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load admin data');
-        setLoading(false);
-      }
-    };
-
-    fetchAdminData();
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+    setSuccessMessage('');
   }, []);
 
-  const handleUserStatusUpdate = async (userId, status) => {
-    try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      await axios.put(`/admin/users/${userId}/status`, { status }, config);
-      setUsers(users.map(user => user._id === userId ? { ...user, status } : user));
-      setSuccessMessage('User status updated successfully');
-    } catch (err) {
-      setError('Failed to update user status');
-    }
-  };
-
-  const handleVendorStatusUpdate = async (vendorId, status) => {
-    try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      await axios.put(`/admin/vendors/${vendorId}/status`, { status }, config);
-      setVendors(vendors.map(vendor => vendor._id === vendorId ? { ...vendor, status } : vendor));
-      setSuccessMessage('Vendor status updated successfully');
-    } catch (err) {
-      setError('Failed to update vendor status');
-    }
-  };
-
-  const handleBookingStatusUpdate = async (bookingId, status) => {
-    try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      await axios.put(`/admin/bookings/${bookingId}/status`, { status }, config);
-      setBookings(bookings.map(booking => booking._id === bookingId ? { ...booking, status } : booking));
-      setSuccessMessage('Booking status updated successfully');
-    } catch (err) {
-      setError('Failed to update booking status');
-    }
-  };
-
-  const renderUsersSection = () => (
+  const UsersSection = memo(({ users, onStatusUpdate }) => (
     <div className="admin-section">
       <h2>User Management</h2>
       <div className="admin-grid">
         {users.map(user => (
-          <UserCard key={user._id} user={user} handleStatusUpdate={handleUserStatusUpdate} />
+          <UserCard key={user._id} user={user} handleStatusUpdate={onStatusUpdate} />
         ))}
       </div>
     </div>
-  );
+  ));
 
-  const renderVendorsSection = () => (
+  const VendorsSection = memo(({ vendors, onStatusUpdate }) => (
     <div className="admin-section">
       <h2>Vendor Management</h2>
       <div className="admin-grid">
         {vendors.map(vendor => (
-          <VendorCard key={vendor._id} vendor={vendor} handleStatusUpdate={handleVendorStatusUpdate} />
+          <VendorCard key={vendor._id} vendor={vendor} handleStatusUpdate={onStatusUpdate} />
         ))}
       </div>
     </div>
-  );
+  ));
 
-  const renderBookingsSection = () => (
+  const BookingsSection = memo(({ bookings, onStatusUpdate }) => (
     <div className="admin-section">
       <h2>Booking Management</h2>
       <div className="admin-grid">
         {bookings.map(booking => (
-          <BookingCard key={booking._id} booking={booking} handleStatusUpdate={handleBookingStatusUpdate} />
+          <BookingCard key={booking._id} booking={booking} handleStatusUpdate={onStatusUpdate} />
         ))}
       </div>
     </div>
-  );
+  ));
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error-message">{error}</div>;
@@ -128,37 +72,27 @@ const AdminDashboard = () => {
     <div className="admin-dashboard-container">
       <div className="admin-dashboard-header">
         <h1>Admin Dashboard</h1>
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}
       </div>
-
-      {successMessage && (
-        <div className="success-message">{successMessage}</div>
-      )}
 
       <div className="admin-dashboard-content">
         <div className="admin-dashboard-tabs">
-          <button
-            className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            Users
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'vendors' ? 'active' : ''}`}
-            onClick={() => setActiveTab('vendors')}
-          >
-            Vendors
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bookings')}
-          >
-            Bookings
-          </button>
+          {['users', 'vendors', 'bookings'].map(tab => (
+            <button
+              key={tab}
+              className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => handleTabChange(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
-        {activeTab === 'users' && renderUsersSection()}
-        {activeTab === 'vendors' && renderVendorsSection()}
-        {activeTab === 'bookings' && renderBookingsSection()}
+        {activeTab === 'users' && <UsersSection users={users} onStatusUpdate={handleUserStatusUpdate} />}
+        {activeTab === 'vendors' && <VendorsSection vendors={vendors} onStatusUpdate={handleVendorStatusUpdate} />}
+        {activeTab === 'bookings' && <BookingsSection bookings={bookings} onStatusUpdate={handleBookingStatusUpdate} />}
       </div>
     </div>
   );
