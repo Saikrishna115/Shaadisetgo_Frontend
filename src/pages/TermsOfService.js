@@ -126,8 +126,8 @@ const TermsOfService = () => {
           </p>
           <p>
             Email: legal@shaadisetgo.com<br />
-            Phone: +91 98765 43210<br />
-            Address: 123 Wedding Street, Celebration City, India 500001
+            Phone: +91 70133 40472<br />
+            Address: Tirupati, Tirupati City,Andhra Pradesh, India 517501
           </p>
         </div>
       </section>

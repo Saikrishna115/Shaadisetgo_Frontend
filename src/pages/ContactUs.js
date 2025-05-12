@@ -67,8 +67,8 @@ const ContactUs = () => {
               <FaPhone />
             </div>
             <h3>Call Us</h3>
-            <p>+91 98765 43210</p>
-            <p>+91 12345 67890</p>
+            <p>+91 70133 40472</p>
+            <p>+91 90001 11373</p>
           </div>
 
           <div className="contact-info-card">
