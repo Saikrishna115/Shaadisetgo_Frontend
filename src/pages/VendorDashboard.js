@@ -92,6 +92,12 @@ const VendorDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login', { replace: true, state: { message: 'Please login to continue' } });
+        return;
+      }
+
       const calculateAnalytics = (bookings) => {
         const totalBookings = bookings.length;
         const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
@@ -113,6 +119,9 @@ const VendorDashboard = () => {
         };
       };
 
+      // Log token for debugging
+      console.debug('Auth token:', token);
+      
       const userResponse = await axios.get('/vendors/profile');
       let userData = userResponse.data;
 
