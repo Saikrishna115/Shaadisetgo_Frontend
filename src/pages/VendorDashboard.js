@@ -102,13 +102,13 @@ const VendorDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      const userResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/vendors/profile', config);
+      const userResponse = await axios.get('/vendors/profile', config);
       let userData = userResponse.data;
 
-      const vendorResponse = await axios.get(`https://shaadisetgo-backend.onrender.com/api/vendors/user/${userData._id}`, config);
+      const vendorResponse = await axios.get(`/vendors/user/${userData._id}`, config);
       userData = { ...userData, vendorInfo: vendorResponse.data };
 
-      const bookingsResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/bookings/vendor', config);
+      const bookingsResponse = await axios.get('/bookings/vendor', config);
 
       setUserInfo(userData);
       const bookingsData = bookingsResponse.data;
