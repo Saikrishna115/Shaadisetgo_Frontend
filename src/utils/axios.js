@@ -24,14 +24,21 @@ instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { config } = error;
+    const token = localStorage.getItem('token');
     
-    // Skip retry for specific status codes or methods
-    if (error.response && (error.response.status === 401 || error.response.status === 404)) {
-      if (error.response.status === 401) {
-        localStorage.clear();
+    // Handle authentication errors
+    if (error.response && error.response.status === 401) {
+      // If token exists but is invalid, clear it and refresh auth state
+      if (token) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
         window.location.href = '/login';
+        return Promise.reject(error);
       }
+      localStorage.clear();
+      window.location.href = '/login';
       return Promise.reject(error);
+    }
     }
 
     // Initialize retry count
