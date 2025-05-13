@@ -91,12 +91,30 @@ const VendorDashboard = () => {
 
 
   const fetchDashboardData = async () => {
-    const calculateAnalytics = (bookings) => {
-      const totalBookings = bookings.length;
-      const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
-      const completedBookings = bookings.filter(b => b.status === 'completed');
-      const rating = completedBookings.reduce((sum, b) => sum + (b.rating || 0), 0) / (completedBookings.length || 1);
-      const uniqueCustomers = new Set(bookings.map(b => b.customerId)).size;
+    try {
+      const vendorResponse = await axios.get('/vendors/profile');
+      
+      // Handle case where vendor profile doesn't exist yet
+      if (!vendorResponse.data) {
+        setUserInfo(null);
+        setProfileData({
+          businessName: '',
+          serviceType: '',
+          location: '',
+          contact: '',
+          priceRange: '',
+          description: ''
+        });
+        setLoading(false);
+        return;
+      }
+
+      const calculateAnalytics = (bookings) => {
+        const totalBookings = bookings.length;
+        const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
+        const completedBookings = bookings.filter(b => b.status === 'completed');
+        const rating = completedBookings.reduce((sum, b) => sum + (b.rating || 0), 0) / (completedBookings.length || 1);
+        const uniqueCustomers = new Set(bookings.map(b => b.customerId)).size;
       
       // Calculate growth (mock data - replace with actual calculations)
       const bookingGrowth = 15;
