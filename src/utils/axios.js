@@ -39,7 +39,6 @@ instance.interceptors.response.use(
       window.location.href = '/login';
       return Promise.reject(error);
     }
-    }
 
     // Initialize retry count
     config.retryCount = config.retryCount || 0;
