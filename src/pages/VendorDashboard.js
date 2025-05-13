@@ -62,13 +62,15 @@ const VendorDashboard = () => {
     description: ''
   });
 
-  const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('userRole');
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
 
-  if (!token || userRole !== 'vendor') {
-    navigate('/login', { replace: true });
-    return null;
-  }
+    if (!token || userRole !== 'vendor') {
+      navigate('/login', { replace: true });
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
     if (user && !userInfo) {
