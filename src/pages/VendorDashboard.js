@@ -157,7 +157,6 @@ const VendorDashboard = () => {
       setError(errorMessage);
       setLoading(false);
     }
-  }
   };
 
   const handleProfileUpdate = async () => {
