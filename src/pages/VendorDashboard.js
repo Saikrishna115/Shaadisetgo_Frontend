@@ -66,17 +66,29 @@ const VendorDashboard = () => {
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole');
 
-    if (!token || userRole !== 'vendor') {
-      navigate('/login', { replace: true });
+    if (!token) {
+      navigate('/login', { replace: true, state: { message: 'Please login to continue' } });
+      return;
+    }
+
+    if (userRole !== 'vendor') {
+      navigate('/login', { replace: true, state: { message: 'Unauthorized access. Please login as a vendor.' } });
       return;
     }
   }, [navigate]);
 
   useEffect(() => {
-    if (user && !userInfo) {
-      fetchDashboardData();
+    if (!user) {
+      return;
     }
-  }, [user, userInfo]);
+    if (user.role !== 'vendor') {
+      navigate('/login', { replace: true, state: { message: 'Unauthorized access. Please login as a vendor.' } });
+      return;
+    }
+    fetchDashboardData();
+  }, [user, navigate]);
+
+
 
   const fetchDashboardData = async () => {
     const calculateAnalytics = (bookings) => {
