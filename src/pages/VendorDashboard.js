@@ -100,17 +100,13 @@ const VendorDashboard = () => {
       };
     };
     try {
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
-
-      const userResponse = await axios.get('/vendors/profile', config);
+      const userResponse = await axios.get('/vendors/profile');
       let userData = userResponse.data;
 
-      const vendorResponse = await axios.get(`/vendors/user/${userData._id}`, config);
+      const vendorResponse = await axios.get(`/vendors/user/${userData._id}`);
       userData = { ...userData, vendorInfo: vendorResponse.data };
 
-      const bookingsResponse = await axios.get('/bookings/vendor', config);
+      const bookingsResponse = await axios.get('/bookings/vendor');
 
       setUserInfo(userData);
       const bookingsData = bookingsResponse.data;
@@ -137,22 +133,16 @@ const VendorDashboard = () => {
 
   const handleProfileUpdate = async () => {
     try {
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
-
       let response;
       if (userInfo.vendorInfo) {
         response = await axios.put(
-          `https://shaadisetgo-backend.onrender.com/api/vendors/${userInfo.vendorInfo._id}`,
-          profileData,
-          config
+          `/vendors/${userInfo.vendorInfo._id}`,
+          profileData
         );
       } else {
         response = await axios.post(
-          'https://shaadisetgo-backend.onrender.com/api/vendors',
-          profileData,
-          config
+          '/vendors',
+          profileData
         );
       }
 
