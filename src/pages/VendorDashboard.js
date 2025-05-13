@@ -92,10 +92,32 @@ const VendorDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const vendorResponse = await axios.get('/vendors/profile');
+      const calculateAnalytics = (bookings) => {
+        const totalBookings = bookings.length;
+        const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
+        const completedBookings = bookings.filter(b => b.status === 'completed');
+        const rating = completedBookings.reduce((sum, b) => sum + (b.rating || 0), 0) / (completedBookings.length || 1);
+        const uniqueCustomers = new Set(bookings.map(b => b.customerId)).size;
       
+        // Calculate growth (mock data - replace with actual calculations)
+        const bookingGrowth = 15;
+        const revenueGrowth = 20;
+
+        return {
+          totalBookings,
+          revenue,
+          rating,
+          activeCustomers: uniqueCustomers,
+          bookingGrowth,
+          revenueGrowth,
+        };
+      };
+
+      const userResponse = await axios.get('/vendors/profile');
+      let userData = userResponse.data;
+
       // Handle case where vendor profile doesn't exist yet
-      if (!vendorResponse.data) {
+      if (!userData) {
         setUserInfo(null);
         setProfileData({
           businessName: '',
@@ -108,30 +130,6 @@ const VendorDashboard = () => {
         setLoading(false);
         return;
       }
-
-      const calculateAnalytics = (bookings) => {
-        const totalBookings = bookings.length;
-        const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
-        const completedBookings = bookings.filter(b => b.status === 'completed');
-        const rating = completedBookings.reduce((sum, b) => sum + (b.rating || 0), 0) / (completedBookings.length || 1);
-        const uniqueCustomers = new Set(bookings.map(b => b.customerId)).size;
-      
-      // Calculate growth (mock data - replace with actual calculations)
-      const bookingGrowth = 15;
-      const revenueGrowth = 20;
-
-      return {
-        totalBookings,
-        revenue,
-        rating,
-        activeCustomers: uniqueCustomers,
-        bookingGrowth,
-        revenueGrowth,
-      };
-    };
-    try {
-      const userResponse = await axios.get('/vendors/profile');
-      let userData = userResponse.data;
 
       const vendorResponse = await axios.get(`/vendors/user/${userData._id}`);
       userData = { ...userData, vendorInfo: vendorResponse.data };
@@ -159,6 +157,7 @@ const VendorDashboard = () => {
       setError(errorMessage);
       setLoading(false);
     }
+  }
   };
 
   const handleProfileUpdate = async () => {
