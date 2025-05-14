@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from '../utils/axios'; // Uses updated interceptor version
+import axios from '../utils/axios';
 
 const AuthContext = createContext(null);
 
@@ -27,24 +27,21 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get('/auth/me', {
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-
+      const response = await axios.get('/api/auth/user'); // ✅ CORRECTED ENDPOINT
       if (response.data && response.data.role) {
         setUser(response.data);
       } else {
-        console.warn('Unexpected user data from /auth/me:', response.data);
+        console.warn('Unexpected user data:', response.data);
         setUser(null);
       }
     } catch (err) {
-      console.error('Auth check failed:', err.response?.data || err.message);
-      setError(
+      const message =
         err.response?.data?.message ||
         (err.response?.status === 401
           ? 'Session expired. Please login again.'
-          : 'Authentication failed')
-      );
+          : 'Authentication failed');
+      console.error('Auth check failed:', message);
+      setError(message);
       logout(); // clear user & token
     } finally {
       setLoading(false);
@@ -55,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await axios.post('/auth/login', { email, password });
+      const response = await axios.post('/api/auth/login', { email, password });
       const { token, user } = response.data;
 
       if (!user || !user.role) {
@@ -85,9 +82,9 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setError(null);
       try {
-        await axios.post('/auth/logout');
+        await axios.post('/api/auth/logout');
       } catch (err) {
-        console.warn('Server logout failed:', err.message);
+        console.warn('Server logout failed:', err?.message);
       }
       if (navigate) navigate('/login');
     } catch {

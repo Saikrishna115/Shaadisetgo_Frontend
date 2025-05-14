@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://shaadisetgo-backend.onrender.com/api',
-  timeout: 15000, // 15 second timeout
-  retries: 2,
-  retryDelay: 1000
+  baseURL: 'https://shaadisetgo-backend.onrender.com',
+  withCredentials: false,
+  retries: 1,
+  retryDelay: 1000,
 });
 
-// Request interceptor: attach token & disable caching
+// ✅ Request interceptor: attach token & disable caching
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -15,7 +15,7 @@ instance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Disable caching for all GET requests
+    // Prevent caching
     config.headers['Cache-Control'] = 'no-cache';
     config.headers['Pragma'] = 'no-cache';
     config.headers['Expires'] = '0';
@@ -25,7 +25,7 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle auth & retry logic
+// ✅ Response interceptor: handle auth failures and retry
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -43,17 +43,22 @@ instance.interceptors.response.use(
 
     config.retryCount = config.retryCount || 0;
 
-    if (config.retryCount < instance.defaults.retries && (!error.response || error.response.status >= 500)) {
+    if (
+      config.retryCount < instance.defaults.retries &&
+      (!error.response || error.response.status >= 500)
+    ) {
       config.retryCount += 1;
-      await new Promise(resolve => setTimeout(resolve, instance.defaults.retryDelay));
+      await new Promise((resolve) => setTimeout(resolve, instance.defaults.retryDelay));
       return instance(config);
     }
 
     if (!error.response) {
       return Promise.reject({
         response: {
-          data: { message: 'Network error. Please check your internet connection and try again later.' }
-        }
+          data: {
+            message: 'Network error. Please check your internet connection and try again later.',
+          },
+        },
       });
     }
 
