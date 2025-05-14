@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from '../utils/axios'; // Axios with interceptors
+import axios from '../utils/axios'; // Uses updated interceptor version
 
 const AuthContext = createContext(null);
 
@@ -27,22 +27,25 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get('/auth/me');
-      setUser(response.data);
+      const response = await axios.get('/auth/me', {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+
+      if (response.data && response.data.role) {
+        setUser(response.data);
+      } else {
+        console.warn('Unexpected user data from /auth/me:', response.data);
+        setUser(null);
+      }
     } catch (err) {
       console.error('Auth check failed:', err.response?.data || err.message);
-      let errorMessage = 'Authentication failed';
-      
-      if (!err.response) {
-        errorMessage = 'Network error. Please check your internet connection.';
-      } else if (err.response.status === 401) {
-        errorMessage = 'Session expired. Please login again.';
-      } else if (err.response.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-      
-      setError(errorMessage);
-      logout();
+      setError(
+        err.response?.data?.message ||
+        (err.response?.status === 401
+          ? 'Session expired. Please login again.'
+          : 'Authentication failed')
+      );
+      logout(); // clear user & token
     } finally {
       setLoading(false);
     }
@@ -55,24 +58,22 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post('/auth/login', { email, password });
       const { token, user } = response.data;
 
+      if (!user || !user.role) {
+        throw new Error('Login succeeded but user role is missing.');
+      }
+
       localStorage.setItem('token', token);
-      localStorage.setItem('userRole', user.role); // Store user role for persistent role checks
+      localStorage.setItem('userRole', user.role);
       setUser(user);
       return true;
     } catch (err) {
-      console.error('Login error:', err.response?.data?.message || err.message);
-      let errorMessage = 'Login failed';
-      
-      if (!err.response) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
-      } else if (err.response.status === 401) {
-        errorMessage = 'Invalid email or password';
-      } else if (err.response.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-      
-      setError(errorMessage);
-      throw err; // Propagate error to handle in component
+      const message =
+        err.response?.data?.message ||
+        (err.response?.status === 401
+          ? 'Invalid email or password.'
+          : 'Login failed. Please try again.');
+      setError(message);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -80,34 +81,19 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async (navigate) => {
     try {
-      // Clear all auth-related state
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
+      localStorage.clear();
       setUser(null);
       setError(null);
-      
-      // Attempt to notify the server about logout
       try {
         await axios.post('/auth/logout');
       } catch (err) {
-        // Silently handle server logout failure
         console.warn('Server logout failed:', err.message);
       }
-
-      // Navigate to login page
-      if (navigate) {
-        navigate('/login');
-      }
-      return true;
-    } catch (err) {
-      console.error('Logout error:', err);
-      // Ensure user is logged out locally even if there's an error
-      localStorage.removeItem('token');
+      if (navigate) navigate('/login');
+    } catch {
+      localStorage.clear();
       setUser(null);
-      if (navigate) {
-        navigate('/login');
-      }
-      return false;
+      if (navigate) navigate('/login');
     }
   };
 
