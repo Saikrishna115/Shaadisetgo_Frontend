@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await axios.post('/auth/login', { email, password });
       const { token, user } = response.data;
 
       if (!user || !user.role) {
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setError(null);
       try {
-        await axios.post('/api/auth/logout');
+        await axios.post('/auth/logout');
       } catch (err) {
         console.warn('Server logout failed:', err?.message);
       }
