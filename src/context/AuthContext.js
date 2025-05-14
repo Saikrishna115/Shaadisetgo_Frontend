@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get('/api/auth/user'); // ✅ CORRECTED ENDPOINT
+      const response = await axios.get('/auth/user'); // ✅ CORRECTED ENDPOINT
       if (response.data && response.data.role) {
         setUser(response.data);
       } else {
