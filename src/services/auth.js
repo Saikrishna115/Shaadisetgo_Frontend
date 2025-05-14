@@ -23,15 +23,30 @@ const authService = {
     }
   },
 
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear local storage and redirect even if the API call fails
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
   },
 
-  getCurrentUser: () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get('/auth/user');
+      return response.data;
+    } catch (error) {
+      // If the API call fails, fall back to local storage
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
+    }
   },
 
   isAuthenticated: () => {
