@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://shaadisetgo-backend.onrender.com',
+  baseURL: 'https://shaadisetgo-backend.onrender.com/api',
   withCredentials: false,
   retries: 1,
   retryDelay: 1000,

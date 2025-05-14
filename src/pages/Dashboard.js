@@ -68,8 +68,8 @@ const Dashboard = () => {
         };
 
         const [userResponse, bookingsResponse] = await Promise.all([
-          axios.get('/auth/me', config),
-          axios.get('/bookings', config)
+          axios.get('/api/auth/me', config),
+          axios.get('/api/bookings', config)
         ]);
 
         const bookingsData = Array.isArray(bookingsResponse.data) ? bookingsResponse.data : [];
