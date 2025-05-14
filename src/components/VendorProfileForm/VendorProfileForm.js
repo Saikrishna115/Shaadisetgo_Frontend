@@ -16,13 +16,17 @@ import {
 const VendorProfileForm = ({ initialData, onSubmit }) => {
   const [formData, setFormData] = useState(initialData || {
     businessName: '',
-    category: '',
+    serviceCategory: '',
     description: '',
-    location: '',
+    location: {
+      city: '',
+      state: '',
+      country: ''
+    },
     priceRange: '',
-    contactEmail: '',
-    contactPhone: '',
-    services: '',
+    email: '',
+    phone: '',
+    services: [],
     experience: ''
   });
 
@@ -31,11 +35,13 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.businessName) newErrors.businessName = 'Business name is required';
-    if (!formData.category) newErrors.category = 'Category is required';
+    if (!formData.serviceCategory) newErrors.serviceCategory = 'Service category is required';
     if (!formData.description) newErrors.description = 'Description is required';
-    if (!formData.location) newErrors.location = 'Location is required';
-    if (!formData.contactEmail) newErrors.contactEmail = 'Email is required';
-    if (!formData.contactPhone) newErrors.contactPhone = 'Phone number is required';
+    if (!formData.location.city) newErrors['location.city'] = 'City is required';
+    if (!formData.location.state) newErrors['location.state'] = 'State is required';
+    if (!formData.location.country) newErrors['location.country'] = 'Country is required';
+    if (!formData.email) newErrors.email = 'Email is required';
+    if (!formData.phone) newErrors.phone = 'Phone number is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -43,10 +49,40 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Handle nested location fields
+    if (name.startsWith('location.')) {
+      const locationField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          [locationField]: value
+        }
+      }));
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: ''
+        }));
+      }
+      return;
+    }
+
+    // Handle services field as array
+    if (name === 'services') {
+      const servicesArray = value.split(',').map(service => service.trim()).filter(Boolean);
+      setFormData(prev => ({
+        ...prev,
+        [name]: servicesArray
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+
     // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => ({
@@ -95,10 +131,10 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
             <FormControl fullWidth required error={!!errors.category}>
               <InputLabel>Category</InputLabel>
               <Select
-                name="category"
-                value={formData.category}
+                name="serviceCategory"
+                value={formData.serviceCategory}
                 onChange={handleChange}
-                label="Category"
+                label="Service Category"
               >
                 {categories.map((category) => (
                   <MenuItem key={category} value={category}>
@@ -125,17 +161,46 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
               helperText={errors.description}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              label="Location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              error={!!errors.location}
-              helperText={errors.location}
-            />
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" gutterBottom>Location</Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  required
+                  fullWidth
+                  label="City"
+                  name="location.city"
+                  value={formData.location.city}
+                  onChange={handleChange}
+                  error={!!errors['location.city']}
+                  helperText={errors['location.city']}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  required
+                  fullWidth
+                  label="State"
+                  name="location.state"
+                  value={formData.location.state}
+                  onChange={handleChange}
+                  error={!!errors['location.state']}
+                  helperText={errors['location.state']}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Country"
+                  name="location.country"
+                  value={formData.location.country}
+                  onChange={handleChange}
+                  error={!!errors['location.country']}
+                  helperText={errors['location.country']}
+                />
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
@@ -151,25 +216,25 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
             <TextField
               required
               fullWidth
-              label="Contact Email"
-              name="contactEmail"
+              label="Email"
+              name="email"
               type="email"
-              value={formData.contactEmail}
+              value={formData.email}
               onChange={handleChange}
-              error={!!errors.contactEmail}
-              helperText={errors.contactEmail}
+              error={!!errors.email}
+              helperText={errors.email}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               required
               fullWidth
-              label="Contact Phone"
-              name="contactPhone"
-              value={formData.contactPhone}
+              label="Phone"
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
-              error={!!errors.contactPhone}
-              helperText={errors.contactPhone}
+              error={!!errors.phone}
+              helperText={errors.phone}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
