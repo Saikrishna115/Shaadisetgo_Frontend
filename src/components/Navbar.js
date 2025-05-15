@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-const Navbar = React.memo() => {
+const Navbar = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const isLoggedIn = localStorage.getItem('token') ? true : false;
@@ -14,7 +14,7 @@ const Navbar = React.memo() => {
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
+  }, [logout, navigate]);
 
   return (
     <nav className="navbar">
@@ -39,4 +39,4 @@ const Navbar = React.memo() => {
   );
 };
 
-export default Navbar;
+export default React.memo(Navbar); // Wrap it properly here

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 
-const Footer = React.memo() => {
+const Footer = () => {
   return (
     <footer className="footer" role="contentinfo" aria-label="Site footer">
       <div className="footer-content">
@@ -67,4 +67,4 @@ const Footer = React.memo() => {
   );
 };
 
-export default Footer;
+export default React.memo(Footer);
