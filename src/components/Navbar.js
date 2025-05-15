@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-const Navbar = React.memo(() => {
+const Navbar = React.memo() => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const isLoggedIn = localStorage.getItem('token') ? true : false;

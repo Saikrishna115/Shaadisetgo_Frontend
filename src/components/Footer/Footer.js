@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 
-const Footer = React.memo(() => {
+const Footer = React.memo() => {
   return (
     <footer className="footer" role="contentinfo" aria-label="Site footer">
       <div className="footer-content">
