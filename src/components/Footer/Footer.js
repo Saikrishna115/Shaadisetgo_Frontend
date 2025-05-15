@@ -2,50 +2,65 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 
-const Footer = () => {
+const Footer = React.memo(() => {
   return (
-    <footer className="footer">
+    <footer className="footer" role="contentinfo" aria-label="Site footer">
       <div className="footer-content">
-        <div className="footer-section">
-          <h3>ShaadiSetGo</h3>
+        <section className="footer-section" aria-labelledby="about-heading">
+          <h3 id="about-heading">ShaadiSetGo</h3>
           <p>Making wedding planning easier for everyone.</p>
-        </div>
+        </section>
         
-        <div className="footer-section">
-          <h4>Quick Links</h4>
-          <Link to="/vendors" aria-label="Find Vendors">Find Vendors</Link>
-          <Link to="/register" aria-label="Become a Vendor">Become a Vendor</Link>
-        </div>
+        <nav className="footer-section" aria-labelledby="quicklinks-heading">
+          <h4 id="quicklinks-heading">Quick Links</h4>
+          <ul>
+            <li><Link to="/vendors">Find Vendors</Link></li>
+            <li><Link to="/register">Become a Vendor</Link></li>
+          </ul>
+        </nav>
 
-        <div className="footer-section">
-          <h4>Support</h4>
-          <Link to="/contact-us" aria-label="Contact Us">Contact Us</Link>
-          <Link to="/connect-with-us" aria-label="Connect With Us">Connect With Us</Link>
-        </div>
+        <nav className="footer-section" aria-labelledby="support-heading">
+          <h4 id="support-heading">Support</h4>
+          <ul>
+            <li><Link to="/contact-us">Contact Us</Link></li>
+            <li><Link to="/connect-with-us">Connect With Us</Link></li>
+          </ul>
+        </nav>
 
-        <div className="footer-section">
-          <h4>Legal</h4>
-          <Link to="/privacy-policy" aria-label="Privacy Policy">Privacy Policy</Link>
-          <Link to="/terms-of-service" aria-label="Terms of Service">Terms of Service</Link>
-        </div>
+        <nav className="footer-section" aria-labelledby="legal-heading">
+          <h4 id="legal-heading">Legal</h4>
+          <ul>
+            <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+            <li><Link to="/terms-of-service">Terms of Service</Link></li>
+          </ul>
+        </nav>
 
-        <div className="footer-section">
-          <h4>Social Media</h4>
-          <div className="social-links">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-              <i className="fab fa-facebook"></i>
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-              <i className="fab fa-instagram"></i>
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-              <i className="fab fa-twitter"></i>
-            </a>
-          </div>
-        </div>
+        <section className="footer-section" aria-labelledby="social-heading">
+          <h4 id="social-heading">Social Media</h4>
+          <ul className="social-links" aria-label="Social media links">
+            <li>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Facebook page (opens in new window)">
+                <i className="fab fa-facebook" aria-hidden="true"></i>
+                <span className="sr-only">Facebook</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram page (opens in new window)">
+                <i className="fab fa-instagram" aria-hidden="true"></i>
+                <span className="sr-only">Instagram</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Twitter page (opens in new window)">
+                <i className="fab fa-twitter" aria-hidden="true"></i>
+                <span className="sr-only">Twitter</span>
+              </a>
+            </li>
+          </ul>
+        </section>
       </div>
       
-      <div className="footer-bottom">
+      <div className="footer-bottom" role="contentinfo">
         <p>&copy; {new Date().getFullYear()} ShaadiSetGo. All rights reserved.</p>
       </div>
     </footer>

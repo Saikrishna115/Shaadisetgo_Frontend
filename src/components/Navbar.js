@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-const Navbar = () => {
+const Navbar = React.memo(() => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const isLoggedIn = localStorage.getItem('token') ? true : false;
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await logout(navigate);
     } catch (error) {
