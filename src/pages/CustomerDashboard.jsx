@@ -70,7 +70,6 @@ const CustomerDashboard = () => {
       savedVendors: 0
     }
   });
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -97,9 +96,14 @@ const CustomerDashboard = () => {
       ]);
 
       // Calculate analytics
+      const currentDate = new Date();
+      const upcomingEvents = bookingsRes.data.filter(
+        booking => new Date(booking.eventDate) > currentDate && booking.status !== 'CANCELLED'
+      ).length;
+
       const analytics = {
         totalBookings: bookingsRes.data.length,
-        upcomingEvents: bookingsRes.data.filter(b => new Date(b.eventDate) > new Date()).length,
+        upcomingEvents,
         totalSpent: bookingsRes.data.reduce((sum, booking) => sum + (booking.amount || 0), 0),
         savedVendors: favoritesRes.data.length
       };
@@ -110,10 +114,6 @@ const CustomerDashboard = () => {
         favorites: favoritesRes.data,
         analytics
       });
-
-      // Fetch upcoming events (assuming there's an endpoint for this)
-      const eventsResponse = await axios.get('/events/upcoming', config);
-      setUpcomingEvents(eventsResponse.data);
 
       setError('');
     } catch (err) {
