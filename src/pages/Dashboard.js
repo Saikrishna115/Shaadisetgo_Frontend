@@ -165,7 +165,7 @@ const Dashboard = () => {
             guestCount: profileData.guestCount
           }
         };
-        response = await axios.put(`/users/${userInfo._id}`, customerData, config);
+        response = await axios.put('/users/profile', customerData, config);
       }
 
       if (response.data) {
