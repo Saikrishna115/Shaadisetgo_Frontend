@@ -20,6 +20,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import ConnectWithUs from './pages/ConnectWithUs';
 import NotFound from './pages/NotFound.js';
+import UserProfile from './pages/UserProfile';
+import Calendar from './pages/Calendar';
 
 const App = () => {
   return (
@@ -50,6 +52,22 @@ const App = () => {
                 element={
                   <PrivateRoute roles={['vendor']}>
                     <VendorDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute roles={['vendor', 'customer']}>
+                    <UserProfile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/calendar"
+                element={
+                  <PrivateRoute roles={['vendor']}>
+                    <Calendar />
                   </PrivateRoute>
                 }
               />
