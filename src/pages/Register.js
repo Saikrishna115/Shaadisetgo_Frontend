@@ -129,10 +129,23 @@ const Register = () => {
         role: formData.role
       };
 
-      console.log('Registering user:', { ...userData, password: '[REDACTED]' });
+      console.log('Registering user:', { 
+        ...userData, 
+        password: '[REDACTED]',
+        validation: {
+          emailValid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email),
+          phoneValid: /^\d{10}$/.test(userData.phone.replace(/[^0-9]/g, '')),
+          passwordValid: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(userData.password)
+        }
+      });
       
       // Register the user
       const response = await api.post('/auth/register', userData);
+      console.log('Registration response:', {
+        success: response.data?.success,
+        hasToken: !!response.data?.data?.token,
+        role: formData.role
+      });
       
       if (response.data && response.data.data.token) {
         localStorage.setItem('token', response.data.data.token);

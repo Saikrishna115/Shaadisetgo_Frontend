@@ -49,9 +49,22 @@ const Login = () => {
     setError('');
 
     try {
+      console.log('Login attempt:', {
+        email,
+        validation: {
+          emailValid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+          hasPassword: !!password
+        }
+      });
+
       await login(email, password);
       // No need to navigate here — wait for useEffect to handle it
     } catch (err) {
+      console.error('Login error details:', {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message
+      });
       setError(err.response?.data?.message || 'Login failed. Please check your credentials and try again.');
     } finally {
       setIsSubmitting(false);
