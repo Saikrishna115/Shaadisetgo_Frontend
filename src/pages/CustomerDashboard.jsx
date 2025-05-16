@@ -22,7 +22,8 @@ import {
   Rating,
   Tab,
   Tabs,
-  Alert
+  Alert,
+  TextField
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -45,6 +46,8 @@ const CustomerDashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editProfileData, setEditProfileData] = useState(null);
   const [dashboardData, setDashboardData] = useState({
     profile: {
       fullName: '',
@@ -137,6 +140,61 @@ const CustomerDashboard = () => {
     }
   };
 
+  const handleProfileUpdate = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+
+      const response = await axios.put('/users/profile', editProfileData, config);
+      
+      if (response.data) {
+        setDashboardData(prev => ({
+          ...prev,
+          profile: response.data
+        }));
+        setIsEditing(false);
+        setError('');
+      }
+    } catch (err) {
+      console.error('Profile update error:', err);
+      setError(err.response?.data?.message || 'Failed to update profile');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const startEditing = () => {
+    setEditProfileData({
+      fullName: dashboardData.profile.fullName || '',
+      email: dashboardData.profile.email || '',
+      phone: dashboardData.profile.phone || '',
+      address: dashboardData.profile.address || '',
+      city: dashboardData.profile.city || '',
+      state: dashboardData.profile.state || '',
+      pincode: dashboardData.profile.pincode || '',
+      preferences: {
+        eventType: dashboardData.profile.preferences?.eventType || '',
+        eventDate: dashboardData.profile.preferences?.eventDate || null,
+        budget: dashboardData.profile.preferences?.budget || '',
+        guestCount: dashboardData.profile.preferences?.guestCount || ''
+      }
+    });
+    setIsEditing(true);
+  };
+
   const renderAnalytics = () => (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={6} md={3}>
@@ -179,64 +237,214 @@ const CustomerDashboard = () => {
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6">Profile Information</Typography>
-          <Button
-            startIcon={<EditIcon />}
-            variant="outlined"
-            onClick={() => navigate('/profile/edit')}
-          >
-            Edit Profile
-          </Button>
+          {!isEditing && (
+            <Button
+              startIcon={<EditIcon />}
+              variant="outlined"
+              onClick={startEditing}
+            >
+              Edit Profile
+            </Button>
+          )}
         </Box>
         <Divider sx={{ mb: 2 }} />
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Full Name"
-                  secondary={dashboardData.profile.fullName}
-                  secondaryTypographyProps={{ component: "div" }}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        {isEditing ? (
+          <Box component="form" noValidate>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Full Name"
+                  name="fullName"
+                  value={editProfileData.fullName}
+                  onChange={handleInputChange}
                 />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><EmailIcon sx={{ mr: 1 }} /> Email</Box>}
-                  secondary={dashboardData.profile.email}
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  value={editProfileData.email}
+                  disabled
                 />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><PhoneIcon sx={{ mr: 1 }} /> Phone</Box>}
-                  secondary={dashboardData.profile.phone}
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Phone"
+                  name="phone"
+                  value={editProfileData.phone}
+                  onChange={handleInputChange}
                 />
-              </ListItem>
-            </List>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Address"
+                  name="address"
+                  value={editProfileData.address}
+                  onChange={handleInputChange}
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="City"
+                  name="city"
+                  value={editProfileData.city}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="State"
+                  name="state"
+                  value={editProfileData.state}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Pincode"
+                  name="pincode"
+                  value={editProfileData.pincode}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>Event Preferences</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Event Type"
+                  name="preferences.eventType"
+                  value={editProfileData.preferences.eventType}
+                  onChange={(e) => setEditProfileData(prev => ({
+                    ...prev,
+                    preferences: {
+                      ...prev.preferences,
+                      eventType: e.target.value
+                    }
+                  }))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Budget"
+                  name="preferences.budget"
+                  type="number"
+                  value={editProfileData.preferences.budget}
+                  onChange={(e) => setEditProfileData(prev => ({
+                    ...prev,
+                    preferences: {
+                      ...prev.preferences,
+                      budget: e.target.value
+                    }
+                  }))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Guest Count"
+                  name="preferences.guestCount"
+                  type="number"
+                  value={editProfileData.preferences.guestCount}
+                  onChange={(e) => setEditProfileData(prev => ({
+                    ...prev,
+                    preferences: {
+                      ...prev.preferences,
+                      guestCount: e.target.value
+                    }
+                  }))}
+                />
+              </Grid>
+            </Grid>
+            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleProfileUpdate}
+              >
+                Save Changes
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  setIsEditing(false);
+                  setError('');
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <List>
+                <ListItem>
+                  <ListItemText
+                    primary="Full Name"
+                    secondary={dashboardData.profile.fullName}
+                    secondaryTypographyProps={{ component: "div" }}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><EmailIcon sx={{ mr: 1 }} /> Email</Box>}
+                    secondary={dashboardData.profile.email}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><PhoneIcon sx={{ mr: 1 }} /> Phone</Box>}
+                    secondary={dashboardData.profile.phone}
+                  />
+                </ListItem>
+              </List>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <List>
+                <ListItem>
+                  <ListItemText
+                    primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><LocationIcon sx={{ mr: 1 }} /> Address</Box>}
+                    secondary={`${dashboardData.profile.address || ''}, ${dashboardData.profile.city || ''}, ${dashboardData.profile.state || ''} ${dashboardData.profile.pincode || ''}`}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary="Event Preferences"
+                    secondary={
+                      <Box>
+                        <Typography variant="body2">Type: {dashboardData.profile.preferences?.eventType || 'Not specified'}</Typography>
+                        <Typography variant="body2">Date: {dashboardData.profile.preferences?.eventDate ? new Date(dashboardData.profile.preferences.eventDate).toLocaleDateString() : 'Not specified'}</Typography>
+                        <Typography variant="body2">Budget: ₹{dashboardData.profile.preferences?.budget || 'Not specified'}</Typography>
+                        <Typography variant="body2">Guest Count: {dashboardData.profile.preferences?.guestCount || 'Not specified'}</Typography>
+                      </Box>
+                    }
+                    secondaryTypographyProps={{ component: "div" }}
+                  />
+                </ListItem>
+              </List>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><LocationIcon sx={{ mr: 1 }} /> Address</Box>}
-                  secondary={`${dashboardData.profile.address || ''}, ${dashboardData.profile.city || ''}, ${dashboardData.profile.state || ''} ${dashboardData.profile.pincode || ''}`}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="Event Preferences"
-                  secondary={
-                    <Box>
-                      <Typography variant="body2">Type: {dashboardData.profile.preferences?.eventType || 'Not specified'}</Typography>
-                      <Typography variant="body2">Date: {dashboardData.profile.preferences?.eventDate ? new Date(dashboardData.profile.preferences.eventDate).toLocaleDateString() : 'Not specified'}</Typography>
-                      <Typography variant="body2">Budget: ₹{dashboardData.profile.preferences?.budget || 'Not specified'}</Typography>
-                      <Typography variant="body2">Guest Count: {dashboardData.profile.preferences?.guestCount || 'Not specified'}</Typography>
-                    </Box>
-                  }
-                  secondaryTypographyProps={{ component: "div" }}
-                />
-              </ListItem>
-            </List>
-          </Grid>
-        </Grid>
+        )}
       </CardContent>
     </Card>
   );
