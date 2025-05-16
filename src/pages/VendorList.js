@@ -76,7 +76,11 @@ const VendorList = () => {
               <p className="vendor-category">{vendor.serviceType}</p>
               <p className="vendor-description">{vendor.description}</p>
               <div className="vendor-footer">
-                <span className="vendor-price">{vendor.priceRange}</span>
+                <span className="vendor-price">
+                  {vendor.priceRange && typeof vendor.priceRange === 'object' 
+                    ? `₹${vendor.priceRange.min || 0} - ₹${vendor.priceRange.max || 0}`
+                    : vendor.priceRange || 'Price not specified'}
+                </span>
                 <button className="book-btn" onClick={() => navigate(`/vendors/${vendor._id}`)}>View Details</button>
               </div>
             </div>
