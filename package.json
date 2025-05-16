@@ -5,6 +5,7 @@
   "dependencies": {
     "@babel/plugin-transform-optional-chaining": "^7.27.1",
     "@babel/plugin-transform-private-methods": "^7.27.1",
+    "@babel/plugin-transform-private-property-in-object": "^7.21.11",
     "@base-ui-components/react": "^1.0.0-alpha.8",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
@@ -29,7 +30,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "audit-fix": "npm audit fix --force"
   },
   "eslintConfig": {
     "extends": [
@@ -50,9 +52,12 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "eslint": "^8.56.0",
     "eslint-config-react-app": "^7.0.1",
     "html-webpack-plugin": "^5.6.3"
+  },
+  "overrides": {
+    "nth-check": "^2.0.1",
+    "postcss": "^8.4.31",
+    "follow-redirects": "^1.15.4"
   }
 }
