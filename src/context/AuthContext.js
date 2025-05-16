@@ -62,6 +62,12 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       const response = await api.post('/auth/login', { email, password });
+      
+      // Check if the response has the expected structure
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Login failed');
+      }
+
       const { token, user: userData } = response.data;
 
       if (!userData || !userData.role) {
@@ -74,11 +80,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true, role: userData.role };
     } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        (err.response?.status === 401
-          ? 'Invalid email or password.'
-          : 'Login failed. Please try again.');
+      const message = err.response?.data?.message || err.message || 'Login failed. Please try again.';
       setError(message);
       setIsAuthenticated(false);
       throw err;

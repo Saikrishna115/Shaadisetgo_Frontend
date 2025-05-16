@@ -16,28 +16,42 @@ const Register = () => {
     // Vendor specific fields
     businessName: '',
     serviceCategory: '',
-    location: '',
-    description: ''
+    location: {
+      city: '',
+      state: '',
+      address: ''
+    },
+    serviceDescription: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const serviceCategories = [
-    'Venues',
-    'Photography',
+    'Venue',
     'Catering',
-    'Decoration',
-    'Music',
-    'Makeup',
-    'Wedding Planner',
+    'Photography',
+    'DJ',
+    'Decor',
     'Other'
   ];
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    if (name.startsWith('location.')) {
+      const locationField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          [locationField]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const validateForm = () => {
@@ -83,8 +97,12 @@ const Register = () => {
         setError('Service category is required for vendors');
         return false;
       }
-      if (!formData.location.trim()) {
-        setError('Location is required for vendors');
+      if (!formData.location.city.trim()) {
+        setError('City is required for vendors');
+        return false;
+      }
+      if (!formData.location.state.trim()) {
+        setError('State is required for vendors');
         return false;
       }
     }
@@ -102,8 +120,6 @@ const Register = () => {
     }
 
     try {
-      const { confirmPassword, ...registerData } = formData;
-      
       // Create the registration data
       const userData = {
         fullName: formData.fullName,
@@ -116,42 +132,50 @@ const Register = () => {
       // Register the user
       const response = await api.post('/auth/register', userData);
       
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      if (response.data && response.data.data.token) {
+        localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('userRole', formData.role);
         
         // If registering as a vendor, create vendor profile
         if (formData.role === 'vendor') {
           try {
+            // Set authorization header with the new token
+            api.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.token}`;
+            
             const vendorData = {
               businessName: formData.businessName,
               ownerName: formData.fullName,
+              email: formData.email,
+              phone: formData.phone,
               serviceCategory: formData.serviceCategory,
-              location: formData.location,
-              description: formData.description || '',
-              phone: formData.phone
+              location: {
+                city: formData.location.city,
+                state: formData.location.state,
+                address: formData.location.address || ''
+              },
+              serviceDescription: formData.serviceDescription || ''
             };
-            
-            await api.post('/vendors', vendorData, {
-              headers: { Authorization: `Bearer ${response.data.token}` }
-            });
+
+            // Create vendor profile
+            await api.post('/vendors', vendorData);
           } catch (vendorError) {
             console.error('Error creating vendor profile:', vendorError);
-            setError('Vendor profile creation failed. Please complete your profile after logging in.');
+            setError('Registration successful but failed to create vendor profile. Please log in and complete your profile.');
+            setLoading(false);
+            navigate('/login');
+            return;
           }
         }
-        
-        setError('Registration successful! Please log in with your credentials.');
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        setError('Registration successful! Please log in.');
-        navigate('/login');
+
+        // Redirect based on role
+        if (formData.role === 'vendor') {
+          navigate('/vendor/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -208,7 +232,7 @@ const Register = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            minLength="6"
+            minLength="8"
           />
         </div>
 
@@ -221,7 +245,7 @@ const Register = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
-            minLength="6"
+            minLength="8"
           />
         </div>
 
@@ -271,24 +295,49 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="location">Location</label>
+              <label htmlFor="location.city">City</label>
               <input
                 type="text"
-                id="location"
-                name="location"
-                value={formData.location}
+                id="location.city"
+                name="location.city"
+                value={formData.location.city}
                 onChange={handleChange}
                 required
-                placeholder="e.g., Mumbai, Maharashtra"
+                placeholder="e.g., Mumbai"
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="description">Business Description</label>
+              <label htmlFor="location.state">State</label>
+              <input
+                type="text"
+                id="location.state"
+                name="location.state"
+                value={formData.location.state}
+                onChange={handleChange}
+                required
+                placeholder="e.g., Maharashtra"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="location.address">Address (Optional)</label>
+              <input
+                type="text"
+                id="location.address"
+                name="location.address"
+                value={formData.location.address}
+                onChange={handleChange}
+                placeholder="Enter your business address"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="serviceDescription">Business Description (Optional)</label>
               <textarea
-                id="description"
-                name="description"
-                value={formData.description}
+                id="serviceDescription"
+                name="serviceDescription"
+                value={formData.serviceDescription}
                 onChange={handleChange}
                 placeholder="Tell us about your business and services"
                 rows="4"
