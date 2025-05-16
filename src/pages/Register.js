@@ -12,10 +12,26 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'customer'
+    role: 'customer',
+    // Vendor specific fields
+    businessName: '',
+    serviceCategory: '',
+    location: '',
+    description: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const serviceCategories = [
+    'Venues',
+    'Photography',
+    'Catering',
+    'Decoration',
+    'Music',
+    'Makeup',
+    'Wedding Planner',
+    'Other'
+  ];
 
   const handleChange = (e) => {
     setFormData({
@@ -56,6 +72,22 @@ const Register = () => {
       setError('Passwords do not match');
       return false;
     }
+
+    // Validate vendor-specific fields if role is vendor
+    if (formData.role === 'vendor') {
+      if (!formData.businessName.trim()) {
+        setError('Business name is required for vendors');
+        return false;
+      }
+      if (!formData.serviceCategory) {
+        setError('Service category is required for vendors');
+        return false;
+      }
+      if (!formData.location.trim()) {
+        setError('Location is required for vendors');
+        return false;
+      }
+    }
     return true;
   };
 
@@ -71,14 +103,44 @@ const Register = () => {
 
     try {
       const { confirmPassword, ...registerData } = formData;
-      const response = await api.post('/auth/register', registerData);
+      
+      // Create the registration data
+      const userData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: formData.role
+      };
+
+      // Register the user
+      const response = await api.post('/auth/register', userData);
       
       if (response.data && response.data.token) {
-        // Store the registration token
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userRole', formData.role);
         
-        // Instead of automatic login, redirect to login page
+        // If registering as a vendor, create vendor profile
+        if (formData.role === 'vendor') {
+          try {
+            const vendorData = {
+              businessName: formData.businessName,
+              ownerName: formData.fullName,
+              serviceCategory: formData.serviceCategory,
+              location: formData.location,
+              description: formData.description || '',
+              phone: formData.phone
+            };
+            
+            await api.post('/vendors', vendorData, {
+              headers: { Authorization: `Bearer ${response.data.token}` }
+            });
+          } catch (vendorError) {
+            console.error('Error creating vendor profile:', vendorError);
+            setError('Vendor profile creation failed. Please complete your profile after logging in.');
+          }
+        }
+        
         setError('Registration successful! Please log in with your credentials.');
         setTimeout(() => {
           navigate('/login');
@@ -175,6 +237,65 @@ const Register = () => {
             <option value="vendor">Vendor</option>
           </select>
         </div>
+
+        {formData.role === 'vendor' && (
+          <>
+            <div className="form-group">
+              <label htmlFor="businessName">Business Name</label>
+              <input
+                type="text"
+                id="businessName"
+                name="businessName"
+                value={formData.businessName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="serviceCategory">Service Category</label>
+              <select
+                id="serviceCategory"
+                name="serviceCategory"
+                value={formData.serviceCategory}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select a category</option>
+                {serviceCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="location">Location</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                placeholder="e.g., Mumbai, Maharashtra"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="description">Business Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Tell us about your business and services"
+                rows="4"
+              />
+            </div>
+          </>
+        )}
 
         <button type="submit" className="submit-btn" disabled={loading}>
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
