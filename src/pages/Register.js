@@ -129,6 +129,8 @@ const Register = () => {
         role: formData.role
       };
 
+      console.log('Registering user:', { ...userData, password: '[REDACTED]' });
+      
       // Register the user
       const response = await api.post('/auth/register', userData);
       
@@ -156,26 +158,45 @@ const Register = () => {
               serviceDescription: formData.serviceDescription || ''
             };
 
+            console.log('Creating vendor profile:', vendorData);
+
             // Create vendor profile
-            await api.post('/vendors', vendorData);
+            const vendorResponse = await api.post('/vendors', vendorData);
+            console.log('Vendor profile created:', vendorResponse.data);
+
+            if (!vendorResponse.data.success) {
+              throw new Error(vendorResponse.data.message || 'Failed to create vendor profile');
+            }
+
+            // Redirect to vendor dashboard
+            navigate('/vendor/dashboard');
           } catch (vendorError) {
             console.error('Error creating vendor profile:', vendorError);
-            setError('Registration successful but failed to create vendor profile. Please log in and complete your profile.');
+            
+            // Clean up if vendor profile creation fails
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            
+            setError(
+              vendorError.response?.data?.message || 
+              vendorError.message || 
+              'Failed to create vendor profile. Please try again.'
+            );
             setLoading(false);
-            navigate('/login');
             return;
           }
-        }
-
-        // Redirect based on role
-        if (formData.role === 'vendor') {
-          navigate('/vendor/dashboard');
         } else {
+          // Redirect customer to dashboard
           navigate('/dashboard');
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      setError(
+        err.response?.data?.message || 
+        err.message || 
+        'Registration failed. Please try again.'
+      );
       setLoading(false);
     }
   };
