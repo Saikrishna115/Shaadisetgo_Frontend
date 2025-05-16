@@ -266,20 +266,27 @@ const VendorDashboard = () => {
   }
 
   const getStatusChip = (status) => {
-    const statusConfig = {
-      pending: { color: 'warning', icon: <ScheduleIcon />, label: 'Pending' },
-      confirmed: { color: 'success', icon: <CheckCircleIcon />, label: 'Confirmed' },
-      cancelled: { color: 'error', icon: <CancelIcon />, label: 'Cancelled' },
-      completed: { color: 'info', icon: <CheckCircleIcon />, label: 'Completed' },
-    };
-
-    const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
-
+    let color;
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+        color = 'success';
+        break;
+      case 'pending':
+        color = 'warning';
+        break;
+      case 'cancelled':
+        color = 'error';
+        break;
+      case 'completed':
+        color = 'info';
+        break;
+      default:
+        color = 'default';
+    }
     return (
       <Chip
-        icon={config.icon}
-        label={config.label}
-        color={config.color}
+        label={status || 'Unknown'}
+        color={color}
         size="small"
         sx={{ ml: 1 }}
       />
@@ -383,14 +390,17 @@ const VendorDashboard = () => {
                           secondary={
                             <>
                               <Typography variant="body2" color="text.secondary">
-                                Service: {booking.serviceType}
+                                Customer Email: {booking.customerEmail}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Customer Phone: {booking.customerPhone}
                               </Typography>
                               <Typography variant="body2" color="text.secondary">
                                 Date: {new Date(booking.eventDate).toLocaleDateString()}
                               </Typography>
-                              {booking.amount && (
-                                <Typography variant="body2" color="primary">
-                                  Amount: ₹{booking.amount}
+                              {booking.message && (
+                                <Typography variant="body2" color="text.secondary">
+                                  Message: {booking.message}
                                 </Typography>
                               )}
                             </>
