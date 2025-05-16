@@ -157,7 +157,8 @@ const VendorDashboard = () => {
           console.error('Error fetching bookings:', {
             message: bookingError.message,
             response: bookingError.response?.data,
-            status: bookingError.response?.status
+            status: bookingError.response?.status,
+            stack: bookingError.stack
           });
           // Don't fail completely if bookings can't be fetched
           setBookings([]);
@@ -175,9 +176,22 @@ const VendorDashboard = () => {
           message: vendorError.message,
           response: vendorError.response?.data,
           status: vendorError.response?.status,
-          stack: vendorError.stack
+          stack: vendorError.stack,
+          code: vendorError.code
         });
-        setError(vendorError.response?.data?.message || 'Failed to load vendor profile. Please try again.');
+
+        // Handle specific error cases
+        if (vendorError.code === 'ECONNABORTED') {
+          setError('Request timed out. Please try again.');
+        } else if (!vendorError.response) {
+          setError('Network error. Please check your internet connection.');
+        } else {
+          const errorMessage = vendorError.response?.data?.message 
+            || vendorError.response?.data?.error 
+            || vendorError.message 
+            || 'Failed to load vendor profile. Please try again.';
+          setError(errorMessage);
+        }
       }
 
       setLoading(false);
@@ -186,10 +200,23 @@ const VendorDashboard = () => {
         message: err.message,
         response: err.response?.data,
         status: err.response?.status,
-        stack: err.stack
+        stack: err.stack,
+        code: err.code
       });
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
-      setError(errorMessage);
+
+      // Handle different types of errors
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timed out. Please try again.');
+      } else if (!err.response) {
+        setError('Network error. Please check your internet connection.');
+      } else {
+        const errorMessage = err.response?.data?.message 
+          || err.response?.data?.error 
+          || err.message 
+          || 'Failed to load dashboard data';
+        setError(errorMessage);
+      }
+      
       setLoading(false);
     }
   };
