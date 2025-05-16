@@ -92,44 +92,43 @@ const VendorDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
+        console.error('No token found');
         navigate('/login', { replace: true, state: { message: 'Please login to continue' } });
         return;
       }
 
-      const calculateAnalytics = (bookings) => {
-        const totalBookings = bookings.length;
-        const revenue = bookings.reduce((sum, booking) => sum + (booking.amount || 0), 0);
-        const completedBookings = bookings.filter(b => b.status === 'completed');
-        const rating = completedBookings.reduce((sum, b) => sum + (b.rating || 0), 0) / (completedBookings.length || 1);
-        const uniqueCustomers = new Set(bookings.map(b => b.customerId)).size;
-      
-        // Calculate growth (mock data - replace with actual calculations)
-        const bookingGrowth = 15;
-        const revenueGrowth = 20;
-
-        return {
-          totalBookings,
-          revenue,
-          rating,
-          activeCustomers: uniqueCustomers,
-          bookingGrowth,
-          revenueGrowth,
-        };
-      };
+      // Log token details (without exposing the full token)
+      console.log('Token check:', {
+        exists: !!token,
+        length: token.length,
+        prefix: token.substring(0, 10) + '...'
+      });
 
       // Fetch vendor profile
       try {
         console.log('Fetching vendor profile...');
         const vendorProfileResponse = await axios.get('/vendors/profile');
-        console.log('Vendor profile response:', vendorProfileResponse.data);
+        console.log('Vendor profile response:', {
+          status: vendorProfileResponse.status,
+          success: vendorProfileResponse.data?.success,
+          hasVendor: !!vendorProfileResponse.data?.vendor
+        });
         
         if (!vendorProfileResponse.data) {
+          console.error('No data in vendor profile response');
           setError('Vendor profile not found');
           setLoading(false);
           return;
         }
 
-        const vendorData = vendorProfileResponse.data;
+        const vendorData = vendorProfileResponse.data.vendor;
+        if (!vendorData) {
+          console.error('No vendor data in response:', vendorProfileResponse.data);
+          setError('Invalid vendor profile data');
+          setLoading(false);
+          return;
+        }
+
         setUserInfo({ ...user, vendorInfo: vendorData });
         
         // Update profile data
@@ -146,13 +145,20 @@ const VendorDashboard = () => {
         try {
           console.log('Fetching bookings...');
           const bookingsResponse = await axios.get('/bookings/vendor');
-          console.log('Bookings response:', bookingsResponse.data);
+          console.log('Bookings response:', {
+            status: bookingsResponse.status,
+            count: bookingsResponse.data?.length || 0
+          });
           
           const bookingsData = bookingsResponse.data;
           setBookings(bookingsData);
           setAnalytics(calculateAnalytics(bookingsData));
         } catch (bookingError) {
-          console.error('Error fetching bookings:', bookingError);
+          console.error('Error fetching bookings:', {
+            message: bookingError.message,
+            response: bookingError.response?.data,
+            status: bookingError.response?.status
+          });
           // Don't fail completely if bookings can't be fetched
           setBookings([]);
           setAnalytics({
@@ -165,13 +171,23 @@ const VendorDashboard = () => {
           });
         }
       } catch (vendorError) {
-        console.error('Error fetching vendor profile:', vendorError);
-        setError('Failed to load vendor profile. Please try again.');
+        console.error('Error fetching vendor profile:', {
+          message: vendorError.message,
+          response: vendorError.response?.data,
+          status: vendorError.response?.status,
+          stack: vendorError.stack
+        });
+        setError(vendorError.response?.data?.message || 'Failed to load vendor profile. Please try again.');
       }
 
       setLoading(false);
     } catch (err) {
-      console.error('Dashboard error:', err);
+      console.error('Dashboard error:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        stack: err.stack
+      });
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
       setError(errorMessage);
       setLoading(false);

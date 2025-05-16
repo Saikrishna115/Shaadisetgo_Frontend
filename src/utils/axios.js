@@ -15,6 +15,14 @@ instance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Log request details
+    console.log('Request:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      hasToken: !!token
+    });
+
     // Prevent caching
     config.headers['Cache-Control'] = 'no-cache';
     config.headers['Pragma'] = 'no-cache';
@@ -22,18 +30,37 @@ instance.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
 );
 
 // ✅ Response interceptor: handle auth failures and retry
 instance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   async (error) => {
-    const { config } = error;
+    const { config, response } = error;
+    console.error('Response error:', {
+      url: config?.url,
+      status: response?.status,
+      data: response?.data,
+      error: error.message,
+      stack: error.stack
+    });
+
     const token = localStorage.getItem('token');
 
-    if (error.response && error.response.status === 401) {
+    if (response && response.status === 401) {
       if (token) {
+        console.log('Unauthorized access, clearing tokens');
         localStorage.removeItem('token');
         localStorage.removeItem('userRole');
         window.location.href = '/login';
@@ -45,14 +72,15 @@ instance.interceptors.response.use(
 
     if (
       config.retryCount < instance.defaults.retries &&
-      (!error.response || error.response.status >= 500)
+      (!response || response.status >= 500)
     ) {
       config.retryCount += 1;
+      console.log(`Retrying request (${config.retryCount}/${instance.defaults.retries})`);
       await new Promise((resolve) => setTimeout(resolve, instance.defaults.retryDelay));
       return instance(config);
     }
 
-    if (!error.response) {
+    if (!response) {
       return Promise.reject({
         response: {
           data: {
