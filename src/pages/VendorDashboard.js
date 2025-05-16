@@ -88,8 +88,6 @@ const VendorDashboard = () => {
     fetchDashboardData();
   }, [user, navigate]);
 
-
-
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -119,49 +117,61 @@ const VendorDashboard = () => {
         };
       };
 
-      // Log token for debugging
-      console.debug('Auth token:', token);
-      
-      const userResponse = await axios.get('/vendors/profile');
-      let userData = userResponse.data;
+      // Fetch vendor profile
+      try {
+        console.log('Fetching vendor profile...');
+        const vendorProfileResponse = await axios.get('/vendors/profile');
+        console.log('Vendor profile response:', vendorProfileResponse.data);
+        
+        if (!vendorProfileResponse.data) {
+          setError('Vendor profile not found');
+          setLoading(false);
+          return;
+        }
 
-      // Handle case where vendor profile doesn't exist yet
-      if (!userData) {
-        setUserInfo(null);
+        const vendorData = vendorProfileResponse.data;
+        setUserInfo({ ...user, vendorInfo: vendorData });
+        
+        // Update profile data
         setProfileData({
-          businessName: '',
-          serviceType: '',
-          location: '',
-          contact: '',
-          priceRange: '',
-          description: ''
+          businessName: vendorData.businessName || '',
+          serviceType: vendorData.serviceCategory || '',
+          location: vendorData.location?.city ? `${vendorData.location.city}, ${vendorData.location.state}` : '',
+          contact: vendorData.phone || '',
+          priceRange: vendorData.priceRange ? `₹${vendorData.priceRange.min} - ₹${vendorData.priceRange.max}` : '',
+          description: vendorData.serviceDescription || ''
         });
-        setLoading(false);
-        return;
+
+        // Fetch bookings
+        try {
+          console.log('Fetching bookings...');
+          const bookingsResponse = await axios.get('/bookings/vendor');
+          console.log('Bookings response:', bookingsResponse.data);
+          
+          const bookingsData = bookingsResponse.data;
+          setBookings(bookingsData);
+          setAnalytics(calculateAnalytics(bookingsData));
+        } catch (bookingError) {
+          console.error('Error fetching bookings:', bookingError);
+          // Don't fail completely if bookings can't be fetched
+          setBookings([]);
+          setAnalytics({
+            totalBookings: 0,
+            revenue: 0,
+            rating: 0,
+            activeCustomers: 0,
+            bookingGrowth: 0,
+            revenueGrowth: 0,
+          });
+        }
+      } catch (vendorError) {
+        console.error('Error fetching vendor profile:', vendorError);
+        setError('Failed to load vendor profile. Please try again.');
       }
 
-      const vendorResponse = await axios.get(`/vendors/user/${userData._id}`);
-      userData = { ...userData, vendorInfo: vendorResponse.data };
-
-      const bookingsResponse = await axios.get('/bookings/vendor');
-
-      setUserInfo(userData);
-      const bookingsData = bookingsResponse.data;
-      setBookings(bookingsData);
-      setAnalytics(calculateAnalytics(bookingsData));
-
-      if (userData.vendorInfo) {
-        setProfileData({
-          businessName: userData.vendorInfo.businessName || '',
-          serviceType: userData.vendorInfo.serviceType || '',
-          location: userData.vendorInfo.location || '',
-          contact: userData.vendorInfo.contact || '',
-          priceRange: userData.vendorInfo.priceRange || '',
-          description: userData.vendorInfo.description || ''
-        });
-      }
       setLoading(false);
     } catch (err) {
+      console.error('Dashboard error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
       setError(errorMessage);
       setLoading(false);
