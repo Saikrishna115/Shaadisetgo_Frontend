@@ -50,6 +50,62 @@ const Dashboard = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [bookingsLoading, setBookingsLoading] = useState(true);
 
+  const fetchDashboardData = async () => {
+    try {
+      setProfileLoading(true);
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+        validateStatus: status => status < 500
+      };
+
+      const [userResponse, bookingsResponse] = await Promise.all([
+        axios.get('/auth/me', config),
+        axios.get('/bookings', config)
+      ]);
+
+      const bookingsData = Array.isArray(bookingsResponse.data) ? bookingsResponse.data : [];
+      let userData = userResponse.data;
+
+      if (userData.role === 'vendor') {
+        const vendorResponse = await axios.get(`/vendors/user/${userData._id}`, config);
+        userData = { ...userData, vendorInfo: vendorResponse.data };
+      }
+
+      setUserInfo(userData);
+      setBookings(bookingsData);
+      setProfileData({
+        name: userData.fullName || '',
+        email: userData.email || '',
+        phone: userData.phone || '',
+        address: userData.address || '',
+        city: userData.city || '',
+        state: userData.state || '',
+        pincode: userData.pincode || '',
+        eventType: userData.eventType || '',
+        eventDate: userData.eventDate ? new Date(userData.eventDate) : null,
+        budget: userData.budget || '',
+        guestCount: userData.guestCount || '',
+        businessName: userData.vendorInfo?.businessName || '',
+        serviceType: userData.vendorInfo?.serviceType || '',
+        location: userData.vendorInfo?.location || '',
+        contact: userData.vendorInfo?.contact || '',
+        priceRange: userData.vendorInfo?.priceRange || '',
+        description: userData.vendorInfo?.description || ''
+      });
+      setLoading(false);
+      setProfileLoading(false);
+      setBookingsLoading(false);
+      setError('');
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
+      setError(errorMessage);
+      setLoading(false);
+      setProfileLoading(false);
+      setBookingsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -58,60 +114,6 @@ const Dashboard = () => {
       setLoading(false);
       return;
     }
-
-    const fetchDashboardData = async () => {
-      try {
-        setProfileLoading(true);
-        const config = {
-          headers: { Authorization: `Bearer ${token}` },
-          validateStatus: status => status < 500
-        };
-
-        const [userResponse, bookingsResponse] = await Promise.all([
-          axios.get('/auth/me', config),
-          axios.get('/bookings', config)
-        ]);
-
-        const bookingsData = Array.isArray(bookingsResponse.data) ? bookingsResponse.data : [];
-        let userData = userResponse.data;
-
-        if (userData.role === 'vendor') {
-          const vendorResponse = await axios.get(`/vendors/user/${userData._id}`, config);
-          userData = { ...userData, vendorInfo: vendorResponse.data };
-        }
-
-        setUserInfo(userData);
-        setBookings(bookingsData);
-        setProfileData({
-          name: userData.name || '',
-          email: userData.email || '',
-          phone: userData.phone || '',
-          address: userData.address || '',
-          city: userData.city || '',
-          state: userData.state || '',
-          pincode: userData.pincode || '',
-          eventType: userData.eventType || '',
-          eventDate: userData.eventDate ? new Date(userData.eventDate) : null,
-          budget: userData.budget || '',
-          guestCount: userData.guestCount || '',
-          businessName: userData.vendorInfo?.businessName || '',
-          serviceType: userData.vendorInfo?.serviceType || '',
-          location: userData.vendorInfo?.location || '',
-          contact: userData.vendorInfo?.contact || '',
-          priceRange: userData.vendorInfo?.priceRange || '',
-          description: userData.vendorInfo?.description || ''
-        });
-        setLoading(false);
-        setProfileLoading(false);
-        setBookingsLoading(false);
-      } catch (err) {
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
-        setError(errorMessage);
-        setLoading(false);
-        setProfileLoading(false);
-        setBookingsLoading(false);
-      }
-    };
 
     fetchDashboardData();
   }, []);
@@ -172,18 +174,8 @@ const Dashboard = () => {
         setSuccessMessage('Profile updated successfully!');
         setError('');
         setIsEditing(false);
-        const updatedData = response.data;
-        if (userInfo.role === 'vendor') {
-          setUserInfo(prev => ({
-            ...prev,
-            vendorInfo: updatedData
-          }));
-        } else {
-          setUserInfo(prev => ({
-            ...prev,
-            ...updatedData
-          }));
-        }
+        // Refresh dashboard data to show updated information
+        await fetchDashboardData();
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to update profile';
