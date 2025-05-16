@@ -37,9 +37,7 @@ import {
   Email as EmailIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
 import './Dashboard.css';
-import api from '../services/api';
 
 const CustomerDashboard = () => {
   const { user } = useAuth();
@@ -114,7 +112,7 @@ const CustomerDashboard = () => {
       });
 
       // Fetch upcoming events (assuming there's an endpoint for this)
-      const eventsResponse = await api.get('/events/upcoming', config);
+      const eventsResponse = await axios.get('/events/upcoming', config);
       setUpcomingEvents(eventsResponse.data);
 
       setError('');

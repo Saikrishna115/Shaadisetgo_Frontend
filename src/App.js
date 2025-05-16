@@ -12,7 +12,7 @@ import Home from './pages/Home';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.js';
 import VendorList from './pages/VendorList.js';
-import Dashboard from './pages/Dashboard.js';
+import CustomerDashboard from './pages/CustomerDashboard';
 import AdminDashboard from './pages/AdminDashboard.js';
 import VendorDashboard from './pages/VendorDashboard.js';
 import ContactUs from './pages/ContactUs';
@@ -41,7 +41,7 @@ const App = () => {
                 path="/dashboard"
                 element={
                   <PrivateRoute roles={['customer']}>
-                    <Dashboard />
+                    <CustomerDashboard />
                   </PrivateRoute>
                 }
               />

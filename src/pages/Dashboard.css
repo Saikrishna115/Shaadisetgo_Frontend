@@ -29,18 +29,17 @@
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  color: #f44336;
+  text-align: center;
+  padding: 20px;
+  margin: 20px;
 }
 
 .loading {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: #666;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 }
 
 .dashboard-content {
@@ -149,18 +148,23 @@
 }
 
 .edit-btn {
-  background-color: #007bff;
+  margin-top: 1rem;
+  padding: 8px 16px;
+  background-color: #1976d2;
   color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .edit-btn:hover {
-  background-color: #0056b3;
+  background-color: #1565c0;
 }
 
 .vendor-info,
 .customer-info {
-  display: grid;
-  gap: 1rem;
+  padding: 1rem;
 }
 
 .vendor-info p,
@@ -176,6 +180,9 @@
 }
 
 .booking-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -222,7 +229,7 @@
 }
 
 .booking-details {
-  margin-top: 1rem;
+  flex-grow: 1;
 }
 
 .booking-details p {
@@ -231,9 +238,8 @@
 }
 
 .booking-actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .no-bookings {
@@ -260,4 +266,74 @@
   .form-actions button {
     width: 100%;
   }
+}
+
+.analytics-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.analytics-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.analytics-label {
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.booking-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.booking-details {
+  flex-grow: 1;
+}
+
+.booking-actions {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.favorite-vendor-card {
+  height: 100%;
+  transition: transform 0.2s;
+}
+
+.favorite-vendor-card:hover {
+  transform: translateY(-4px);
+}
+
+.vendor-rating {
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.vendor-location {
+  display: flex;
+  align-items: center;
+  color: #666;
+}
+
+.vendor-price {
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.tab-panel {
+  padding: 1rem 0;
 }
