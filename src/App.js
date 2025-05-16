@@ -22,6 +22,8 @@ import ConnectWithUs from './pages/ConnectWithUs';
 import NotFound from './pages/NotFound.js';
 import UserProfile from './pages/UserProfile';
 import Calendar from './pages/Calendar';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const App = () => {
   return (
@@ -34,6 +36,8 @@ const App = () => {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/vendors" element={<VendorList />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />

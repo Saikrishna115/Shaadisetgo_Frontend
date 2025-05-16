@@ -116,6 +116,16 @@ const Login = () => {
             >
               {isSubmitting ? <CircularProgress size={24} /> : 'Login'}
             </Button>
+
+            <Box sx={{ textAlign: 'right', mb: 2 }}>
+              <Button
+                onClick={() => navigate('/forgot-password')}
+                color="primary"
+                size="small"
+              >
+                Forgot Password?
+              </Button>
+            </Box>
           </form>
 
           <Box sx={{ mt: 2, textAlign: 'center' }}>

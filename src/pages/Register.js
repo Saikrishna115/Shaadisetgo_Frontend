@@ -268,6 +268,16 @@ const Register = () => {
             required
             minLength="8"
           />
+          <small style={{ color: '#666', marginTop: '4px', display: 'block' }}>
+            Password must contain:
+            <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
+              <li style={{ color: /[A-Z]/.test(formData.password) ? '#4caf50' : '#666' }}>At least one uppercase letter</li>
+              <li style={{ color: /[a-z]/.test(formData.password) ? '#4caf50' : '#666' }}>At least one lowercase letter</li>
+              <li style={{ color: /\d/.test(formData.password) ? '#4caf50' : '#666' }}>At least one number</li>
+              <li style={{ color: /[@$!%*?&]/.test(formData.password) ? '#4caf50' : '#666' }}>At least one special character (@$!%*?&)</li>
+              <li style={{ color: formData.password.length >= 8 ? '#4caf50' : '#666' }}>At least 8 characters long</li>
+            </ul>
+          </small>
         </div>
 
         <div className="form-group">
