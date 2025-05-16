@@ -133,7 +133,7 @@ const Dashboard = () => {
 
       const requiredFields = userInfo?.role === 'vendor'
         ? ['businessName', 'serviceType', 'location', 'contact']
-        : ['name'];
+        : ['fullName', 'email', 'phone'];
 
       const missingFields = requiredFields.filter(field => !profileData[field]);
       if (missingFields.length > 0) {
@@ -149,7 +149,23 @@ const Dashboard = () => {
           response = await axios.post('/vendors', profileData, config);
         }
       } else {
-        response = await axios.put(`/users/${userInfo._id}`, profileData, config);
+        // For customer profile update
+        const customerData = {
+          fullName: profileData.name,
+          email: profileData.email,
+          phone: profileData.phone,
+          address: profileData.address,
+          city: profileData.city,
+          state: profileData.state,
+          pincode: profileData.pincode,
+          preferences: {
+            eventType: profileData.eventType,
+            eventDate: profileData.eventDate,
+            budget: profileData.budget,
+            guestCount: profileData.guestCount
+          }
+        };
+        response = await axios.put(`/users/${userInfo._id}`, customerData, config);
       }
 
       if (response.data) {

@@ -11,47 +11,15 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const UserProfileForm = ({ initialData, onSubmit }) => {
+const UserProfileForm = ({ profileData, handleInputChange, handleProfileUpdate, setIsEditing, error, successMessage }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    location: '',
-    preferences: '',
-  });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name || '',
-        email: initialData.email || '',
-        phone: initialData.phone || '',
-        location: initialData.location || '',
-        preferences: initialData.preferences || '',
-      });
-    }
-  }, [initialData]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await onSubmit(formData);
-      setSuccess('Profile updated successfully!');
-      setError('');
+      await handleProfileUpdate();
     } catch (err) {
-      setError(err.message || 'Failed to update profile');
-      setSuccess('');
+      console.error('Error updating profile:', err);
     }
   };
 
@@ -63,7 +31,7 @@ const UserProfileForm = ({ initialData, onSubmit }) => {
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={3}>
@@ -71,10 +39,10 @@ const UserProfileForm = ({ initialData, onSubmit }) => {
               <TextField
                 required
                 fullWidth
-                label="Name"
+                label="Full Name"
                 name="name"
-                value={formData.name}
-                onChange={handleChange}
+                value={profileData.name || ''}
+                onChange={handleInputChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -84,52 +52,74 @@ const UserProfileForm = ({ initialData, onSubmit }) => {
                 label="Email"
                 name="email"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
+                value={profileData.email || ''}
+                onChange={handleInputChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
+                required
                 fullWidth
                 label="Phone"
                 name="phone"
-                value={formData.phone}
-                onChange={handleChange}
+                value={profileData.phone || ''}
+                onChange={handleInputChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
+                label="Address"
+                name="address"
+                value={profileData.address || ''}
+                onChange={handleInputChange}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Event Preferences"
-                name="preferences"
-                multiline
-                rows={4}
-                value={formData.preferences}
-                onChange={handleChange}
-                placeholder="Enter your event preferences and requirements"
+                label="City"
+                name="city"
+                value={profileData.city || ''}
+                onChange={handleInputChange}
               />
             </Grid>
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                size="large"
+            <Grid item xs={12} sm={6}>
+              <TextField
                 fullWidth
-              >
-                Save Profile
-              </Button>
+                label="State"
+                name="state"
+                value={profileData.state || ''}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Pincode"
+                name="pincode"
+                value={profileData.pincode || ''}
+                onChange={handleInputChange}
+              />
             </Grid>
           </Grid>
+          
+          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+            >
+              Save Changes
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setIsEditing(false)}
+            >
+              Cancel
+            </Button>
+          </Box>
         </Box>
       </Paper>
     </Container>
