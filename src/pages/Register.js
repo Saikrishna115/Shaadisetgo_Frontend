@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import './Register.css';
 import { CircularProgress } from '@mui/material';
 
@@ -68,11 +68,7 @@ const Register = () => {
 
     try {
       const { confirmPassword, ...registerData } = formData;
-      const response = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/register', registerData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api.post('/auth/register', registerData);
       
       if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -80,7 +76,7 @@ const Register = () => {
         setError('');
         // Attempt to log in automatically after successful registration
         try {
-          const loginResponse = await axios.post('https://shaadisetgo-backend.onrender.com/api/auth/login', {
+          const loginResponse = await api.post('/auth/login', {
             email: formData.email,
             password: formData.password
           });
@@ -102,12 +98,7 @@ const Register = () => {
         navigate('/login');
       }
     } catch (err) {
-      console.error('Registration error:', err.response?.data || err.message);
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          (err.response?.status === 400 ? 'Invalid registration data. Please check your input.' : err.message) || 
-                          'Registration failed. Please try again.';
-      setError(errorMessage);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

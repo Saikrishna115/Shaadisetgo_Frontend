@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from '../utils/axios';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get('/auth/me'); // ✅ CORRECTED ENDPOINT
+      const response = await api.get('/auth/me');
       if (response.data && response.data.role) {
         setUser(response.data);
       } else {
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
           : 'Authentication failed');
       console.error('Auth check failed:', message);
       setError(message);
-      logout(); // clear user & token
+      logout();
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await axios.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data;
 
       if (!user || !user.role) {
@@ -78,18 +78,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async (navigate) => {
     try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.warn('Server logout failed:', err?.message);
+    } finally {
       localStorage.clear();
       setUser(null);
       setError(null);
-      try {
-        await axios.post('/auth/logout');
-      } catch (err) {
-        console.warn('Server logout failed:', err?.message);
-      }
-      if (navigate) navigate('/login');
-    } catch {
-      localStorage.clear();
-      setUser(null);
       if (navigate) navigate('/login');
     }
   };

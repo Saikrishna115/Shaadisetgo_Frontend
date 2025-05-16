@@ -33,6 +33,7 @@ import {
 } from '@mui/icons-material';
 import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
 import './Dashboard.css';
+import api from '../services/api';
 
 const CustomerDashboard = () => {
   const { user } = useAuth();
@@ -83,11 +84,11 @@ const CustomerDashboard = () => {
       });
 
       // Fetch upcoming events (assuming there's an endpoint for this)
-      const eventsResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/events/upcoming', config);
+      const eventsResponse = await api.get('/events/upcoming', config);
       setUpcomingEvents(eventsResponse.data);
 
       // Fetch favorite vendors
-      const favoritesResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/favorites', config);
+      const favoritesResponse = await api.get('/favorites', config);
       setFavoriteVendors(favoritesResponse.data);
 
       setLoading(false);

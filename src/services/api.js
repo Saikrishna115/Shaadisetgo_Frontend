@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:10000/api',
+  baseURL: 'https://shaadisetgo-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json'
   },
@@ -11,7 +11,10 @@ const api = axios.create({
 // Request interceptor for handling requests
 api.interceptors.request.use(
   (config) => {
-    // No need to manually add token as it's handled by HttpOnly cookies
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -35,6 +38,8 @@ api.interceptors.response.use(
         return await api(originalRequest);
       } catch (refreshError) {
         // If refresh fails, redirect to login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
