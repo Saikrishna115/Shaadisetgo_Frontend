@@ -122,108 +122,79 @@ const VendorDashboard = () => {
         return;
       }
 
-      // Log token details (without exposing the full token)
       console.log('Token check:', {
         exists: !!token,
         length: token.length,
         prefix: token.substring(0, 10) + '...'
       });
 
-      // Fetch vendor profile
+      const vendorProfileResponse = await axios.get('/vendors/profile');
+      console.log('Vendor profile response:', {
+        status: vendorProfileResponse.status,
+        success: vendorProfileResponse.data?.success,
+        hasVendor: !!vendorProfileResponse.data?.vendor
+      });
+      
+      if (!vendorProfileResponse.data) {
+        console.error('No data in vendor profile response');
+        setError('Vendor profile not found');
+        setLoading(false);
+        return;
+      }
+
+      const vendorData = vendorProfileResponse.data.vendor;
+      if (!vendorData) {
+        console.error('No vendor data in response:', vendorProfileResponse.data);
+        setError('Invalid vendor profile data');
+        setLoading(false);
+        return;
+      }
+
+      setUserInfo({ ...user, vendorInfo: vendorData });
+      
+      setProfileData({
+        businessName: vendorData.businessName || '',
+        serviceCategory: vendorData.serviceCategory || '',
+        location: {
+          city: vendorData.location?.city || '',
+          state: vendorData.location?.state || '',
+          address: vendorData.location?.address || ''
+        },
+        phone: vendorData.phone || '',
+        priceRange: {
+          min: vendorData.priceRange?.min || 0,
+          max: vendorData.priceRange?.max || 0
+        },
+        serviceDescription: vendorData.serviceDescription || ''
+      });
+
       try {
-        console.log('Fetching vendor profile...');
-        const vendorProfileResponse = await axios.get('/vendors/profile');
-        console.log('Vendor profile response:', {
-          status: vendorProfileResponse.status,
-          success: vendorProfileResponse.data?.success,
-          hasVendor: !!vendorProfileResponse.data?.vendor
+        console.log('Fetching bookings...');
+        const bookingsResponse = await axios.get('/bookings/vendor');
+        console.log('Bookings response:', {
+          status: bookingsResponse.status,
+          count: bookingsResponse.data?.length || 0
         });
         
-        if (!vendorProfileResponse.data) {
-          console.error('No data in vendor profile response');
-          setError('Vendor profile not found');
-          setLoading(false);
-          return;
-        }
-
-        const vendorData = vendorProfileResponse.data.vendor;
-        if (!vendorData) {
-          console.error('No vendor data in response:', vendorProfileResponse.data);
-          setError('Invalid vendor profile data');
-          setLoading(false);
-          return;
-        }
-
-        setUserInfo({ ...user, vendorInfo: vendorData });
-        
-        // Update profile data
-        setProfileData({
-          businessName: vendorData.businessName || '',
-          serviceCategory: vendorData.serviceCategory || '',
-          location: {
-            city: vendorData.location?.city || '',
-            state: vendorData.location?.state || '',
-            address: vendorData.location?.address || ''
-          },
-          phone: vendorData.phone || '',
-          priceRange: {
-            min: vendorData.priceRange?.min || 0,
-            max: vendorData.priceRange?.max || 0
-          },
-          serviceDescription: vendorData.serviceDescription || ''
+        const bookingsData = bookingsResponse.data;
+        setBookings(bookingsData);
+        setAnalytics(calculateAnalytics(bookingsData));
+      } catch (bookingError) {
+        console.error('Error fetching bookings:', {
+          message: bookingError.message,
+          response: bookingError.response?.data,
+          status: bookingError.response?.status,
+          stack: bookingError.stack
         });
-
-        // Fetch bookings
-        try {
-          console.log('Fetching bookings...');
-          const bookingsResponse = await axios.get('/bookings/vendor');
-          console.log('Bookings response:', {
-            status: bookingsResponse.status,
-            count: bookingsResponse.data?.length || 0
-          });
-          
-          const bookingsData = bookingsResponse.data;
-          setBookings(bookingsData);
-          setAnalytics(calculateAnalytics(bookingsData));
-        } catch (bookingError) {
-          console.error('Error fetching bookings:', {
-            message: bookingError.message,
-            response: bookingError.response?.data,
-            status: bookingError.response?.status,
-            stack: bookingError.stack
-          });
-          // Don't fail completely if bookings can't be fetched
-          setBookings([]);
-          setAnalytics({
-            totalBookings: 0,
-            revenue: 0,
-            rating: 0,
-            activeCustomers: 0,
-            bookingGrowth: 0,
-            revenueGrowth: 0,
-          });
-        }
-      } catch (vendorError) {
-        console.error('Error fetching vendor profile:', {
-          message: vendorError.message,
-          response: vendorError.response?.data,
-          status: vendorError.response?.status,
-          stack: vendorError.stack,
-          code: vendorError.code
+        setBookings([]);
+        setAnalytics({
+          totalBookings: 0,
+          revenue: 0,
+          rating: 0,
+          activeCustomers: 0,
+          bookingGrowth: 0,
+          revenueGrowth: 0,
         });
-
-        // Handle specific error cases
-        if (vendorError.code === 'ECONNABORTED') {
-          setError('Request timed out. Please try again.');
-        } else if (!vendorError.response) {
-          setError('Network error. Please check your internet connection.');
-        } else {
-          const errorMessage = vendorError.response?.data?.message 
-            || vendorError.response?.data?.error 
-            || vendorError.message 
-            || 'Failed to load vendor profile. Please try again.';
-          setError(errorMessage);
-        }
       }
 
       setLoading(false);
@@ -236,7 +207,6 @@ const VendorDashboard = () => {
         code: err.code
       });
 
-      // Handle different types of errors
       if (err.code === 'ECONNABORTED') {
         setError('Request timed out. Please try again.');
       } else if (!err.response) {
