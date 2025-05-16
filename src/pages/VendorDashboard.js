@@ -40,6 +40,24 @@ import './Dashboard.css';
 const VendorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const calculateAnalytics = (bookings) => {
+    const currentDate = new Date();
+    const lastMonth = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+    
+    const recentBookings = bookings.filter(booking => new Date(booking.createdAt) >= lastMonth);
+    const completedBookings = bookings.filter(booking => booking.status === 'completed');
+    
+    return {
+      totalBookings: bookings.length,
+      revenue: completedBookings.reduce((total, booking) => total + (booking.amount || 0), 0),
+      rating: completedBookings.reduce((total, booking) => total + (booking.rating || 0), 0) / (completedBookings.length || 1),
+      activeCustomers: new Set(bookings.map(booking => booking.customerId)).size,
+      bookingGrowth: ((recentBookings.length / (bookings.length || 1)) * 100) - 100,
+      revenueGrowth: 0 // This would need historical data to calculate properly
+    };
+  };
+
   const [userInfo, setUserInfo] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [analytics, setAnalytics] = useState({
@@ -55,11 +73,18 @@ const VendorDashboard = () => {
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [profileData, setProfileData] = useState({
     businessName: '',
-    serviceType: '',
-    location: '',
-    contact: '',
-    priceRange: '',
-    description: ''
+    serviceCategory: '',
+    location: {
+      city: '',
+      state: '',
+      address: ''
+    },
+    phone: '',
+    priceRange: {
+      min: 0,
+      max: 0
+    },
+    serviceDescription: ''
   });
 
   useEffect(() => {
@@ -134,11 +159,18 @@ const VendorDashboard = () => {
         // Update profile data
         setProfileData({
           businessName: vendorData.businessName || '',
-          serviceType: vendorData.serviceCategory || '',
-          location: vendorData.location?.city ? `${vendorData.location.city}, ${vendorData.location.state}` : '',
-          contact: vendorData.phone || '',
-          priceRange: vendorData.priceRange ? `₹${vendorData.priceRange.min} - ₹${vendorData.priceRange.max}` : '',
-          description: vendorData.serviceDescription || ''
+          serviceCategory: vendorData.serviceCategory || '',
+          location: {
+            city: vendorData.location?.city || '',
+            state: vendorData.location?.state || '',
+            address: vendorData.location?.address || ''
+          },
+          phone: vendorData.phone || '',
+          priceRange: {
+            min: vendorData.priceRange?.min || 0,
+            max: vendorData.priceRange?.max || 0
+          },
+          serviceDescription: vendorData.serviceDescription || ''
         });
 
         // Fetch bookings
@@ -343,11 +375,19 @@ const VendorDashboard = () => {
                 {userInfo?.vendorInfo ? (
                   <List>
                     <ListItem><ListItemText primary="Business Name" secondary={userInfo.vendorInfo.businessName} /></ListItem>
-                    <ListItem><ListItemText primary="Service Type" secondary={userInfo.vendorInfo.serviceType} /></ListItem>
-                    <ListItem><ListItemText primary="Location" secondary={userInfo.vendorInfo.location} /></ListItem>
-                    <ListItem><ListItemText primary="Contact" secondary={userInfo.vendorInfo.contact} /></ListItem>
-                    <ListItem><ListItemText primary="Price Range" secondary={userInfo.vendorInfo.priceRange} /></ListItem>
-                    <ListItem><ListItemText primary="Description" secondary={userInfo.vendorInfo.description} /></ListItem>
+                    <ListItem><ListItemText primary="Service Type" secondary={userInfo.vendorInfo.serviceCategory} /></ListItem>
+                    <ListItem><ListItemText primary="Location" secondary={
+                      userInfo.vendorInfo.location ? 
+                        `${userInfo.vendorInfo.location.city || ''}, ${userInfo.vendorInfo.location.state || ''}`.trim() : 
+                        'Not specified'
+                    } /></ListItem>
+                    <ListItem><ListItemText primary="Contact" secondary={userInfo.vendorInfo.phone || 'Not specified'} /></ListItem>
+                    <ListItem><ListItemText primary="Price Range" secondary={
+                      userInfo.vendorInfo.priceRange ? 
+                        `₹${userInfo.vendorInfo.priceRange.min || 0} - ₹${userInfo.vendorInfo.priceRange.max || 0}` : 
+                        'Not specified'
+                    } /></ListItem>
+                    <ListItem><ListItemText primary="Description" secondary={userInfo.vendorInfo.serviceDescription || 'No description available'} /></ListItem>
                   </List>
                 ) : (
                   <Typography variant="body2" color="textSecondary">
@@ -433,12 +473,94 @@ const VendorDashboard = () => {
         <DialogTitle>{userInfo?.vendorInfo ? 'Update Business Profile' : 'Create Business Profile'}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
-            <TextField fullWidth label="Business Name" value={profileData.businessName} onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })} margin="normal" />
-            <TextField fullWidth label="Service Type" value={profileData.serviceType} onChange={(e) => setProfileData({ ...profileData, serviceType: e.target.value })} margin="normal" />
-            <TextField fullWidth label="Location" value={profileData.location} onChange={(e) => setProfileData({ ...profileData, location: e.target.value })} margin="normal" />
-            <TextField fullWidth label="Contact" value={profileData.contact} onChange={(e) => setProfileData({ ...profileData, contact: e.target.value })} margin="normal" />
-            <TextField fullWidth label="Price Range" value={profileData.priceRange} onChange={(e) => setProfileData({ ...profileData, priceRange: e.target.value })} margin="normal" />
-            <TextField fullWidth label="Description" value={profileData.description} onChange={(e) => setProfileData({ ...profileData, description: e.target.value })} margin="normal" multiline rows={4} />
+            <TextField 
+              fullWidth 
+              label="Business Name" 
+              value={profileData.businessName} 
+              onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })} 
+              margin="normal" 
+            />
+            <TextField 
+              fullWidth 
+              label="Service Category" 
+              value={profileData.serviceCategory} 
+              onChange={(e) => setProfileData({ ...profileData, serviceCategory: e.target.value })} 
+              margin="normal" 
+            />
+            <TextField 
+              fullWidth 
+              label="City" 
+              value={profileData.location.city} 
+              onChange={(e) => setProfileData({ 
+                ...profileData, 
+                location: { ...profileData.location, city: e.target.value } 
+              })} 
+              margin="normal" 
+            />
+            <TextField 
+              fullWidth 
+              label="State" 
+              value={profileData.location.state} 
+              onChange={(e) => setProfileData({ 
+                ...profileData, 
+                location: { ...profileData.location, state: e.target.value } 
+              })} 
+              margin="normal" 
+            />
+            <TextField 
+              fullWidth 
+              label="Address" 
+              value={profileData.location.address} 
+              onChange={(e) => setProfileData({ 
+                ...profileData, 
+                location: { ...profileData.location, address: e.target.value } 
+              })} 
+              margin="normal" 
+            />
+            <TextField 
+              fullWidth 
+              label="Phone" 
+              value={profileData.phone} 
+              onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })} 
+              margin="normal" 
+            />
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField 
+                  fullWidth 
+                  type="number"
+                  label="Minimum Price (₹)" 
+                  value={profileData.priceRange.min} 
+                  onChange={(e) => setProfileData({ 
+                    ...profileData, 
+                    priceRange: { ...profileData.priceRange, min: Number(e.target.value) } 
+                  })} 
+                  margin="normal" 
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField 
+                  fullWidth 
+                  type="number"
+                  label="Maximum Price (₹)" 
+                  value={profileData.priceRange.max} 
+                  onChange={(e) => setProfileData({ 
+                    ...profileData, 
+                    priceRange: { ...profileData.priceRange, max: Number(e.target.value) } 
+                  })} 
+                  margin="normal" 
+                />
+              </Grid>
+            </Grid>
+            <TextField 
+              fullWidth 
+              label="Service Description" 
+              value={profileData.serviceDescription} 
+              onChange={(e) => setProfileData({ ...profileData, serviceDescription: e.target.value })} 
+              margin="normal" 
+              multiline 
+              rows={4} 
+            />
           </Box>
         </DialogContent>
         <DialogActions>
