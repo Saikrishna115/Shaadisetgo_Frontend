@@ -61,16 +61,21 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
+      console.log('Attempting login:', { email });
+      
       const response = await api.post('/auth/login', { email, password });
+      console.log('Login response:', response.data);
       
       // Check if the response has the expected structure
       if (!response.data.success) {
+        console.error('Login failed:', response.data.message);
         throw new Error(response.data.message || 'Login failed');
       }
 
       const { token, user: userData } = response.data;
 
       if (!userData || !userData.role) {
+        console.error('Invalid user data:', userData);
         throw new Error('Login succeeded but user role is missing.');
       }
 
@@ -80,6 +85,12 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true, role: userData.role };
     } catch (err) {
+      console.error('Login error:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      
       const message = err.response?.data?.message || err.message || 'Login failed. Please try again.';
       setError(message);
       setIsAuthenticated(false);

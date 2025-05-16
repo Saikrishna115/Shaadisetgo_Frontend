@@ -10,6 +10,12 @@ const api = axios.create({
 // Request interceptor for handling requests
 api.interceptors.request.use(
   (config) => {
+    console.log('API Request:', {
+      method: config.method,
+      url: config.url,
+      hasToken: !!localStorage.getItem('token')
+    });
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -17,14 +23,29 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for handling errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('API Response:', {
+      status: response.status,
+      url: response.config.url,
+      success: response.data?.success
+    });
+    return response;
+  },
   async (error) => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      message: error.response?.data?.message || error.message,
+      data: error.response?.data
+    });
+
     // If the error is 401 (Unauthorized)
     if (error.response?.status === 401) {
       // Clear auth data and redirect to login
