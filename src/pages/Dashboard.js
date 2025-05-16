@@ -167,15 +167,53 @@ const Dashboard = () => {
             guestCount: profileData.guestCount
           }
         };
-        response = await axios.put('/users/profile', customerData, config);
-      }
 
-      if (response.data) {
-        setSuccessMessage('Profile updated successfully!');
-        setError('');
-        setIsEditing(false);
-        // Refresh dashboard data to show updated information
-        await fetchDashboardData();
+        try {
+          response = await axios.put('/users/profile', customerData, config);
+          console.log('Profile update response:', response.data);  // Add logging
+          
+          if (response.data) {
+            setSuccessMessage('Profile updated successfully!');
+            setError('');
+            setIsEditing(false);
+            
+            // Update local state with the response data
+            const updatedUserData = response.data;
+            setUserInfo(prev => ({
+              ...prev,
+              fullName: updatedUserData.fullName,
+              email: updatedUserData.email,
+              phone: updatedUserData.phone,
+              address: updatedUserData.address,
+              city: updatedUserData.city,
+              state: updatedUserData.state,
+              pincode: updatedUserData.pincode,
+              preferences: updatedUserData.preferences
+            }));
+            
+            // Update profile data state
+            setProfileData(prev => ({
+              ...prev,
+              name: updatedUserData.fullName,
+              email: updatedUserData.email,
+              phone: updatedUserData.phone,
+              address: updatedUserData.address,
+              city: updatedUserData.city,
+              state: updatedUserData.state,
+              pincode: updatedUserData.pincode,
+              eventType: updatedUserData.preferences?.eventType || '',
+              eventDate: updatedUserData.preferences?.eventDate || null,
+              budget: updatedUserData.preferences?.budget || '',
+              guestCount: updatedUserData.preferences?.guestCount || ''
+            }));
+            
+            // Refresh dashboard data
+            await fetchDashboardData();
+          }
+        } catch (err) {
+          console.error('Profile update error:', err);  // Add error logging
+          throw err;
+        }
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to update profile';
