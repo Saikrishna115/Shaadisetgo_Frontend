@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axios';
 import {
   Container,
   Typography,
@@ -20,8 +20,10 @@ import {
   Avatar,
   Tooltip,
   Rating,
+  Tab,
+  Tabs,
+  Alert
 } from '@mui/material';
-import { useAuth } from '../context/AuthContext';
 import {
   Edit as EditIcon,
   Event as EventIcon,
@@ -30,7 +32,11 @@ import {
   Cancel as CancelIcon,
   Schedule as ScheduleIcon,
   CalendarMonth as CalendarIcon,
+  LocationOn as LocationIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon
 } from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
 import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
 import './Dashboard.css';
 import api from '../services/api';
@@ -38,322 +44,355 @@ import api from '../services/api';
 const CustomerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [analytics, setAnalytics] = useState({
-    activeBookings: 0,
-    totalSpent: 0,
-    favoriteVendors: 0,
-    completedEvents: 0,
+  const [dashboardData, setDashboardData] = useState({
+    profile: {
+      fullName: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      pincode: '',
+      preferences: {
+        eventType: '',
+        eventDate: null,
+        budget: '',
+        guestCount: ''
+      }
+    },
+    bookings: [],
+    favorites: [],
+    analytics: {
+      totalBookings: 0,
+      upcomingEvents: 0,
+      totalSpent: 0,
+      savedVendors: 0
+    }
   });
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [favoriteVendors, setFavoriteVendors] = useState([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
     fetchDashboardData();
-  }, [navigate]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      // Fetch customer's bookings
-      const bookingsResponse = await axios.get('https://shaadisetgo-backend.onrender.com/api/bookings/customer', config);
-      const bookingsData = bookingsResponse.data;
-      setBookings(bookingsData);
+      // Fetch all required data in parallel
+      const [profileRes, bookingsRes, favoritesRes] = await Promise.all([
+        axios.get('/users/profile', config),
+        axios.get('/bookings/customer', config),
+        axios.get('/favorites', config)
+      ]);
 
       // Calculate analytics
-      const activeBookings = bookingsData.filter(b => b.status === 'confirmed' || b.status === 'pending').length;
-      const totalSpent = bookingsData.reduce((sum, b) => sum + (b.amount || 0), 0);
-      const completedEvents = bookingsData.filter(b => b.status === 'completed').length;
+      const analytics = {
+        totalBookings: bookingsRes.data.length,
+        upcomingEvents: bookingsRes.data.filter(b => new Date(b.eventDate) > new Date()).length,
+        totalSpent: bookingsRes.data.reduce((sum, booking) => sum + (booking.amount || 0), 0),
+        savedVendors: favoritesRes.data.length
+      };
 
-      setAnalytics({
-        activeBookings,
-        totalSpent,
-        favoriteVendors: favoriteVendors.length,
-        completedEvents,
+      setDashboardData({
+        profile: profileRes.data,
+        bookings: bookingsRes.data,
+        favorites: favoritesRes.data,
+        analytics
       });
 
       // Fetch upcoming events (assuming there's an endpoint for this)
       const eventsResponse = await api.get('/events/upcoming', config);
       setUpcomingEvents(eventsResponse.data);
 
-      // Fetch favorite vendors
-      const favoritesResponse = await api.get('/favorites', config);
-      setFavoriteVendors(favoritesResponse.data);
-
-      setLoading(false);
+      setError('');
     } catch (err) {
+      console.error('Dashboard data fetch error:', err);
       setError(err.response?.data?.message || 'Failed to load dashboard data');
+    } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container>
-        <Box sx={{ mt: 4 }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
-      </Container>
-    );
-  }
-
-  const getStatusChip = (status) => {
-    const statusConfig = {
-      pending: { color: 'warning', icon: <ScheduleIcon />, label: 'Pending' },
-      confirmed: { color: 'success', icon: <CheckCircleIcon />, label: 'Confirmed' },
-      cancelled: { color: 'error', icon: <CancelIcon />, label: 'Cancelled' },
-      completed: { color: 'info', icon: <CheckCircleIcon />, label: 'Completed' },
-    };
-
-    const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
-
-    return (
-      <Chip
-        icon={config.icon}
-        label={config.label}
-        color={config.color}
-        size="small"
-        sx={{ ml: 1 }}
-      />
-    );
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
   };
 
-  return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Welcome, {user?.name || 'Customer'}
-        </Typography>
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      await axios.put(`/bookings/${bookingId}/cancel`);
+      fetchDashboardData(); // Refresh data after cancellation
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to cancel booking');
+    }
+  };
 
-        <Box sx={{ mb: 4 }}>
-          <DashboardAnalytics stats={analytics} userType="customer" />
+  const renderAnalytics = () => (
+    <Grid container spacing={3}>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>Total Bookings</Typography>
+            <Typography variant="h4">{dashboardData.analytics.totalBookings}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>Upcoming Events</Typography>
+            <Typography variant="h4">{dashboardData.analytics.upcomingEvents}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>Total Spent</Typography>
+            <Typography variant="h4">₹{dashboardData.analytics.totalSpent}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>Saved Vendors</Typography>
+            <Typography variant="h4">{dashboardData.analytics.savedVendors}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  );
+
+  const renderProfile = () => (
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">Profile Information</Typography>
+          <Button
+            startIcon={<EditIcon />}
+            variant="outlined"
+            onClick={() => navigate('/profile/edit')}
+          >
+            Edit Profile
+          </Button>
         </Box>
+        <Divider sx={{ mb: 2 }} />
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <List>
+              <ListItem>
+                <ListItemText
+                  primary="Full Name"
+                  secondary={dashboardData.profile.fullName}
+                  secondaryTypographyProps={{ component: "div" }}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><EmailIcon sx={{ mr: 1 }} /> Email</Box>}
+                  secondary={dashboardData.profile.email}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><PhoneIcon sx={{ mr: 1 }} /> Phone</Box>}
+                  secondary={dashboardData.profile.phone}
+                />
+              </ListItem>
+            </List>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <List>
+              <ListItem>
+                <ListItemText
+                  primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><LocationIcon sx={{ mr: 1 }} /> Address</Box>}
+                  secondary={`${dashboardData.profile.address || ''}, ${dashboardData.profile.city || ''}, ${dashboardData.profile.state || ''} ${dashboardData.profile.pincode || ''}`}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Event Preferences"
+                  secondary={
+                    <Box>
+                      <Typography variant="body2">Type: {dashboardData.profile.preferences?.eventType || 'Not specified'}</Typography>
+                      <Typography variant="body2">Date: {dashboardData.profile.preferences?.eventDate ? new Date(dashboardData.profile.preferences.eventDate).toLocaleDateString() : 'Not specified'}</Typography>
+                      <Typography variant="body2">Budget: ₹{dashboardData.profile.preferences?.budget || 'Not specified'}</Typography>
+                      <Typography variant="body2">Guest Count: {dashboardData.profile.preferences?.guestCount || 'Not specified'}</Typography>
+                    </Box>
+                  }
+                  secondaryTypographyProps={{ component: "div" }}
+                />
+              </ListItem>
+            </List>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
 
-        <Grid container spacing={3}>
-          {/* Quick Actions */}
-          <Grid item xs={12}>
-            <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
-              <Typography variant="h6" gutterBottom>Quick Actions</Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
+  const renderBookings = () => (
+    <Grid container spacing={3}>
+      {dashboardData.bookings.map((booking) => (
+        <Grid item xs={12} md={6} key={booking._id}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">{booking.vendorName}</Typography>
+                <Chip
+                  label={booking.status}
+                  color={
+                    booking.status === 'CONFIRMED' ? 'success' :
+                    booking.status === 'PENDING' ? 'warning' :
+                    booking.status === 'CANCELLED' ? 'error' : 'default'
+                  }
+                />
+              </Box>
+              <Typography color="textSecondary" gutterBottom>
+                <EventIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                {new Date(booking.eventDate).toLocaleDateString()}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                Service: {booking.service}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                Amount: ₹{booking.amount}
+              </Typography>
+              {booking.status === 'PENDING' && (
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleCancelBooking(booking._id)}
+                  >
+                    Cancel Booking
+                  </Button>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+      {dashboardData.bookings.length === 0 && (
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography color="textSecondary">
+              No bookings found. Start exploring vendors to make your first booking!
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => navigate('/vendors')}
+            >
+              Browse Vendors
+            </Button>
+          </Paper>
+        </Grid>
+      )}
+    </Grid>
+  );
+
+  const renderFavorites = () => (
+    <Grid container spacing={3}>
+      {dashboardData.favorites.map((vendor) => (
+        <Grid item xs={12} md={6} key={vendor._id}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">{vendor.businessName}</Typography>
+                <Rating value={vendor.rating?.average || 0} readOnly size="small" />
+              </Box>
+              <Typography color="textSecondary" gutterBottom>{vendor.serviceType}</Typography>
+              <Typography variant="body2" gutterBottom>
+                <LocationIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                {vendor.location}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                Price Range: {vendor.priceRange}
+              </Typography>
+              <Box sx={{ mt: 2 }}>
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => navigate('/vendors')}
+                  onClick={() => navigate(`/vendors/${vendor._id}`)}
                 >
-                  Browse Vendors
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/profile')}
-                  startIcon={<EditIcon />}
-                >
-                  Edit Profile
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/calendar')}
-                  startIcon={<EventIcon />}
-                >
-                  View Calendar
+                  View Details
                 </Button>
               </Box>
-            </Paper>
-          </Grid>
-
-          {/* Upcoming Events */}
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Upcoming Events</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <List>
-                  {upcomingEvents.length > 0 ? (
-                    upcomingEvents.map((event) => (
-                      <ListItem
-                        key={event._id}
-                        sx={{
-                          bgcolor: 'background.paper',
-                          borderRadius: 1,
-                          mb: 1,
-                          '&:hover': { bgcolor: 'action.hover' },
-                        }}
-                      >
-                        <CalendarIcon sx={{ mr: 2, color: 'primary.main' }} />
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle1">
-                              {event.title}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(event.date).toLocaleDateString()}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No upcoming events
-                    </Typography>
-                  )}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Recent Bookings */}
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Recent Bookings</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <List>
-                  {bookings.length > 0 ? (
-                    bookings.map((booking) => (
-                      <ListItem
-                        key={booking._id}
-                        sx={{
-                          bgcolor: 'background.paper',
-                          borderRadius: 1,
-                          mb: 1,
-                          '&:hover': { bgcolor: 'action.hover' },
-                        }}
-                      >
-                        <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-                          {booking.vendorName?.charAt(0) || 'V'}
-                        </Avatar>
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Typography variant="subtitle1">
-                                {booking.vendorName}
-                              </Typography>
-                              {getStatusChip(booking.status)}
-                            </Box>
-                          }
-                          secondary={
-                            <>
-                              <Typography variant="body2" color="text.secondary">
-                                Service: {booking.serviceType}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Date: {new Date(booking.eventDate).toLocaleDateString()}
-                              </Typography>
-                              {booking.amount && (
-                                <Typography variant="body2" color="primary">
-                                  Amount: ₹{booking.amount}
-                                </Typography>
-                              )}
-                            </>
-                          }
-                        />
-                        <Tooltip title="View Details">
-                          <IconButton
-                            edge="end"
-                            onClick={() => navigate(`/bookings/${booking._id}`)}
-                            sx={{ ml: 2 }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </ListItem>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No bookings yet
-                    </Typography>
-                  )}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Favorite Vendors */}
-          <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Favorite Vendors</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Grid container spacing={2}>
-                  {favoriteVendors.length > 0 ? (
-                    favoriteVendors.map((vendor) => (
-                      <Grid item xs={12} sm={6} md={4} key={vendor._id}>
-                        <Card variant="outlined" sx={{
-                            '&:hover': { boxShadow: 3 },
-                            transition: 'box-shadow 0.3s',
-                          }}>
-                          <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <Avatar sx={{ mr: 1, bgcolor: 'secondary.main' }}>
-                                {vendor.businessName?.charAt(0) || 'V'}
-                              </Avatar>
-                              <Typography variant="subtitle1">{vendor.businessName}</Typography>
-                            </Box>
-                            <Typography variant="body2" color="textSecondary" gutterBottom>
-                              {vendor.serviceType}
-                            </Typography>
-                            {vendor.rating && (
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <Rating value={vendor.rating} readOnly size="small" />
-                                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                                  ({vendor.rating})
-                                </Typography>
-                              </Box>
-                            )}
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="primary"
-                                onClick={() => navigate(`/vendors/${vendor._id}`)}
-                              >
-                                View Profile
-                              </Button>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => navigate(`/vendors/${vendor._id}`)}
-                              >
-                                <FavoriteIcon />
-                              </IconButton>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))
-                  ) : (
-                    <Grid item xs={12}>
-                      <Typography variant="body2" color="textSecondary">
-                        No favorite vendors yet
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
+            </CardContent>
+          </Card>
         </Grid>
+      ))}
+      {dashboardData.favorites.length === 0 && (
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography color="textSecondary">
+              No favorite vendors yet. Start exploring to find and save your preferred vendors!
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => navigate('/vendors')}
+            >
+              Browse Vendors
+            </Button>
+          </Paper>
+        </Grid>
+      )}
+    </Grid>
+  );
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Welcome, {dashboardData.profile.fullName}
+        </Typography>
+        <Typography color="textSecondary">
+          Manage your wedding planning journey
+        </Typography>
+      </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {renderAnalytics()}
+
+      <Box sx={{ mt: 4 }}>
+        <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+          <Tab label="Profile" />
+          <Tab label="Bookings" />
+          <Tab label="Favorites" />
+        </Tabs>
+
+        {activeTab === 0 && renderProfile()}
+        {activeTab === 1 && renderBookings()}
+        {activeTab === 2 && renderFavorites()}
       </Box>
     </Container>
   );
