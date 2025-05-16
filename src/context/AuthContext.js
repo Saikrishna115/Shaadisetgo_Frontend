@@ -22,36 +22,52 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const storedUser = localStorage.getItem('user');
+      
+      if (!token || !storedUser) {
         setUser(null);
         setIsAuthenticated(false);
         setLoading(false);
         return;
       }
 
-      const response = await api.get('/auth/me');
-      if (response.data && response.data.role) {
-        setUser(response.data);
-        setIsAuthenticated(true);
-      } else {
-        console.warn('Unexpected user data:', response.data);
+      // Parse stored user data
+      const userData = JSON.parse(storedUser);
+
+      try {
+        const response = await api.get('/auth/me');
+        if (response.data && response.data.role) {
+          setUser({ ...response.data, ...userData });
+          setIsAuthenticated(true);
+        } else {
+          console.warn('Unexpected user data:', response.data);
+          setUser(null);
+          setIsAuthenticated(false);
+          localStorage.removeItem('token');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('user');
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
         setUser(null);
         setIsAuthenticated(false);
         localStorage.removeItem('token');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('user');
+        setError(
+          err.response?.data?.message ||
+          (err.response?.status === 401
+            ? 'Session expired. Please login again.'
+            : 'Authentication failed')
+        );
       }
     } catch (err) {
-      console.error('Auth check failed:', err);
+      console.error('Auth check error:', err);
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');
-      setError(
-        err.response?.data?.message ||
-        (err.response?.status === 401
-          ? 'Session expired. Please login again.'
-          : 'Authentication failed')
-      );
+      localStorage.removeItem('user');
     } finally {
       setLoading(false);
     }
@@ -66,7 +82,6 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/auth/login', { email, password });
       console.log('Login response:', response.data);
       
-      // Check if the response has the expected structure
       if (!response.data.success) {
         console.error('Login failed:', response.data.message);
         throw new Error(response.data.message || 'Login failed');
@@ -79,10 +94,18 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Login succeeded but user role is missing.');
       }
 
+      // Store all necessary data
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', userData.role);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Update auth state
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Update API headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       return { success: true, role: userData.role };
     } catch (err) {
       console.error('Login error:', {
@@ -91,8 +114,7 @@ export const AuthProvider = ({ children }) => {
         status: err.response?.status
       });
       
-      const message = err.response?.data?.message || err.message || 'Login failed. Please try again.';
-      setError(message);
+      setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
       setIsAuthenticated(false);
       throw err;
     } finally {
@@ -107,8 +129,10 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.warn('Server logout failed:', err?.message);
     } finally {
+      // Clear all auth data
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');
+      localStorage.removeItem('user');
       setUser(null);
       setIsAuthenticated(false);
       setError(null);

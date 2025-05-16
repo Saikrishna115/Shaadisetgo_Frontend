@@ -45,27 +45,43 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-    setIsSubmitting(true);
+    
+    // Clear any previous errors
     setError('');
+    setIsSubmitting(true);
 
     try {
+      // Basic validation
+      if (!email || !password) {
+        throw new Error('Please fill in all fields');
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
       console.log('Login attempt:', {
         email,
         validation: {
-          emailValid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+          emailValid: emailRegex.test(email),
           hasPassword: !!password
         }
       });
 
-      await login(email, password);
-      // No need to navigate here — wait for useEffect to handle it
+      const result = await login(email, password);
+      
+      // No need to navigate here — useEffect will handle it based on user role
+      console.log('Login successful:', result);
     } catch (err) {
       console.error('Login error details:', {
         status: err.response?.status,
         data: err.response?.data,
         message: err.message
       });
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials and try again.');
+      
+      setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -95,6 +111,8 @@ const Login = () => {
               margin="normal"
               required
               autoComplete="username"
+              disabled={isSubmitting || authLoading}
+              error={!!error && !email}
             />
             <TextField
               fullWidth
@@ -105,6 +123,8 @@ const Login = () => {
               margin="normal"
               required
               autoComplete="current-password"
+              disabled={isSubmitting || authLoading}
+              error={!!error && !password}
             />
             <Button
               type="submit"
@@ -114,28 +134,19 @@ const Login = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={isSubmitting || authLoading}
             >
-              {isSubmitting ? <CircularProgress size={24} /> : 'Login'}
+              {(isSubmitting || authLoading) ? <CircularProgress size={24} /> : 'Login'}
             </Button>
 
-            <Box sx={{ textAlign: 'right', mb: 2 }}>
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Button
-                onClick={() => navigate('/forgot-password')}
                 color="primary"
-                size="small"
+                onClick={() => navigate('/register')}
+                disabled={isSubmitting || authLoading}
               >
-                Forgot Password?
+                Don't have an account? Register
               </Button>
             </Box>
           </form>
-
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography variant="body2">
-              Don't have an account?{' '}
-              <Button onClick={() => navigate('/register')} color="primary">
-                Register
-              </Button>
-            </Typography>
-          </Box>
         </Paper>
       </Box>
     </Container>

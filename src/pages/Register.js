@@ -148,15 +148,16 @@ const Register = () => {
       });
       
       if (response.data && response.data.data.token) {
+        // Store auth data
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('userRole', formData.role);
+        
+        // Update API headers with new token
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.token}`;
         
         // If registering as a vendor, create vendor profile
         if (formData.role === 'vendor') {
           try {
-            // Set authorization header with the new token
-            api.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.token}`;
-            
             const vendorData = {
               businessName: formData.businessName,
               ownerName: formData.fullName,
@@ -181,14 +182,21 @@ const Register = () => {
               throw new Error(vendorResponse.data.message || 'Failed to create vendor profile');
             }
 
+            // Store user data
+            localStorage.setItem('user', JSON.stringify({
+              ...response.data.data.user,
+              vendorProfile: vendorResponse.data.vendor
+            }));
+
             // Redirect to vendor dashboard
-            navigate('/vendor/dashboard');
+            window.location.href = '/vendor/dashboard';
           } catch (vendorError) {
             console.error('Error creating vendor profile:', vendorError);
             
             // Clean up if vendor profile creation fails
             localStorage.removeItem('token');
             localStorage.removeItem('userRole');
+            localStorage.removeItem('user');
             
             setError(
               vendorError.response?.data?.message || 
@@ -199,8 +207,11 @@ const Register = () => {
             return;
           }
         } else {
+          // Store user data for customer
+          localStorage.setItem('user', JSON.stringify(response.data.data.user));
+          
           // Redirect customer to dashboard
-          navigate('/dashboard');
+          window.location.href = '/dashboard';
         }
       }
     } catch (err) {

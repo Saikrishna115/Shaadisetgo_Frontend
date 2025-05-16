@@ -4,7 +4,8 @@ const api = axios.create({
   baseURL: 'https://shaadisetgo-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // Enable sending cookies with requests
 });
 
 // Request interceptor for handling requests
@@ -20,6 +21,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Prevent caching
+    config.headers['Cache-Control'] = 'no-cache';
+    config.headers['Pragma'] = 'no-cache';
+    config.headers['Expires'] = '0';
+
     return config;
   },
   (error) => {
@@ -51,6 +58,7 @@ api.interceptors.response.use(
       // Clear auth data and redirect to login
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
     

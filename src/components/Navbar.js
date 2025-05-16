@@ -5,12 +5,16 @@ import './Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
-  const isLoggedIn = localStorage.getItem('token') ? true : false;
+  const { user, logout, isAuthenticated } = useAuth();
 
   const handleLogout = useCallback(async () => {
     try {
       await logout(navigate);
+      // Clear all auth data
+      localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -23,9 +27,15 @@ const Navbar = () => {
       </div>
       <div className="nav-links">
         <Link to="/vendors" className="nav-link">Vendors</Link>
-        {isLoggedIn ? (
+        {isAuthenticated && user ? (
           <>
-            <Link to="/dashboard" className="nav-link">Dashboard</Link>
+            <Link 
+              to={user.role === 'vendor' ? '/vendor/dashboard' : '/dashboard'} 
+              className="nav-link"
+            >
+              Dashboard
+            </Link>
+            <Link to="/profile" className="nav-link">Profile</Link>
             <button onClick={handleLogout} className="nav-link logout-btn">Logout</button>
           </>
         ) : (
@@ -39,4 +49,4 @@ const Navbar = () => {
   );
 };
 
-export default React.memo(Navbar); // Wrap it properly here
+export default Navbar;
