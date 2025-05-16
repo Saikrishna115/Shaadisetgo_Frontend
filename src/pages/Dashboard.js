@@ -133,7 +133,7 @@ const Dashboard = () => {
 
       const requiredFields = userInfo?.role === 'vendor'
         ? ['businessName', 'serviceType', 'location', 'contact']
-        : ['fullName', 'email', 'phone'];
+        : ['name', 'email', 'phone'];
 
       const missingFields = requiredFields.filter(field => !profileData[field]);
       if (missingFields.length > 0) {
@@ -151,7 +151,7 @@ const Dashboard = () => {
       } else {
         // For customer profile update
         const customerData = {
-          fullName: profileData.name,
+          fullName: profileData.name,  // Map 'name' from form to 'fullName' for backend
           email: profileData.email,
           phone: profileData.phone,
           address: profileData.address,
