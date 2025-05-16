@@ -45,8 +45,11 @@ const Register = () => {
       setError('Please enter a valid 10-digit phone number');
       return false;
     }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    
+    // Updated password validation to match backend requirements
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)');
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -71,28 +74,15 @@ const Register = () => {
       const response = await api.post('/auth/register', registerData);
       
       if (response.data && response.data.token) {
+        // Store the registration token
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userRole', formData.role);
-        setError('');
-        // Attempt to log in automatically after successful registration
-        try {
-          const loginResponse = await api.post('/auth/login', {
-            email: formData.email,
-            password: formData.password
-          });
-          if (loginResponse.data && loginResponse.data.token) {
-            localStorage.setItem('token', loginResponse.data.token);
-            // Redirect based on user role
-            if (formData.role === 'vendor') {
-              navigate('/vendor/dashboard');
-            } else {
-              navigate('/dashboard');
-            }
-          }
-        } catch (loginErr) {
-          console.error('Auto-login failed:', loginErr);
+        
+        // Instead of automatic login, redirect to login page
+        setError('Registration successful! Please log in with your credentials.');
+        setTimeout(() => {
           navigate('/login');
-        }
+        }, 2000);
       } else {
         setError('Registration successful! Please log in.');
         navigate('/login');
