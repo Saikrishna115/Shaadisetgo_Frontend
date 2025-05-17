@@ -4,6 +4,7 @@
   align-items: center;
   min-height: 70vh;
   background-color: #f5f6fa;
+  padding: 16px;
 }
 
 .register-form {
@@ -83,6 +84,11 @@
 }
 
 @media (max-width: 600px) {
+  .register-container {
+    padding: 8px;
+    min-height: 100vh;
+  }
+
   .register-form {
     padding: 1.5rem 0.5rem;
     max-width: 95vw;
@@ -101,88 +107,155 @@
   transition: all 0.3s ease-in-out !important;
 }
 
-.MuiTextField-root {
-  transition: all 0.2s ease-in-out !important;
+.MuiTextField-root, 
+.MuiSelect-root,
+.MuiButton-root {
+  transition: transform 0.2s ease-in-out !important;
 }
 
-.MuiTextField-root:hover {
-  transform: translateY(-1px);
+/* Disable hover effects on mobile */
+@media (hover: hover) {
+  .MuiTextField-root:hover,
+  .MuiSelect-root:hover {
+    transform: translateY(-1px);
+  }
 }
 
-.MuiButton-contained {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-  transition: all 0.2s ease-in-out !important;
+/* Ensure form fields don't overflow on mobile */
+.MuiInputBase-root {
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
-.MuiButton-contained:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+.MuiInputLabel-root {
+  white-space: normal;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: calc(100% - 32px);
 }
 
+/* Prevent text overflow in buttons */
+.MuiButton-root {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Adjust chip sizes for mobile */
 .MuiChip-root {
-  transition: all 0.2s ease-in-out !important;
+  max-width: 100%;
+  height: auto;
+  padding: 4px 0;
 }
 
-.MuiChip-root.MuiChip-colorSuccess {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
+@media (max-width: 600px) {
+  .MuiChip-root {
+    font-size: 0.75rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .MuiChip-label {
+    padding: 4px 8px;
   }
 }
 
+/* Improve form field spacing on mobile */
+@media (max-width: 600px) {
+  .MuiFormControl-root {
+    margin-bottom: 8px;
+  }
+
+  .MuiInputBase-input {
+    padding: 12px !important;
+  }
+
+  .MuiFormHelperText-root {
+    margin-top: 4px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Ensure stepper is readable on mobile */
+@media (max-width: 600px) {
+  .MuiStepper-root {
+    padding: 16px 0;
+  }
+
+  .MuiStepLabel-label {
+    font-size: 0.75rem !important;
+    line-height: 1.2;
+    text-align: center;
+  }
+}
+
+/* Improve card content spacing on mobile */
+@media (max-width: 600px) {
+  .MuiCardContent-root {
+    padding: 12px !important;
+  }
+
+  .MuiTypography-root {
+    margin-bottom: 8px;
+  }
+}
+
+/* Fix select menu on mobile */
+.MuiSelect-select {
+  white-space: normal !important;
+  min-height: 1.4375em;
+}
+
+/* Ensure helper text doesn't overlap */
+.MuiFormHelperText-root {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Prevent text overlap in typography */
+.MuiTypography-root {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Smooth transitions */
 .MuiFade-root {
-  animation: slideIn 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out !important;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Custom scrollbar for better UX */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #888;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
-/* Mobile responsiveness */
+/* Touch-friendly targets */
 @media (max-width: 600px) {
-  .MuiContainer-root {
-    padding: 0 8px !important;
+  .MuiButtonBase-root {
+    min-height: 44px;
   }
 
-  .MuiPaper-root {
-    padding: 16px !important;
+  .MuiSelect-select {
+    min-height: 44px;
   }
 
-  .MuiStepLabel-label {
-    font-size: 12px !important;
+  .MuiInputBase-input {
+    min-height: 44px;
   }
 }

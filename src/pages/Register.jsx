@@ -203,27 +203,60 @@ const Register = () => {
   };
 
   const renderStepContent = (step) => {
+    const commonBoxStyles = {
+      p: { xs: 1.5, sm: 2 },
+      bgcolor: theme.palette.background.default,
+      borderRadius: 1,
+      mb: { xs: 2, sm: 3 }
+    };
+
+    const commonTypographyStyles = {
+      fontSize: { xs: '0.875rem', sm: '1rem' }
+    };
+
+    const commonInputProps = {
+      sx: { 
+        bgcolor: 'white',
+        '& .MuiInputLabel-root': {
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        },
+        '& .MuiInputBase-input': {
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        }
+      }
+    };
+
     switch (step) {
       case 0:
         return (
           <Fade in={true}>
             <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3, color: theme.palette.primary.main }}>
+              <Typography 
+                variant="h6" 
+                gutterBottom 
+                sx={{ 
+                  mb: { xs: 2, sm: 3 }, 
+                  color: theme.palette.primary.main,
+                  fontSize: { xs: '1.125rem', sm: '1.25rem' }
+                }}
+              >
                 Tell us about yourself
               </Typography>
               
-              <Grid container spacing={3}>
+              <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }}>
                 <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    mb: 3, 
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 1
-                  }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                  <Box sx={commonBoxStyles}>
+                    <Typography 
+                      variant="subtitle1" 
+                      gutterBottom 
+                      sx={{ 
+                        color: theme.palette.text.secondary,
+                        ...commonTypographyStyles
+                      }}
+                    >
                       Personal Information
                     </Typography>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={{ xs: 1.5, sm: 2 }}>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
@@ -234,9 +267,7 @@ const Register = () => {
                           required
                           variant="outlined"
                           placeholder="Enter your full name"
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
+                          InputProps={commonInputProps}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -252,9 +283,7 @@ const Register = () => {
                           placeholder="Enter your email address"
                           error={formData.email && !validations.email}
                           helperText={formData.email && !validations.email ? 'Please enter a valid email address' : ''}
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
+                          InputProps={commonInputProps}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -269,9 +298,7 @@ const Register = () => {
                           placeholder="Enter your 10-digit phone number"
                           error={formData.phone && !validations.phone}
                           helperText={formData.phone && !validations.phone ? 'Please enter a valid 10-digit phone number' : ''}
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
+                          InputProps={commonInputProps}
                         />
                       </Grid>
                     </Grid>
@@ -279,35 +306,55 @@ const Register = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 1
-                  }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                  <Box sx={commonBoxStyles}>
+                    <Typography 
+                      variant="subtitle1" 
+                      gutterBottom 
+                      sx={{ 
+                        color: theme.palette.text.secondary,
+                        ...commonTypographyStyles
+                      }}
+                    >
                       Account Type
                     </Typography>
                     <FormControl fullWidth variant="outlined">
-                      <InputLabel>I am a</InputLabel>
+                      <InputLabel sx={commonTypographyStyles}>I am a</InputLabel>
                       <Select
                         value={formData.role}
                         onChange={handleChange}
                         name="role"
                         label="I am a"
-                        sx={{ bgcolor: 'white' }}
+                        sx={{ 
+                          bgcolor: 'white',
+                          '& .MuiSelect-select': {
+                            fontSize: { xs: '0.875rem', sm: '1rem' }
+                          }
+                        }}
                       >
                         <MenuItem value="customer">
-                          <Box sx={{ py: 1 }}>
-                            <Typography variant="subtitle2">Customer</Typography>
-                            <Typography variant="caption" color="text.secondary">
+                          <Box sx={{ py: { xs: 0.5, sm: 1 } }}>
+                            <Typography variant="subtitle2" sx={commonTypographyStyles}>
+                              Customer
+                            </Typography>
+                            <Typography 
+                              variant="caption" 
+                              color="text.secondary"
+                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
                               Looking to book wedding services
                             </Typography>
                           </Box>
                         </MenuItem>
                         <MenuItem value="vendor">
-                          <Box sx={{ py: 1 }}>
-                            <Typography variant="subtitle2">Vendor</Typography>
-                            <Typography variant="caption" color="text.secondary">
+                          <Box sx={{ py: { xs: 0.5, sm: 1 } }}>
+                            <Typography variant="subtitle2" sx={commonTypographyStyles}>
+                              Vendor
+                            </Typography>
+                            <Typography 
+                              variant="caption" 
+                              color="text.secondary"
+                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
                               Offering wedding services
                             </Typography>
                           </Box>
@@ -570,29 +617,51 @@ const Register = () => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ mt: 4, mb: 8 }}>
+    <Container maxWidth="md" sx={{
+      px: { xs: 1, sm: 2, md: 3 }  // Responsive padding
+    }}>
+      <Box sx={{ 
+        mt: { xs: 2, sm: 3, md: 4 }, 
+        mb: { xs: 4, sm: 6, md: 8 }
+      }}>
         <Paper elevation={3} sx={{ 
-          p: 4,
+          p: { xs: 2, sm: 3, md: 4 },
           bgcolor: 'white',
           borderRadius: 2
         }}>
-          <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 600 }}>
+          <Typography 
+            variant="h4" 
+            align="center" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 600,
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
+            }}
+          >
             Create Your Account
           </Typography>
           
           <Stepper 
             activeStep={activeStep} 
             sx={{ 
-              mt: 4, 
-              mb: 4,
+              mt: { xs: 2, sm: 3, md: 4 }, 
+              mb: { xs: 2, sm: 3, md: 4 },
               '& .MuiStepLabel-root .Mui-completed': {
                 color: theme.palette.success.main
               },
               '& .MuiStepLabel-root .Mui-active': {
                 color: theme.palette.primary.main
+              },
+              // Mobile stepper adjustments
+              '& .MuiStepLabel-label': {
+                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
+              },
+              // Hide step numbers on mobile, show only labels
+              '& .MuiStepIcon-root': {
+                display: { xs: 'none', sm: 'block' }
               }
             }}
+            alternativeLabel  // Better for mobile
           >
             {steps.map((label) => (
               <Step key={label}>
@@ -605,28 +674,29 @@ const Register = () => {
             <Alert 
               severity="error" 
               sx={{ 
-                mb: 3,
-                borderRadius: 1
+                mb: { xs: 2, sm: 3 },
+                borderRadius: 1,
+                fontSize: { xs: '0.875rem', sm: '1rem' }
               }}
             >
               {error}
             </Alert>
           )}
 
-          <Box sx={{ mt: 4 }}>
+          <Box sx={{ mt: { xs: 2, sm: 3, md: 4 } }}>
             {renderStepContent(activeStep)}
             
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
-              mt: 4,
-              px: 2
+              mt: { xs: 2, sm: 3, md: 4 },
+              px: { xs: 0, sm: 2 }
             }}>
               <Button
                 onClick={handleBack}
                 disabled={activeStep === 0 || loading}
                 sx={{
-                  px: 4,
+                  px: { xs: 2, sm: 3, md: 4 },
                   '&.Mui-disabled': {
                     opacity: 0
                   }
@@ -639,17 +709,24 @@ const Register = () => {
                 onClick={handleNext}
                 disabled={!validateStep() || loading}
                 endIcon={loading && <CircularProgress size={20} />}
-                sx={{ px: 4 }}
+                sx={{ 
+                  px: { xs: 2, sm: 3, md: 4 },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
               >
                 {activeStep === steps.length - 1 ? 'Complete' : 'Next'}
               </Button>
             </Box>
           </Box>
 
-          <Divider sx={{ my: 4 }} />
+          <Divider sx={{ my: { xs: 2, sm: 3, md: 4 } }} />
 
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" color="textSecondary">
+            <Typography 
+              variant="body2" 
+              color="textSecondary"
+              sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+            >
               Already have an account?{' '}
               <Link 
                 to="/login" 
