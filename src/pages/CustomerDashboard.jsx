@@ -35,7 +35,11 @@ import {
   CalendarMonth as CalendarIcon,
   LocationOn as LocationIcon,
   Phone as PhoneIcon,
-  Email as EmailIcon
+  Email as EmailIcon,
+  Business as BusinessIcon,
+  Category as CategoryIcon,
+  Group as GroupIcon,
+  Money as MoneyIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
@@ -490,36 +494,104 @@ const CustomerDashboard = () => {
   const renderBookings = () => (
     <Grid container spacing={3}>
       {dashboardData.bookings.map((booking) => (
-        <Grid item xs={12} md={6} key={booking._id}>
+        <Grid item xs={12} key={booking._id}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">{booking.vendorName}</Typography>
-                <Chip
-                  label={booking.status}
-                  color={
-                    booking.status === 'CONFIRMED' ? 'success' :
-                    booking.status === 'PENDING' ? 'warning' :
-                    booking.status === 'CANCELLED' ? 'error' : 'default'
-                  }
-                />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    {booking.eventType}
+                    <Box component="span" sx={{ ml: 2 }}>
+                      <Chip
+                        label={booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        color={
+                          booking.status === 'confirmed' ? 'success' :
+                          booking.status === 'pending' ? 'warning' :
+                          booking.status === 'rejected' ? 'error' :
+                          booking.status === 'cancelled' ? 'default' :
+                          booking.status === 'completed' ? 'info' : 'default'
+                        }
+                        size="small"
+                      />
+                    </Box>
+                  </Typography>
+                  <Typography color="textSecondary" gutterBottom>
+                    Booking ID: {booking._id}
+                  </Typography>
+                </Box>
+                <Typography variant="subtitle2" color="textSecondary">
+                  {new Date(booking.createdAt).toLocaleDateString()}
+                </Typography>
               </Box>
-              <Typography color="textSecondary" gutterBottom>
-                <EventIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                {new Date(booking.eventDate).toLocaleDateString()}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Service: {booking.service}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Amount: ₹{booking.amount}
-              </Typography>
-              {booking.status === 'PENDING' && (
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Vendor Details
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <BusinessIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography>{booking.vendorName}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <CategoryIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography>{booking.vendorService}</Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Event Details
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography>
+                      {new Date(booking.eventDate).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <GroupIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography>{booking.guestCount} Guests</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <MoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography>Budget: ₹{booking.budget}</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {booking.message && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Your Message
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {booking.message}
+                  </Typography>
+                </Box>
+              )}
+
+              {booking.vendorResponse && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Vendor Response
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {booking.vendorResponse}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    Responded on: {new Date(booking.vendorResponseDate).toLocaleString()}
+                  </Typography>
+                </Box>
+              )}
+
+              {booking.status === 'pending' && (
                 <Box sx={{ mt: 2 }}>
                   <Button
                     variant="outlined"
                     color="error"
                     onClick={() => handleCancelBooking(booking._id)}
+                    startIcon={<CancelIcon />}
                   >
                     Cancel Booking
                   </Button>
