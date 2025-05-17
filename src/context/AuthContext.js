@@ -14,6 +14,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState(null);
 
   useEffect(() => {
     checkAuthStatus();
@@ -25,9 +27,7 @@ export const AuthProvider = ({ children }) => {
       const storedUser = localStorage.getItem('user');
       
       if (!token || !storedUser) {
-        setUser(null);
-        setIsAuthenticated(false);
-        setLoading(false);
+        handleLogout();
         return;
       }
 
@@ -39,22 +39,15 @@ export const AuthProvider = ({ children }) => {
         if (response.data && response.data.role) {
           setUser({ ...response.data, ...userData });
           setIsAuthenticated(true);
+          // Reset login attempts on successful auth check
+          setLoginAttempts(0);
+          setLockUntil(null);
         } else {
-          console.warn('Unexpected user data:', response.data);
-          setUser(null);
-          setIsAuthenticated(false);
-          localStorage.removeItem('token');
-          localStorage.removeItem('userRole');
-          localStorage.removeItem('user');
+          handleLogout('Session expired. Please login again.');
         }
       } catch (err) {
         console.error('Auth check failed:', err);
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('token');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('user');
-        setError(
+        handleLogout(
           err.response?.data?.message ||
           (err.response?.status === 401
             ? 'Session expired. Please login again.'
@@ -63,38 +56,51 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Auth check error:', err);
-      setUser(null);
-      setIsAuthenticated(false);
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('user');
+      handleLogout('Authentication check failed');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleLogout = (errorMessage = null) => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('user');
+    if (errorMessage) {
+      setError(errorMessage);
+    }
+  };
+
   const login = async (email, password) => {
     try {
+      // Check if account is locked
+      if (lockUntil && new Date(lockUntil) > new Date()) {
+        const timeLeft = Math.ceil((new Date(lockUntil) - new Date()) / 1000 / 60);
+        throw new Error(`Account is temporarily locked. Please try again in ${timeLeft} minutes.`);
+      }
+
       setError(null);
       setLoading(true);
-      console.log('Attempting login:', { email });
       
       const response = await api.post('/auth/login', { email, password });
-      console.log('Login response:', response.data);
       
       if (!response.data.success) {
-        console.error('Login failed:', response.data.message);
         throw new Error(response.data.message || 'Login failed');
       }
 
       const { token, user: userData } = response.data;
 
       if (!userData || !userData.role) {
-        console.error('Invalid user data:', userData);
-        throw new Error('Login succeeded but user role is missing.');
+        throw new Error('Invalid user data received');
       }
 
-      // Store all necessary data
+      // Reset login attempts on successful login
+      setLoginAttempts(0);
+      setLockUntil(null);
+
+      // Store auth data
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', userData.role);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -113,6 +119,22 @@ export const AuthProvider = ({ children }) => {
         response: err.response?.data,
         status: err.response?.status
       });
+
+      // Handle account locking
+      if (err.response?.data?.message?.includes('locked')) {
+        setLockUntil(new Date(Date.now() + 60 * 60 * 1000)); // 1 hour lock
+      } else {
+        // Increment login attempts
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        
+        // Lock account after 5 failed attempts
+        if (newAttempts >= 5) {
+          setLockUntil(new Date(Date.now() + 60 * 60 * 1000)); // 1 hour lock
+          setError('Too many failed attempts. Account is locked for 1 hour.');
+          throw new Error('Too many failed attempts. Account is locked for 1 hour.');
+        }
+      }
       
       setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
       setIsAuthenticated(false);
@@ -129,14 +151,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.warn('Server logout failed:', err?.message);
     } finally {
-      // Clear all auth data
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('user');
-      setUser(null);
-      setIsAuthenticated(false);
-      setError(null);
-      setLoading(false);
+      handleLogout();
       if (navigate) navigate('/login');
     }
   };
@@ -149,7 +164,9 @@ export const AuthProvider = ({ children }) => {
       login, 
       logout,
       isAuthenticated,
-      checkAuthStatus 
+      checkAuthStatus,
+      loginAttempts,
+      lockUntil
     }}>
       {children}
     </AuthContext.Provider>
