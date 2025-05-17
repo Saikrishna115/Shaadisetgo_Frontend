@@ -344,6 +344,25 @@ const CustomerDashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  label="Event Date"
+                  name="preferences.eventDate"
+                  type="date"
+                  value={editProfileData.preferences.eventDate ? new Date(editProfileData.preferences.eventDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setEditProfileData(prev => ({
+                    ...prev,
+                    preferences: {
+                      ...prev.preferences,
+                      eventDate: e.target.value
+                    }
+                  }))}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
                   label="Budget"
                   name="preferences.budget"
                   type="number"
@@ -424,7 +443,26 @@ const CustomerDashboard = () => {
                 <ListItem>
                   <ListItemText
                     primary={<Box sx={{ display: 'flex', alignItems: 'center' }}><LocationIcon sx={{ mr: 1 }} /> Address</Box>}
-                    secondary={`${dashboardData.profile.address || ''}, ${dashboardData.profile.city || ''}, ${dashboardData.profile.state || ''} ${dashboardData.profile.pincode || ''}`}
+                    secondary={
+                      <Box>
+                        {dashboardData.profile.address && (
+                          <Typography variant="body2">{dashboardData.profile.address}</Typography>
+                        )}
+                        {(dashboardData.profile.city || dashboardData.profile.state || dashboardData.profile.pincode) && (
+                          <Typography variant="body2">
+                            {[
+                              dashboardData.profile.city,
+                              dashboardData.profile.state,
+                              dashboardData.profile.pincode
+                            ].filter(Boolean).join(', ')}
+                          </Typography>
+                        )}
+                        {!dashboardData.profile.address && !dashboardData.profile.city && !dashboardData.profile.state && !dashboardData.profile.pincode && (
+                          <Typography variant="body2">Not specified</Typography>
+                        )}
+                      </Box>
+                    }
+                    secondaryTypographyProps={{ component: "div" }}
                   />
                 </ListItem>
                 <ListItem>

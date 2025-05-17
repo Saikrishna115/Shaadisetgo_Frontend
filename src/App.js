@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.js';
 import VendorList from './pages/VendorList.js';
+import VendorDetails from './pages/VendorDetails';
 import CustomerDashboard from './pages/CustomerDashboard';
 import AdminDashboard from './pages/AdminDashboard.js';
 import VendorDashboard from './pages/VendorDashboard.js';
@@ -39,6 +40,7 @@ const App = () => {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/vendors" element={<VendorList />} />
+              <Route path="/vendors/:id" element={<VendorDetails />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
