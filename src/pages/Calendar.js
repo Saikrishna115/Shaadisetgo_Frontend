@@ -89,8 +89,10 @@ const Calendar = () => {
   }, []);
 
   useEffect(() => {
-    fetchVendorData();
-    fetchBookings();
+    const fetchData = async () => {
+      await Promise.all([fetchVendorData(), fetchBookings()]);
+    };
+    fetchData();
   }, [fetchVendorData, fetchBookings]);
 
   const handleDateSelect = (slotInfo) => {

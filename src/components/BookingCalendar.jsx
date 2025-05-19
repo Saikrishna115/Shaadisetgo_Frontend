@@ -95,7 +95,6 @@ const BookingCalendar = ({ bookings }) => {
 
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       const dayBookings = bookings.filter(booking => {
         const bookingDate = new Date(booking.eventDate);
         return (
