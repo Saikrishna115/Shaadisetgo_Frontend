@@ -3,16 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import {
   Container,
-  Typography,
   Box,
   CircularProgress,
   Alert,
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Button
 } from '@mui/material';
 import './VendorList.css';

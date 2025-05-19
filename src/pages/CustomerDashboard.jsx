@@ -15,10 +15,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton,
   Chip,
-  Avatar,
-  Tooltip,
   Rating,
   Tab,
   Tabs,
@@ -28,25 +25,19 @@ import {
 import {
   Edit as EditIcon,
   Event as EventIcon,
-  Favorite as FavoriteIcon,
-  CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
-  Schedule as ScheduleIcon,
-  CalendarMonth as CalendarIcon,
   LocationOn as LocationIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
   Business as BusinessIcon,
   Category as CategoryIcon,
   Group as GroupIcon,
-  Money as MoneyIcon,
-  Search as SearchIcon
+  Money as MoneyIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 const CustomerDashboard = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);

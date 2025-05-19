@@ -74,15 +74,22 @@ const Calendar = () => {
     }
   }, []);
 
-  const fetchBookings = useCallback(async () => {
+  const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get('/bookings');
-      setBookings(response.data);
+      const formattedEvents = response.data.map(booking => ({
+        id: booking._id,
+        title: booking.title || 'Booking',
+        start: new Date(booking.startDate),
+        end: new Date(booking.endDate),
+        resource: booking
+      }));
+      setEvents(formattedEvents);
       setError('');
     } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setError(err.response?.data?.message || 'Failed to fetch bookings');
+      console.error('Error fetching events:', err);
+      setError(err.response?.data?.message || 'Failed to fetch events');
     } finally {
       setLoading(false);
     }
@@ -90,10 +97,10 @@ const Calendar = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await Promise.all([fetchVendorData(), fetchBookings()]);
+      await Promise.all([fetchVendorData(), fetchEvents()]);
     };
     fetchData();
-  }, [fetchVendorData, fetchBookings]);
+  }, [fetchVendorData, fetchEvents]);
 
   const handleDateSelect = (slotInfo) => {
     const selectedDate = slotInfo.start;
@@ -120,7 +127,7 @@ const Calendar = () => {
         ...selectedDateData
       });
 
-      fetchBookings(); // Refresh calendar data
+      fetchEvents(); // Refresh calendar data
       setIsDialogOpen(false);
     } catch (err) {
       console.error('Error saving availability:', err);
@@ -131,7 +138,7 @@ const Calendar = () => {
   const handleUpdateSettings = async () => {
     try {
       await axios.put('/vendors/settings', vendorSettings);
-      fetchBookings(); // Refresh calendar data
+      fetchEvents(); // Refresh calendar data
     } catch (err) {
       console.error('Error updating vendor settings:', err);
       setError('Failed to update vendor settings');
