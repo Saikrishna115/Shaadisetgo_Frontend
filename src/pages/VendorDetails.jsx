@@ -323,8 +323,10 @@ const VendorDetails = () => {
                           boxShadow: 3,
                           transform: 'translateY(-2px)',
                           transition: 'all 0.2s ease-in-out'
-                        }
+                        },
+                        cursor: 'pointer'
                       }}
+                      onClick={() => navigate(`/bookings/${booking._id}`)}
                     >
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
