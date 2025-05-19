@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import {
@@ -39,7 +39,8 @@ import {
   Business as BusinessIcon,
   Category as CategoryIcon,
   Group as GroupIcon,
-  Money as MoneyIcon
+  Money as MoneyIcon,
+  Search as SearchIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
@@ -78,11 +79,7 @@ const CustomerDashboard = () => {
     }
   });
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -129,7 +126,24 @@ const CustomerDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
+
+    if (!token) {
+      navigate('/login', { replace: true, state: { message: 'Please login to continue' } });
+      return;
+    }
+
+    if (userRole !== 'customer') {
+      navigate('/login', { replace: true, state: { message: 'Unauthorized access. Please login as a customer.' } });
+      return;
+    }
+
+    fetchDashboardData();
+  }, [navigate, fetchDashboardData]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -197,6 +211,34 @@ const CustomerDashboard = () => {
       }
     });
     setIsEditing(true);
+  };
+
+  const getStatusChip = (status) => {
+    let color;
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+        color = 'success';
+        break;
+      case 'pending':
+        color = 'warning';
+        break;
+      case 'cancelled':
+        color = 'error';
+        break;
+      case 'completed':
+        color = 'info';
+        break;
+      default:
+        color = 'default';
+    }
+    return (
+      <Chip
+        label={status || 'Unknown'}
+        color={color}
+        size="small"
+        sx={{ ml: 1 }}
+      />
+    );
   };
 
   const renderAnalytics = () => (
@@ -502,17 +544,7 @@ const CustomerDashboard = () => {
                   <Typography variant="h6" gutterBottom>
                     {booking.eventType}
                     <Box component="span" sx={{ ml: 2 }}>
-                      <Chip
-                        label={booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        color={
-                          booking.status === 'confirmed' ? 'success' :
-                          booking.status === 'pending' ? 'warning' :
-                          booking.status === 'rejected' ? 'error' :
-                          booking.status === 'cancelled' ? 'default' :
-                          booking.status === 'completed' ? 'info' : 'default'
-                        }
-                        size="small"
-                      />
+                      {getStatusChip(booking.status)}
                     </Box>
                   </Typography>
                   <Typography color="textSecondary" gutterBottom>

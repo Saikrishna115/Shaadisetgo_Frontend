@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -36,7 +36,7 @@ import { useAuth } from '../context/AuthContext';
 const VendorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user: { role } } = useAuth();
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,41 +46,42 @@ const VendorDetails = () => {
   const [responseMessage, setResponseMessage] = useState('');
   const [responseType, setResponseType] = useState('');
 
+  const fetchVendorDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/vendors/${id}`);
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+      setVendor(response.data);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching vendor details:', err);
+      setError(err.response?.data?.message || 'Failed to fetch vendor details');
+      setVendor(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  const fetchBookings = useCallback(async () => {
+    try {
+      const response = await axios.get(`/bookings/vendor/${id}`);
+      setBookings(response.data);
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setError(err.response?.data?.message || 'Failed to fetch bookings');
+    }
+  }, [id]);
+
   useEffect(() => {
-    const fetchVendorDetails = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`/vendors/${id}`);
-        if (!response.data) {
-          throw new Error('No data received from server');
-        }
-        setVendor(response.data);
-        setError('');
-      } catch (err) {
-        console.error('Error fetching vendor details:', err);
-        setError(err.response?.data?.message || 'Failed to fetch vendor details');
-        setVendor(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchBookings = async () => {
-      try {
-        const response = await axios.get(`/bookings/vendor/${id}`);
-        setBookings(response.data);
-      } catch (err) {
-        console.error('Error fetching bookings:', err);
-      }
-    };
-
     if (id) {
       fetchVendorDetails();
-      if (user?.role === 'vendor') {
+      if (role === 'vendor') {
         fetchBookings();
       }
     }
-  }, [id, user]);
+  }, [id, role, fetchVendorDetails, fetchBookings]);
 
   const handleResponse = (booking, type) => {
     setSelectedBooking(booking);
@@ -294,7 +295,7 @@ const VendorDetails = () => {
           )}
 
           {/* Booking management section for vendors */}
-          {user?.role === 'vendor' && (
+          {role === 'vendor' && (
             <Card sx={{ mt: 3 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

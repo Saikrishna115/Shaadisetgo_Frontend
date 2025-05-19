@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../utils/axios'; // Use centralized axios instance
+import axios from '../utils/axios';
+import {
+  Container,
+  Typography,
+  Box,
+  CircularProgress,
+  Alert,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
+} from '@mui/material';
 import './VendorList.css';
 
 const VendorList = () => {
@@ -17,10 +30,20 @@ const VendorList = () => {
 
   const fetchVendors = async () => {
     try {
-      const response = await axios.get('/vendors'); // uses baseURL from axios instance
+      setLoading(true);
+      setError('');
+      const response = await axios.get('/vendors');
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
       setVendors(response.data);
     } catch (err) {
-      setError('Failed to fetch vendors');
+      console.error('Error fetching vendors:', err);
+      setError(
+        err.response?.data?.message || 
+        err.message || 
+        'Failed to fetch vendors. Please try again later.'
+      );
     } finally {
       setLoading(false);
     }
@@ -33,8 +56,30 @@ const VendorList = () => {
     return matchesSearch && matchesCategory;
   });
 
-  if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={fetchVendors}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
+      </Container>
+    );
+  }
 
   return (
     <div className="vendor-list-container">

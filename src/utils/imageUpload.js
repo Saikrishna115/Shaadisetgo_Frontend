@@ -1,9 +1,20 @@
 import axios from 'axios';
 
-const IMGBB_API_KEY = 'e9dda7b09cae15492ab0bf042b6f29e6';
+const IMGBB_API_KEY = process.env.REACT_APP_IMGBB_API_KEY;
 const IMGBB_UPLOAD_URL = 'https://api.imgbb.com/1/upload';
 
+if (!IMGBB_API_KEY) {
+  console.error('IMGBB_API_KEY is not defined in environment variables');
+}
+
 export const uploadImage = async (file, retries = 3) => {
+  if (!IMGBB_API_KEY) {
+    return {
+      success: false,
+      error: 'Image upload service is not configured'
+    };
+  }
+
   for (let i = 0; i < retries; i++) {
     try {
       // Create form data

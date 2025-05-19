@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from '../utils/axios';
 
 const useAdminData = () => {
@@ -10,55 +10,74 @@ const useAdminData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Please login as admin to view dashboard');
-      setLoading(false);
-      return;
-    }
-
-    const fetchAdminData = async () => {
-      try {
-        const config = {
-          headers: { Authorization: `Bearer ${token}` },
-          validateStatus: status => status < 500
-        };
-
-        const [usersResponse, vendorsResponse, bookingsResponse] = await Promise.all([
-          axios.get('/admin/users', config),
-          axios.get('/admin/vendors', config),
-          axios.get('/admin/bookings', config)
-        ]);
-
-        setData({
-          users: usersResponse.data,
-          vendors: vendorsResponse.data,
-          bookings: bookingsResponse.data
-        });
+  const fetchAdminData = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please login as admin to view dashboard');
         setLoading(false);
-      } catch (err) {
-        setError('Failed to load admin data');
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchAdminData();
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+        validateStatus: status => status < 500
+      };
+
+      const [usersResponse, vendorsResponse, bookingsResponse] = await Promise.all([
+        axios.get('/admin/users', config),
+        axios.get('/admin/vendors', config),
+        axios.get('/admin/bookings', config)
+      ]);
+
+      if (usersResponse.status === 401 || vendorsResponse.status === 401 || bookingsResponse.status === 401) {
+        setError('Unauthorized access. Please login as admin.');
+        return;
+      }
+
+      setData({
+        users: usersResponse.data,
+        vendors: vendorsResponse.data,
+        bookings: bookingsResponse.data
+      });
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load admin data');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAdminData();
+  }, [fetchAdminData]);
 
   const updateUserStatus = async (userId, status) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found');
+        return { success: false, message: 'Authentication token not found' };
+      }
+
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      await axios.put(`/admin/users/${userId}/status`, { status }, config);
+      const response = await axios.put(`/admin/users/${userId}/status`, { status }, config);
+      
+      if (response.status === 401) {
+        setError('Unauthorized access');
+        return { success: false, message: 'Unauthorized access' };
+      }
+
       setData(prev => ({
         ...prev,
         users: prev.users.map(user => user._id === userId ? { ...user, status } : user)
       }));
       return { success: true, message: 'User status updated successfully' };
     } catch (err) {
-      return { success: false, message: 'Failed to update user status' };
+      const errorMessage = err.response?.data?.message || 'Failed to update user status';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
     }
   };
 
@@ -100,7 +119,8 @@ const useAdminData = () => {
     error,
     updateUserStatus,
     updateVendorStatus,
-    updateBookingStatus
+    updateBookingStatus,
+    refreshData: fetchAdminData
   };
 };
 

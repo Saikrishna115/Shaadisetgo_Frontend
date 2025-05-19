@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
 import VendorProfileForm from '../components/VendorProfileForm';
@@ -14,7 +15,9 @@ import {
   CardContent,
   Chip,
   Button,
-  Paper
+  Paper,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 
 const initialProfileState = {
@@ -38,6 +41,7 @@ const initialProfileState = {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,61 +54,37 @@ const Dashboard = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [bookingsLoading, setBookingsLoading] = useState(true);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
-      setProfileLoading(true);
+      setLoading(true);
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       const config = {
-        headers: { Authorization: `Bearer ${token}` },
-        validateStatus: status => status < 500
+        headers: { Authorization: `Bearer ${token}` }
       };
 
-      const [userResponse, bookingsResponse] = await Promise.all([
-        axios.get('/auth/me', config),
+      const [profileRes, bookingsRes] = await Promise.all([
+        axios.get('/users/profile', config),
         axios.get('/bookings', config)
       ]);
 
-      const bookingsData = Array.isArray(bookingsResponse.data) ? bookingsResponse.data : [];
-      let userData = userResponse.data;
-
-      if (userData.role === 'vendor') {
-        const vendorResponse = await axios.get(`/vendors/user/${userData._id}`, config);
-        userData = { ...userData, vendorInfo: vendorResponse.data };
-      }
-
-      setUserInfo(userData);
-      setBookings(bookingsData);
-      setProfileData({
-        name: userData.fullName || '',
-        email: userData.email || '',
-        phone: userData.phone || '',
-        address: userData.address || '',
-        city: userData.city || '',
-        state: userData.state || '',
-        pincode: userData.pincode || '',
-        eventType: userData.eventType || '',
-        eventDate: userData.eventDate ? new Date(userData.eventDate) : null,
-        budget: userData.budget || '',
-        guestCount: userData.guestCount || '',
-        businessName: userData.vendorInfo?.businessName || '',
-        serviceType: userData.vendorInfo?.serviceType || '',
-        location: userData.vendorInfo?.location || '',
-        contact: userData.vendorInfo?.contact || '',
-        priceRange: userData.vendorInfo?.priceRange || '',
-        description: userData.vendorInfo?.description || ''
-      });
-      setLoading(false);
-      setProfileLoading(false);
-      setBookingsLoading(false);
+      setUserInfo(profileRes.data);
+      setProfileData(profileRes.data);
+      setBookings(bookingsRes.data);
       setError('');
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard data';
       setError(errorMessage);
+    } finally {
       setLoading(false);
       setProfileLoading(false);
       setBookingsLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -116,10 +96,7 @@ const Dashboard = () => {
     }
 
     fetchDashboardData();
-  }, []);
-
-  if (loading || profileLoading || bookingsLoading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  }, [fetchDashboardData]);
 
   const handleProfileUpdate = async () => {
     try {
@@ -143,82 +120,13 @@ const Dashboard = () => {
         return;
       }
 
-      let response;
-      if (userInfo.role === 'vendor') {
-        if (userInfo.vendorInfo) {
-          response = await axios.put(`/vendors/${userInfo.vendorInfo._id}`, profileData, config);
-        } else {
-          response = await axios.post('/vendors', profileData, config);
-        }
-      } else {
-        // For customer profile update
-        const customerData = {
-          fullName: profileData.name,  // Map 'name' from form to 'fullName' for backend
-          email: profileData.email,
-          phone: profileData.phone,
-          address: profileData.address,
-          city: profileData.city,
-          state: profileData.state,
-          pincode: profileData.pincode,
-          preferences: {
-            eventType: profileData.eventType,
-            eventDate: profileData.eventDate,
-            budget: profileData.budget,
-            guestCount: profileData.guestCount
-          }
-        };
-
-        try {
-          response = await axios.put('/users/profile', customerData, config);
-          console.log('Profile update response:', response.data);  // Add logging
-          
-          if (response.data) {
-            setSuccessMessage('Profile updated successfully!');
-            setError('');
-            setIsEditing(false);
-            
-            // Update local state with the response data
-            const updatedUserData = response.data;
-            setUserInfo(prev => ({
-              ...prev,
-              fullName: updatedUserData.fullName,
-              email: updatedUserData.email,
-              phone: updatedUserData.phone,
-              address: updatedUserData.address,
-              city: updatedUserData.city,
-              state: updatedUserData.state,
-              pincode: updatedUserData.pincode,
-              preferences: updatedUserData.preferences
-            }));
-            
-            // Update profile data state
-            setProfileData(prev => ({
-              ...prev,
-              name: updatedUserData.fullName,
-              email: updatedUserData.email,
-              phone: updatedUserData.phone,
-              address: updatedUserData.address,
-              city: updatedUserData.city,
-              state: updatedUserData.state,
-              pincode: updatedUserData.pincode,
-              eventType: updatedUserData.preferences?.eventType || '',
-              eventDate: updatedUserData.preferences?.eventDate || null,
-              budget: updatedUserData.preferences?.budget || '',
-              guestCount: updatedUserData.preferences?.guestCount || ''
-            }));
-            
-            // Refresh dashboard data
-            await fetchDashboardData();
-          }
-        } catch (err) {
-          console.error('Profile update error:', err);  // Add error logging
-          throw err;
-        }
-      }
+      const response = await axios.put('/users/profile', profileData, config);
+      setUserInfo(response.data);
+      setProfileData(response.data);
+      setError('');
+      setSuccessMessage('Profile updated successfully');
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to update profile';
-      setError(errorMessage);
-      setSuccessMessage('');
+      setError(err.response?.data?.message || 'Failed to update profile');
     }
   };
 
@@ -231,55 +139,55 @@ const Dashboard = () => {
   };
 
   const renderProfileSection = () => (
-    <div className="profile-section">
-      <h2>{userInfo?.role === 'vendor' ? 'Vendor Profile' : 'Your Profile'}</h2>
+    <Box>
+      <Typography variant="h5" gutterBottom>
+        {userInfo?.role === 'vendor' ? 'Vendor Profile' : 'Your Profile'}
+      </Typography>
       {isEditing ? (
         userInfo?.role === 'vendor' ? (
           <VendorProfileForm
-            profileData={profileData}
-            handleInputChange={handleInputChange}
-            handleProfileUpdate={handleProfileUpdate}
-            setIsEditing={setIsEditing}
-            error={error}
-            successMessage={successMessage}
+            initialData={profileData}
+            onSuccess={handleProfileUpdate}
+            isEditing={isEditing}
           />
         ) : (
           <UserProfileForm
-            profileData={profileData}
-            handleInputChange={handleInputChange}
-            handleProfileUpdate={handleProfileUpdate}
-            setIsEditing={setIsEditing}
-            error={error}
-            successMessage={successMessage}
+            initialData={profileData}
+            onSuccess={handleProfileUpdate}
+            isEditing={isEditing}
           />
         )
       ) : (
-        <div className={userInfo?.role === 'vendor' ? 'vendor-info' : 'customer-info'}>
+        <Box>
           {userInfo?.role === 'vendor' ? (
             userInfo.vendorInfo ? (
               <>
-                <p><strong>Business Name:</strong> {userInfo.vendorInfo.businessName}</p>
-                <p><strong>Service Type:</strong> {userInfo.vendorInfo.serviceType}</p>
-                <p><strong>Location:</strong> {userInfo.vendorInfo.location}</p>
-                <p><strong>Contact:</strong> {userInfo.vendorInfo.contact}</p>
-                <p><strong>Price Range:</strong> {userInfo.vendorInfo.priceRange}</p>
-                <p><strong>Description:</strong> {userInfo.vendorInfo.description}</p>
+                <Typography><strong>Business Name:</strong> {userInfo.vendorInfo.businessName}</Typography>
+                <Typography><strong>Service Type:</strong> {userInfo.vendorInfo.serviceType}</Typography>
+                <Typography><strong>Location:</strong> {userInfo.vendorInfo.location}</Typography>
+                <Typography><strong>Contact:</strong> {userInfo.vendorInfo.contact}</Typography>
+                <Typography><strong>Price Range:</strong> {userInfo.vendorInfo.priceRange}</Typography>
+                <Typography><strong>Description:</strong> {userInfo.vendorInfo.description}</Typography>
               </>
             ) : (
-              <p>Please complete your vendor profile to start receiving bookings.</p>
+              <Typography>Please complete your vendor profile to start receiving bookings.</Typography>
             )
           ) : (
             <>
-              <p><strong>Name:</strong> {userInfo.name}</p>
-              <p><strong>Email:</strong> {userInfo.email}</p>
+              <Typography><strong>Name:</strong> {userInfo.name}</Typography>
+              <Typography><strong>Email:</strong> {userInfo.email}</Typography>
             </>
           )}
-          <button onClick={() => setIsEditing(true)} className="edit-btn">
+          <Button
+            variant="contained"
+            onClick={() => setIsEditing(true)}
+            sx={{ mt: 2 }}
+          >
             {userInfo?.role === 'vendor' && !userInfo.vendorInfo ? 'Create Profile' : 'Edit Profile'}
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 
   const renderBookingsSection = () => (
@@ -336,26 +244,42 @@ const Dashboard = () => {
     </Box>
   );
 
+  if (loading || profileLoading || bookingsLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Welcome, {userInfo?.name}
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-          Account Type: {userInfo?.role}
-        </Typography>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Dashboard
+      </Typography>
+      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+        Account Type: {userInfo?.role}
+      </Typography>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={activeTab === 'profile' ? 0 : 1} onChange={(e, newValue) => setActiveTab(newValue === 0 ? 'profile' : 'bookings')}>
-            <Tab label="Profile" />
-            <Tab label="Bookings" />
-          </Tabs>
-        </Box>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={activeTab === 'profile' ? 0 : 1} onChange={(e, newValue) => setActiveTab(newValue === 0 ? 'profile' : 'bookings')}>
+          <Tab label="Profile" />
+          <Tab label="Bookings" />
+        </Tabs>
+      </Box>
 
-        <Box sx={{ mt: 3 }}>
-          {activeTab === 'profile' ? renderProfileSection() : renderBookingsSection()}
-        </Box>
+      <Box sx={{ mt: 3 }}>
+        {activeTab === 'profile' ? renderProfileSection() : renderBookingsSection()}
       </Box>
     </Container>
   );

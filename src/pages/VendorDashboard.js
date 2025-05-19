@@ -159,18 +159,16 @@ const VendorDashboard = () => {
     }
   };
 
-  const handleStatusChange = async (bookingId, newStatus) => {
-    try {
-      const response = await axios.put(`/bookings/${bookingId}`, { status: newStatus });
-      setBookings(bookings.map(booking => 
-        booking._id === bookingId ? response.data : booking
-      ));
-      // Refresh stats after status change
-      fetchDashboardData();
-    } catch (err) {
-      console.error('Error updating booking status:', err);
-      setError(err.response?.data?.message || 'Failed to update booking status');
-    }
+  const handleTabChange = (event, newValue) => {
+    setView(newValue);
+  };
+
+  const handleViewBooking = (bookingId) => {
+    navigate(`/bookings/${bookingId}`);
+  };
+
+  const handleEditProfile = () => {
+    navigate('/profile');
   };
 
   if (loading) {
@@ -230,7 +228,7 @@ const VendorDashboard = () => {
       <Paper sx={{ mt: 4 }}>
         <Tabs
           value={view}
-          onChange={(e, newValue) => setView(newValue)}
+          onChange={handleTabChange}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           <Tab label="List View" value="list" />
@@ -270,7 +268,7 @@ const VendorDashboard = () => {
                 </Button>
                 <Button
                   variant="outlined"
-                  onClick={() => navigate('/profile')}
+                  onClick={handleEditProfile}
                   startIcon={<EditIcon />}
                 >
                   Edit Personal Profile
@@ -368,7 +366,7 @@ const VendorDashboard = () => {
                         <Tooltip title="View Details">
                           <IconButton
                             edge="end"
-                            onClick={() => navigate(`/bookings/${booking._id}`)}
+                            onClick={() => handleViewBooking(booking._id)}
                             sx={{ ml: 2 }}
                           >
                             <EditIcon />
