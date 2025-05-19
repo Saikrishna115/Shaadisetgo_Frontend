@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import {
@@ -24,6 +24,7 @@ import {
   Chip,
   Avatar,
   Tooltip,
+  Alert
 } from '@mui/material';
 import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
 import { useAuth } from '../context/AuthContext';
@@ -34,8 +35,13 @@ import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Schedule as ScheduleIcon,
+  AttachMoney as MoneyIcon,
+  Group as GroupIcon
 } from '@mui/icons-material';
 import './Dashboard.css';
+import BookingStats from '../components/BookingStats';
+import BookingList from '../components/BookingList';
+import BookingCalendar from '../components/BookingCalendar';
 
 const VendorDashboard = () => {
   const { user } = useAuth();
@@ -86,6 +92,8 @@ const VendorDashboard = () => {
     },
     serviceDescription: ''
   });
+  const [stats, setStats] = useState(null);
+  const [view, setView] = useState('list');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -113,7 +121,7 @@ const VendorDashboard = () => {
     fetchDashboardData();
   }, [user, navigate]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -169,6 +177,25 @@ const VendorDashboard = () => {
       });
 
       try {
+        console.log('Fetching stats...');
+        const statsResponse = await axios.get('/bookings/stats');
+        console.log('Stats response:', {
+          status: statsResponse.status,
+          data: statsResponse.data
+        });
+        
+        setStats(statsResponse.data);
+      } catch (statsError) {
+        console.error('Error fetching stats:', {
+          message: statsError.message,
+          response: statsError.response?.data,
+          status: statsError.response?.status,
+          stack: statsError.stack
+        });
+        setStats(null);
+      }
+
+      try {
         console.log('Fetching bookings...');
         const bookingsResponse = await axios.get('/bookings/vendor');
         console.log('Bookings response:', {
@@ -221,7 +248,7 @@ const VendorDashboard = () => {
       
       setLoading(false);
     }
-  };
+  }, [user, navigate]);
 
   const handleProfileUpdate = async () => {
     try {
@@ -249,6 +276,20 @@ const VendorDashboard = () => {
     }
   };
 
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      const response = await axios.put(`/bookings/${bookingId}`, { status: newStatus });
+      setBookings(bookings.map(booking => 
+        booking._id === bookingId ? response.data : booking
+      ));
+      // Refresh stats after status change
+      fetchDashboardData();
+    } catch (err) {
+      console.error('Error updating booking status:', err);
+      setError(err.response?.data?.message || 'Failed to update booking status');
+    }
+  };
+
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -259,10 +300,10 @@ const VendorDashboard = () => {
 
   if (error) {
     return (
-      <Container>
-        <Box sx={{ mt: 4 }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
       </Container>
     );
   }
@@ -296,7 +337,35 @@ const VendorDashboard = () => {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <BookingStats stats={stats} bookings={bookings} />
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h5" gutterBottom>
+                Bookings
+              </Typography>
+            </Box>
+            
+            {view === 'list' ? (
+              <BookingList 
+                bookings={bookings}
+                onStatusChange={handleStatusChange}
+              />
+            ) : (
+              <BookingCalendar 
+                bookings={bookings}
+                onStatusChange={handleStatusChange}
+              />
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Welcome, {userInfo?.vendorInfo?.businessName || user?.name || 'Vendor'}
