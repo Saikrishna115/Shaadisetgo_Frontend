@@ -55,7 +55,7 @@ const Calendar = () => {
     isFullyBooked: false,
     notes: ''
   });
-  const [bookings, setBookings] = useState([]);
+  const [bookings] = useState([]);
 
   const fetchVendorData = useCallback(async () => {
     try {

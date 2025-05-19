@@ -34,7 +34,6 @@ import {
   Group as GroupIcon,
   Money as MoneyIcon
 } from '@mui/icons-material';
-import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 const CustomerDashboard = () => {
