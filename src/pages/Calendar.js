@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -24,6 +24,7 @@ import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
+import BookingCalendar from '../components/BookingCalendar';
 
 const locales = {
   'en-US': enUS
@@ -56,11 +57,7 @@ const Calendar = () => {
     isFullyBooked: false,
     notes: ''
   });
-
-  useEffect(() => {
-    fetchVendorData();
-    fetchBookings();
-  }, []);
+  const [bookings, setBookings] = useState([]);
 
   const fetchVendorData = async () => {
     try {
@@ -79,39 +76,24 @@ const Calendar = () => {
     }
   };
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
-      const [bookingsResponse, availabilityResponse] = await Promise.all([
-        axios.get('/bookings/vendor'),
-        axios.get('/vendors/availability')
-      ]);
-
-      const bookingEvents = bookingsResponse.data.map(booking => ({
-        title: `Booking: ${booking.customerName}`,
-        start: new Date(booking.eventDate),
-        end: new Date(booking.eventDate),
-        allDay: true,
-        resource: booking
-      }));
-
-      const availabilityEvents = availabilityResponse.data.map(day => ({
-        title: `Available (${day.eventsBooked}/${vendorSettings.maxEventsPerDay})`,
-        start: new Date(day.date),
-        end: new Date(day.date),
-        allDay: true,
-        resource: day,
-        className: day.isFullyBooked ? 'fully-booked' : 'available'
-      }));
-
-      setEvents([...bookingEvents, ...availabilityEvents]);
+      setLoading(true);
+      const response = await axios.get('/bookings');
+      setBookings(response.data);
       setError('');
     } catch (err) {
-      console.error('Error fetching calendar data:', err);
-      setError('Failed to load calendar events');
+      console.error('Error fetching bookings:', err);
+      setError(err.response?.data?.message || 'Failed to fetch bookings');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchVendorData();
+    fetchBookings();
+  }, [fetchVendorData, fetchBookings]);
 
   const handleDateSelect = (slotInfo) => {
     const selectedDate = slotInfo.start;
@@ -158,24 +140,33 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Booking Calendar
+      </Typography>
+      <BookingCalendar bookings={bookings} />
+
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Event Calendar
         </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
 
         <Paper sx={{ p: 2, mb: 3 }}>
           <Grid container spacing={2} alignItems="center">

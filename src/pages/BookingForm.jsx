@@ -76,28 +76,12 @@ const BookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      setLoading(true);
-      setError('');
-      setSuccess('');
-
-      if (!user) {
-        navigate('/login', { state: { from: `/booking/${id}` } });
-        return;
-      }
-
-      const bookingData = {
-        vendorId: id,
-        ...formData,
-        eventDate: formData.eventDate?.toISOString()
-      };
-
-      const response = await axios.post('/bookings', bookingData);
-      
-      setSuccess('Booking request sent successfully!');
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+      await axios.post('/bookings', formData);
+      navigate('/bookings');
     } catch (err) {
       console.error('Booking error:', err);
       setError(err.response?.data?.message || 'Failed to create booking');

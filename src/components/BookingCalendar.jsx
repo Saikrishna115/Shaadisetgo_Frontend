@@ -23,6 +23,7 @@ const BookingCalendar = ({ bookings }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedBookings, setSelectedBookings] = useState([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -41,17 +42,16 @@ const BookingCalendar = ({ bookings }) => {
   };
 
   const handleDateClick = (day) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    const dayBookings = bookings.filter(booking => {
+    const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const bookingsForDay = bookings.filter(booking => {
       const bookingDate = new Date(booking.eventDate);
-      return (
-        bookingDate.getDate() === day &&
-        bookingDate.getMonth() === currentDate.getMonth() &&
-        bookingDate.getFullYear() === currentDate.getFullYear()
-      );
+      return bookingDate.getDate() === day &&
+             bookingDate.getMonth() === currentDate.getMonth() &&
+             bookingDate.getFullYear() === currentDate.getFullYear();
     });
-    setSelectedDate(date);
-    setSelectedBookings(dayBookings);
+    setSelectedDate(selectedDate);
+    setSelectedBookings(bookingsForDay);
+    setDialogOpen(true);
   };
 
   const renderCalendar = () => {
@@ -169,8 +169,8 @@ const BookingCalendar = ({ bookings }) => {
       </Paper>
 
       <Dialog
-        open={Boolean(selectedDate)}
-        onClose={() => setSelectedDate(null)}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
         maxWidth="sm"
         fullWidth
       >
@@ -219,7 +219,7 @@ const BookingCalendar = ({ bookings }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSelectedDate(null)}>
+          <Button onClick={() => setDialogOpen(false)}>
             Close
           </Button>
         </DialogActions>
