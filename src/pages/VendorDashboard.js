@@ -24,19 +24,16 @@ import {
   Chip,
   Avatar,
   Tooltip,
-  Alert
+  Alert,
+  Tabs,
+  Tab
 } from '@mui/material';
 import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
 import { useAuth } from '../context/AuthContext';
 import {
   Edit as EditIcon,
   Event as EventIcon,
-  Business as BusinessIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  Schedule as ScheduleIcon,
-  AttachMoney as MoneyIcon,
-  Group as GroupIcon
+  Business as BusinessIcon
 } from '@mui/icons-material';
 import './Dashboard.css';
 import BookingStats from '../components/BookingStats';
@@ -46,6 +43,7 @@ import BookingCalendar from '../components/BookingCalendar';
 const VendorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [view, setView] = useState('list');
 
   const calculateAnalytics = (bookings) => {
     const currentDate = new Date();
@@ -92,8 +90,31 @@ const VendorDashboard = () => {
     },
     serviceDescription: ''
   });
-  const [stats, setStats] = useState(null);
-  const [view, setView] = useState('list');
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    rejected: 0
+  });
+
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [bookingsResponse, statsResponse] = await Promise.all([
+        axios.get('/bookings/vendor'),
+        axios.get('/bookings/stats')
+      ]);
+      setBookings(bookingsResponse.data);
+      setStats(statsResponse.data);
+      setAnalytics(calculateAnalytics(bookingsResponse.data));
+      setError('');
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err.response?.data?.message || 'Failed to fetch dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -108,147 +129,9 @@ const VendorDashboard = () => {
       navigate('/login', { replace: true, state: { message: 'Unauthorized access. Please login as a vendor.' } });
       return;
     }
-  }, [navigate]);
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-    if (user.role !== 'vendor') {
-      navigate('/login', { replace: true, state: { message: 'Unauthorized access. Please login as a vendor.' } });
-      return;
-    }
     fetchDashboardData();
-  }, [user, navigate]);
-
-  const fetchDashboardData = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token found');
-        navigate('/login', { replace: true, state: { message: 'Please login to continue' } });
-        return;
-      }
-
-      console.log('Token check:', {
-        exists: !!token,
-        length: token.length,
-        prefix: token.substring(0, 10) + '...'
-      });
-
-      const vendorProfileResponse = await axios.get('/vendors/profile');
-      console.log('Vendor profile response:', {
-        status: vendorProfileResponse.status,
-        success: vendorProfileResponse.data?.success,
-        hasVendor: !!vendorProfileResponse.data?.vendor
-      });
-      
-      if (!vendorProfileResponse.data) {
-        console.error('No data in vendor profile response');
-        setError('Vendor profile not found');
-        setLoading(false);
-        return;
-      }
-
-      const vendorData = vendorProfileResponse.data.vendor;
-      if (!vendorData) {
-        console.error('No vendor data in response:', vendorProfileResponse.data);
-        setError('Invalid vendor profile data');
-        setLoading(false);
-        return;
-      }
-
-      setUserInfo({ ...user, vendorInfo: vendorData });
-      
-      setProfileData({
-        businessName: vendorData.businessName || '',
-        serviceCategory: vendorData.serviceCategory || '',
-        location: {
-          city: vendorData.location?.city || '',
-          state: vendorData.location?.state || '',
-          address: vendorData.location?.address || ''
-        },
-        phone: vendorData.phone || '',
-        priceRange: {
-          min: vendorData.priceRange?.min || 0,
-          max: vendorData.priceRange?.max || 0
-        },
-        serviceDescription: vendorData.serviceDescription || ''
-      });
-
-      try {
-        console.log('Fetching stats...');
-        const statsResponse = await axios.get('/bookings/stats');
-        console.log('Stats response:', {
-          status: statsResponse.status,
-          data: statsResponse.data
-        });
-        
-        setStats(statsResponse.data);
-      } catch (statsError) {
-        console.error('Error fetching stats:', {
-          message: statsError.message,
-          response: statsError.response?.data,
-          status: statsError.response?.status,
-          stack: statsError.stack
-        });
-        setStats(null);
-      }
-
-      try {
-        console.log('Fetching bookings...');
-        const bookingsResponse = await axios.get('/bookings/vendor');
-        console.log('Bookings response:', {
-          status: bookingsResponse.status,
-          count: bookingsResponse.data?.length || 0
-        });
-        
-        const bookingsData = bookingsResponse.data;
-        setBookings(bookingsData);
-        setAnalytics(calculateAnalytics(bookingsData));
-      } catch (bookingError) {
-        console.error('Error fetching bookings:', {
-          message: bookingError.message,
-          response: bookingError.response?.data,
-          status: bookingError.response?.status,
-          stack: bookingError.stack
-        });
-        setBookings([]);
-        setAnalytics({
-          totalBookings: 0,
-          revenue: 0,
-          rating: 0,
-          activeCustomers: 0,
-          bookingGrowth: 0,
-          revenueGrowth: 0,
-        });
-      }
-
-      setLoading(false);
-    } catch (err) {
-      console.error('Dashboard error:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        stack: err.stack,
-        code: err.code
-      });
-
-      if (err.code === 'ECONNABORTED') {
-        setError('Request timed out. Please try again.');
-      } else if (!err.response) {
-        setError('Network error. Please check your internet connection.');
-      } else {
-        const errorMessage = err.response?.data?.message 
-          || err.response?.data?.error 
-          || err.message 
-          || 'Failed to load dashboard data';
-        setError(errorMessage);
-      }
-      
-      setLoading(false);
-    }
-  }, [user, navigate]);
+  }, [navigate, fetchDashboardData]);
 
   const handleProfileUpdate = async () => {
     try {
@@ -292,9 +175,9 @@ const VendorDashboard = () => {
 
   if (loading) {
     return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
         <CircularProgress />
-      </Container>
+      </Box>
     );
   }
 
@@ -338,33 +221,30 @@ const VendorDashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <BookingStats stats={stats} bookings={bookings} />
-        </Grid>
-        
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h5" gutterBottom>
-                Bookings
-              </Typography>
-            </Box>
-            
-            {view === 'list' ? (
-              <BookingList 
-                bookings={bookings}
-                onStatusChange={handleStatusChange}
-              />
-            ) : (
-              <BookingCalendar 
-                bookings={bookings}
-                onStatusChange={handleStatusChange}
-              />
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Dashboard
+      </Typography>
+
+      <BookingStats stats={stats} />
+
+      <Paper sx={{ mt: 4 }}>
+        <Tabs
+          value={view}
+          onChange={(e, newValue) => setView(newValue)}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          <Tab label="List View" value="list" />
+          <Tab label="Calendar View" value="calendar" />
+        </Tabs>
+
+        <Box sx={{ p: 3 }}>
+          {view === 'list' ? (
+            <BookingList bookings={bookings} onUpdate={fetchDashboardData} />
+          ) : (
+            <BookingCalendar bookings={bookings} />
+          )}
+        </Box>
+      </Paper>
 
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>

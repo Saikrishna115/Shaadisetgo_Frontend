@@ -1,57 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
-  Paper,
   Typography,
+  Box,
+  Paper,
   TextField,
   Button,
-  Box,
-  Alert,
   CircularProgress,
+  Alert,
   Grid
 } from '@mui/material';
+import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
-import api from '../utils/axios';
 
 const UserProfile = () => {
-  const { user, updateUser } = useAuth();
-  const [formData, setFormData] = useState({
+  const { updateUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [profileData, setProfileData] = useState({
     name: '',
     email: '',
     phone: '',
     address: ''
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const fetchUserProfile = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/users/profile');
-      setFormData({
-        name: response.data.name || '',
-        email: response.data.email || '',
-        phone: response.data.phone || '',
-        address: response.data.address || ''
-      });
-    } catch (err) {
-      console.error('Error fetching user profile:', err);
-      setError(err.response?.data?.message || 'Failed to fetch profile');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]);
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('/users/profile');
+        setProfileData(response.data);
+        setError('');
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError(err.response?.data?.message || 'Failed to fetch profile');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    fetchProfile();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -61,7 +58,7 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      const response = await api.put('/users/profile', formData);
+      const response = await axios.put('/users/profile', profileData);
       updateUser(response.data);
       setSuccess('Profile updated successfully');
     } catch (err) {
@@ -72,7 +69,7 @@ const UserProfile = () => {
     }
   };
 
-  if (loading && !formData.name) {
+  if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
         <CircularProgress />
@@ -82,86 +79,81 @@ const UserProfile = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Profile
-        </Typography>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Profile
+      </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
-          </Alert>
-        )}
+      {success && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          {success}
+        </Alert>
+      )}
 
-        <Box component="form" onSubmit={handleSubmit}>
+      <Paper sx={{ p: 3 }}>
+        <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
+                required
                 fullWidth
                 label="Name"
                 name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
+                value={profileData.name}
+                onChange={handleInputChange}
               />
             </Grid>
-
             <Grid item xs={12}>
               <TextField
+                required
                 fullWidth
                 label="Email"
                 name="email"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
+                value={profileData.email}
+                onChange={handleInputChange}
                 disabled
               />
             </Grid>
-
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Phone"
                 name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
+                value={profileData.phone}
+                onChange={handleInputChange}
               />
             </Grid>
-
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Address"
                 name="address"
-                value={formData.address}
-                onChange={handleChange}
                 multiline
                 rows={3}
+                value={profileData.address}
+                onChange={handleInputChange}
               />
             </Grid>
-
             <Grid item xs={12}>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
-                fullWidth
                 size="large"
+                fullWidth
                 disabled={loading}
               >
-                {loading ? <CircularProgress size={24} /> : 'Update Profile'}
+                {loading ? 'Updating...' : 'Update Profile'}
               </Button>
             </Grid>
           </Grid>
-        </Box>
+        </form>
       </Paper>
     </Container>
   );

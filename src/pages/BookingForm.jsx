@@ -18,16 +18,13 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
 
 const BookingForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     eventDate: null,
     guestCount: '',
@@ -134,18 +131,6 @@ const BookingForm = () => {
                 Book {vendor?.businessName || 'Vendor'}
               </Typography>
               <Divider sx={{ mb: 3 }} />
-
-              {success && (
-                <Alert severity="success" sx={{ mb: 3 }}>
-                  {success}
-                </Alert>
-              )}
-
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
-                </Alert>
-              )}
 
               <form onSubmit={handleSubmit}>
                 <Grid container spacing={3}>

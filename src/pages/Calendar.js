@@ -23,7 +23,6 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
 import BookingCalendar from '../components/BookingCalendar';
 
 const locales = {
@@ -39,7 +38,6 @@ const localizer = dateFnsLocalizer({
 });
 
 const Calendar = () => {
-  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,7 +57,7 @@ const Calendar = () => {
   });
   const [bookings, setBookings] = useState([]);
 
-  const fetchVendorData = async () => {
+  const fetchVendorData = useCallback(async () => {
     try {
       const response = await axios.get('/vendors/profile');
       const vendorData = response.data.vendor;
@@ -74,7 +72,7 @@ const Calendar = () => {
       console.error('Error fetching vendor data:', err);
       setError('Failed to load vendor settings');
     }
-  };
+  }, []);
 
   const fetchBookings = useCallback(async () => {
     try {
