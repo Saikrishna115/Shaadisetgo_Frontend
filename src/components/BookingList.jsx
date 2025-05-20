@@ -39,9 +39,9 @@ const BookingList = ({ bookings, onStatusChange }) => {
     setSelectedBooking(null);
   };
 
-  const handleStatusChange = (newStatus) => {
-    if (selectedBooking) {
-      onStatusChange(selectedBooking._id, newStatus);
+  const handleStatusChange = async (newStatus) => {
+    if (selectedBooking && onStatusChange) {
+      await onStatusChange(selectedBooking._id, newStatus);
     }
     handleMenuClose();
   };
@@ -220,4 +220,4 @@ const BookingList = ({ bookings, onStatusChange }) => {
   );
 };
 
-export default BookingList; 
+export default BookingList;
