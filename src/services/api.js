@@ -29,6 +29,11 @@ api.interceptors.request.use(
       config.headers['Pragma'] = 'no-cache';
     }
 
+    // Ensure the URL starts with a forward slash
+    if (!config.url.startsWith('/')) {
+      config.url = '/' + config.url;
+    }
+
     return config;
   },
   (error) => {
