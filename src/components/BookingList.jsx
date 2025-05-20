@@ -46,11 +46,11 @@ const BookingList = ({ bookings, onStatusChange }) => {
         if (!token) {
           throw new Error('Authentication token is missing');
         }
-
+  
         if (!selectedBooking?._id) {
           throw new Error('Booking ID is missing');
         }
-
+  
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}/status`, {
           method: 'PUT',
           headers: {
@@ -62,18 +62,18 @@ const BookingList = ({ bookings, onStatusChange }) => {
             vendorResponse: newStatus === 'rejected' ? 'Booking rejected by vendor' : undefined
           })
         });
-
+  
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || errorData.message || 'Failed to update booking status');
         }
-
+  
         const updatedBookings = bookings.map(booking => 
           booking._id === selectedBooking._id 
             ? { ...booking, status: newStatus }
             : booking
         );
-
+  
         if (onStatusChange) {
           onStatusChange(null, null, updatedBookings);
         }
