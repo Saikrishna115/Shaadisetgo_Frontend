@@ -57,7 +57,7 @@ const BookingDetails = () => {
     try {
       setLoading(true);
       const response = await axios.get(`/bookings/${id}`);
-      setBooking(response.data);
+      setBooking(response.data.data || response.data);
       setError('');
     } catch (err) {
       console.error('Error fetching booking details:', err);
