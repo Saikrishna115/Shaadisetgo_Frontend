@@ -33,7 +33,10 @@ import {
   Phone as PhoneIcon,
   Email as EmailIcon,
   AttachMoney as MoneyIcon,
-  Group as GroupIcon
+  Group as GroupIcon,
+  Person as PersonIcon,
+  Star as StarIcon,
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +45,8 @@ const VendorDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [vendorProfile, setVendorProfile] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -50,18 +55,25 @@ const VendorDashboard = () => {
   const [responseType, setResponseType] = useState('');
 
   useEffect(() => {
-    fetchBookings();
+    fetchDashboardData();
   }, []);
 
-  const fetchBookings = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/bookings/vendor');
-      setBookings(response.data);
+      const [bookingsRes, profileRes, statsRes] = await Promise.all([
+        axios.get('/bookings/vendor'),
+        axios.get('/vendors/profile'),
+        axios.get('/vendors/stats')
+      ]);
+      
+      setBookings(bookingsRes.data.data);
+      setVendorProfile(profileRes.data.data);
+      setStats(statsRes.data.data);
       setError('');
     } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setError(err.response?.data?.message || 'Failed to fetch bookings');
+      console.error('Error fetching dashboard data:', err);
+      setError(err.response?.data?.message || 'Failed to fetch dashboard data');
     } finally {
       setLoading(false);
     }
@@ -119,7 +131,7 @@ const VendorDashboard = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Booking Requests
+        Vendor Dashboard
       </Typography>
 
       {error && (
@@ -127,6 +139,69 @@ const VendorDashboard = () => {
           {error}
         </Alert>
       )}
+
+      {/* Stats Section */}
+      {stats && (
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="h6">Total Bookings</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                  {stats.totalBookings}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <MoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="h6">Total Revenue</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                  ₹{stats.totalRevenue}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <TrendingUpIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="h6">Recent Bookings</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                  {stats.recentBookings}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <StarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="h6">Average Rating</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                  {stats.averageRating.toFixed(1)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
+
+      {/* Bookings Section */}
+      <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+        Booking Requests
+      </Typography>
 
       <Grid container spacing={3}>
         {bookings.map((booking) => (
@@ -251,25 +326,20 @@ const VendorDashboard = () => {
         )}
       </Grid>
 
-      <Dialog open={responseDialog} onClose={() => setResponseDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={responseDialog} onClose={() => setResponseDialog(false)}>
         <DialogTitle>
-          {responseType === 'accept' ? 'Accept Booking Request' : 'Reject Booking Request'}
+          {responseType === 'accept' ? 'Accept Booking' : 'Reject Booking'}
         </DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Message to Customer"
+            label="Response Message"
             fullWidth
             multiline
             rows={4}
             value={responseMessage}
             onChange={(e) => setResponseMessage(e.target.value)}
-            placeholder={
-              responseType === 'accept'
-                ? 'Add any special instructions or message for the customer...'
-                : 'Provide a reason for rejecting the booking...'
-            }
           />
         </DialogContent>
         <DialogActions>
@@ -279,7 +349,7 @@ const VendorDashboard = () => {
             variant="contained"
             color={responseType === 'accept' ? 'success' : 'error'}
           >
-            {responseType === 'accept' ? 'Accept Booking' : 'Reject Booking'}
+            {responseType === 'accept' ? 'Accept' : 'Reject'}
           </Button>
         </DialogActions>
       </Dialog>
