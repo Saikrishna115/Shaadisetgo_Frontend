@@ -63,9 +63,19 @@ const BookingList = ({ bookings, onStatusChange }) => {
           })
         });
   
+        let data;
+  
+        const text = await response.text();
+        console.log('Raw response text:', text);
+  
+        try {
+          data = JSON.parse(text);
+        } catch (err) {
+          console.warn('Invalid JSON, response was:', text);
+        }
+  
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || errorData.message || 'Failed to update booking status');
+          throw new Error(data?.message || response.statusText);
         }
   
         const updatedBookings = bookings.map(booking => 
