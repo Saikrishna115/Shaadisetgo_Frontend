@@ -63,32 +63,22 @@ const BookingList = ({ bookings, onStatusChange }) => {
           })
         });
 
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          console.error('Failed to parse response:', e);
-          throw new Error('Invalid server response');
-        }
-
         if (!response.ok) {
+          const errorData = await response.json();
           throw new Error(errorData.error || errorData.message || 'Failed to update booking status');
         }
-        
-        // Update the local state to reflect the change
+
         const updatedBookings = bookings.map(booking => 
           booking._id === selectedBooking._id 
             ? { ...booking, status: newStatus }
             : booking
         );
 
-        // Call the parent component's onStatusChange if it exists
         if (onStatusChange) {
           onStatusChange(null, null, updatedBookings);
         }
       } catch (error) {
         console.error('Failed to update booking status:', error);
-        // You can add a toast notification here to show error
         alert(error.message || 'Failed to update booking status');
       }
     }
