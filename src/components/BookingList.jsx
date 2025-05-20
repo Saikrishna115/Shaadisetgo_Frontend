@@ -51,7 +51,11 @@ const BookingList = ({ bookings, onStatusChange }) => {
                 throw new Error('Booking ID is missing');
             }
 
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}/status`, {
+            // Ensure the API URL does not include undefined vendorId
+            const apiBaseUrl = process.env.REACT_APP_API_URL;
+            const url = `${apiBaseUrl}/api/bookings/${selectedBooking._id}/status`;
+
+            const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
