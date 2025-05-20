@@ -40,6 +40,7 @@ import {
 } from '@mui/icons-material';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
+import BookingStats from '../components/BookingStats';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
@@ -130,201 +131,140 @@ const VendorDashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Vendor Dashboard
+      <Typography variant="h4" component="h1" gutterBottom>
+        Dashboard
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+      <BookingStats bookings={bookings} />
 
-      {/* Stats Section */}
-      {stats && (
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Total Bookings</Typography>
-                </Box>
-                <Typography variant="h4" sx={{ mt: 1 }}>
-                  {stats.totalBookings}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <MoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Total Revenue</Typography>
-                </Box>
-                <Typography variant="h4" sx={{ mt: 1 }}>
-                  ₹{stats.totalRevenue}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <TrendingUpIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Recent Bookings</Typography>
-                </Box>
-                <Typography variant="h4" sx={{ mt: 1 }}>
-                  {stats.recentBookings}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <StarIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Average Rating</Typography>
-                </Box>
-                <Typography variant="h4" sx={{ mt: 1 }}>
-                  {stats.averageRating.toFixed(1)}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
+      <Paper sx={{ mt: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+          Booking Requests
+        </Typography>
 
-      {/* Bookings Section */}
-      <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-        Booking Requests
-      </Typography>
-
-      <Grid container spacing={3}>
-        {bookings.map((booking) => (
-          <Grid item xs={12} key={booking._id}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      {booking.eventType}
-                      <Box component="span" sx={{ ml: 2 }}>
-                        {getStatusChip(booking.status)}
-                      </Box>
-                    </Typography>
-                    <Typography color="textSecondary" gutterBottom>
-                      Booking ID: {booking._id}
-                    </Typography>
-                  </Box>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    {new Date(booking.createdAt).toLocaleDateString()}
-                  </Typography>
-                </Box>
-
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Customer Details
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography>{booking.customerName}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <EmailIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography>{booking.customerEmail}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <PhoneIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography>{booking.customerPhone}</Typography>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Event Details
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography>
-                        {new Date(booking.eventDate).toLocaleDateString()}
+        <Grid container spacing={3}>
+          {bookings.map((booking) => (
+            <Grid item xs={12} key={booking._id}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box>
+                      <Typography variant="h6" gutterBottom>
+                        {booking.eventType}
+                        <Box component="span" sx={{ ml: 2 }}>
+                          {getStatusChip(booking.status)}
+                        </Box>
+                      </Typography>
+                      <Typography color="textSecondary" gutterBottom>
+                        Booking ID: {booking._id}
                       </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <GroupIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography>{booking.guestCount} Guests</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <MoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography>Budget: ₹{booking.budget}</Typography>
-                    </Box>
+                    <Typography variant="subtitle2" color="textSecondary">
+                      {new Date(booking.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Customer Details
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography>{booking.customerName}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <EmailIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography>{booking.customerEmail}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <PhoneIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography>{booking.customerPhone}</Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Event Details
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography>
+                          {new Date(booking.eventDate).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <GroupIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography>{booking.guestCount} Guests</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <MoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography>Budget: ₹{booking.budget}</Typography>
+                      </Box>
+                    </Grid>
                   </Grid>
-                </Grid>
 
-                {booking.message && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Customer Message
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {booking.message}
-                    </Typography>
-                  </Box>
-                )}
+                  {booking.message && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Customer Message
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {booking.message}
+                      </Typography>
+                    </Box>
+                  )}
 
-                {booking.vendorResponse && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Your Response
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {booking.vendorResponse}
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Responded on: {new Date(booking.vendorResponseDate).toLocaleString()}
-                    </Typography>
-                  </Box>
-                )}
+                  {booking.vendorResponse && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Your Response
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {booking.vendorResponse}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        Responded on: {new Date(booking.vendorResponseDate).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  )}
 
-                {booking.status === 'pending' && (
-                  <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      startIcon={<AcceptIcon />}
-                      onClick={() => handleResponse(booking, 'accept')}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      startIcon={<RejectIcon />}
-                      onClick={() => handleResponse(booking, 'reject')}
-                    >
-                      Reject
-                    </Button>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                  {booking.status === 'pending' && (
+                    <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={<AcceptIcon />}
+                        onClick={() => handleResponse(booking, 'accept')}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        startIcon={<RejectIcon />}
+                        onClick={() => handleResponse(booking, 'reject')}
+                      >
+                        Reject
+                      </Button>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
 
-        {bookings.length === 0 && (
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3, textAlign: 'center' }}>
-              <Typography color="textSecondary">
-                No booking requests found.
-              </Typography>
-            </Paper>
-          </Grid>
-        )}
-      </Grid>
+          {bookings.length === 0 && (
+            <Grid item xs={12}>
+              <Paper sx={{ p: 3, textAlign: 'center' }}>
+                <Typography color="textSecondary">
+                  No booking requests found.
+                </Typography>
+              </Paper>
+            </Grid>
+          )}
+        </Grid>
+      </Paper>
 
       <Dialog open={responseDialog} onClose={() => setResponseDialog(false)}>
         <DialogTitle>

@@ -54,8 +54,9 @@ const StatCard = ({ title, value, icon, color, percentage }) => (
 );
 
 const BookingStats = ({ bookings = [] }) => {
-  // Ensure bookings is an array
-  const safeBookings = Array.isArray(bookings) ? bookings : [];
+  // Ensure bookings is an array and handle nested data structure
+  const safeBookings = Array.isArray(bookings) ? bookings : 
+                      Array.isArray(bookings?.data) ? bookings.data : [];
   
   const totalBookings = safeBookings.length;
   const confirmedBookings = safeBookings.filter(b => b?.status === 'confirmed').length;
