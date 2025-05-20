@@ -41,59 +41,59 @@ const BookingList = ({ bookings, onStatusChange }) => {
 
   const handleStatusChange = async (newStatus) => {
     if (selectedBooking) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Authentication token is missing');
-        }
-  
-        if (!selectedBooking?._id) {
-          throw new Error('Booking ID is missing');
-        }
-  
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}/status`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            status: newStatus,
-            vendorResponse: newStatus === 'rejected' ? 'Booking rejected by vendor' : undefined
-          })
-        });
-  
-        let data;
-  
-        const text = await response.text();
-        console.log('Raw response text:', text);
-  
         try {
-          data = JSON.parse(text);
-        } catch (err) {
-          console.warn('Invalid JSON, response was:', text);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Authentication token is missing');
+            }
+
+            if (!selectedBooking?._id) {
+                throw new Error('Booking ID is missing');
+            }
+
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    status: newStatus,
+                    vendorResponse: newStatus === 'rejected' ? 'Booking rejected by vendor' : undefined
+                })
+            });
+
+            let data;
+
+            const text = await response.text();
+            console.log('Raw response text:', text);
+
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.warn('Invalid JSON, response was:', text);
+            }
+
+            if (!response.ok) {
+                throw new Error(data?.message || response.statusText);
+            }
+
+            const updatedBookings = bookings.map(booking => 
+                booking._id === selectedBooking._id 
+                    ? { ...booking, status: newStatus }
+                    : booking
+            );
+
+            if (onStatusChange) {
+                onStatusChange(null, null, updatedBookings);
+            }
+        } catch (error) {
+            console.error('Failed to update booking status:', error);
+            alert(error.message || 'Failed to update booking status');
         }
-  
-        if (!response.ok) {
-          throw new Error(data?.message || response.statusText);
-        }
-  
-        const updatedBookings = bookings.map(booking => 
-          booking._id === selectedBooking._id 
-            ? { ...booking, status: newStatus }
-            : booking
-        );
-  
-        if (onStatusChange) {
-          onStatusChange(null, null, updatedBookings);
-        }
-      } catch (error) {
-        console.error('Failed to update booking status:', error);
-        alert(error.message || 'Failed to update booking status');
-      }
     }
     handleMenuClose();
-  };
+};
 
   const filteredBookings = bookings
     .filter(booking => {
