@@ -64,10 +64,10 @@ const VendorDashboard = () => {
       const [bookingsRes, profileRes, statsRes] = await Promise.all([
         axios.get('/bookings/vendor'),
         axios.get('/vendors/profile'),
-        axios.get('/vendors/stats')
+        axios.get('/bookings/stats')
       ]);
       
-      setBookings(bookingsRes.data.data);
+      setBookings(bookingsRes.data.data || []);
       setVendorProfile(profileRes.data.data);
       setStats(statsRes.data.data);
       setError('');
