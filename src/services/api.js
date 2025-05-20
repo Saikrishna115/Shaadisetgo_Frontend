@@ -20,7 +20,8 @@ api.interceptors.request.use(
     // Set cache control headers only for GET requests
     if (config.method === 'get') {
       config.headers['Cache-Control'] = 'no-cache';
-      config.headers['Pragma'] = 'no-cache';
+      // Remove Pragma header as it's causing CORS issues
+      delete config.headers['Pragma'];
     }
 
     // Ensure the URL starts with a forward slash
