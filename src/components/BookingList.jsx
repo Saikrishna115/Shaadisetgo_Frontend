@@ -78,7 +78,7 @@ const BookingList = ({ bookings, onStatusChange }) => {
         // Update the local state to reflect the change
         const updatedBookings = bookings.map(booking => 
           booking._id === selectedBooking._id 
-            ? { ...booking, status: updatedBooking.status }
+            ? { ...booking, status: newStatus }
             : booking
         );
 
