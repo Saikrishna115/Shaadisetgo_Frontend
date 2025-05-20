@@ -27,14 +27,20 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // Set token in API headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       // Parse stored user data
       const userData = JSON.parse(storedUser);
 
       try {
         const response = await api.get('/auth/me');
-        if (response.data && response.data.role) {
-          setUser({ ...response.data, ...userData });
+        if (response.data && response.data.success) {
+          const updatedUser = { ...userData, ...response.data.user };
+          setUser(updatedUser);
           setIsAuthenticated(true);
+          // Update stored user data
+          localStorage.setItem('user', JSON.stringify(updatedUser));
           // Reset login attempts on successful auth check
           setLoginAttempts(0);
           setLockUntil(null);
@@ -43,12 +49,12 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (err) {
         console.error('Auth check failed:', err);
-        handleLogout(
-          err.response?.data?.message ||
-          (err.response?.status === 401
-            ? 'Session expired. Please login again.'
-            : 'Authentication failed')
-        );
+        if (err.response?.status === 401) {
+          handleLogout('Session expired. Please login again.');
+        } else {
+          // For other errors, keep the user logged in but show error
+          setError(err.response?.data?.message || 'Authentication check failed');
+        }
       }
     } catch (err) {
       console.error('Auth check error:', err);
@@ -68,6 +74,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
     localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
     if (errorMessage) {
       setError(errorMessage);
     }
@@ -158,6 +165,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (userData) => {
     setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const value = {
