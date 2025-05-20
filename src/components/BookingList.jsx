@@ -53,7 +53,7 @@ const BookingList = ({ bookings, onStatusChange }) => {
 
             // Ensure the API URL does not include undefined vendorId
             const apiBaseUrl = process.env.REACT_APP_API_URL;
-            const url = `${apiBaseUrl}/api/bookings/${selectedBooking._id}/status`;
+            const url = `${apiBaseUrl}/api/bookings/${selectedBooking._id}/vendor-status`;
 
             const response = await fetch(url, {
                 method: 'PUT',
