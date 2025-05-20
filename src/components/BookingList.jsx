@@ -41,7 +41,20 @@ const BookingList = ({ bookings, onStatusChange }) => {
 
   const handleStatusChange = async (newStatus) => {
     if (selectedBooking && onStatusChange) {
-      await onStatusChange(selectedBooking._id, newStatus);
+      try {
+        await onStatusChange(selectedBooking._id, newStatus);
+        // Update the local state to reflect the change
+        const updatedBookings = bookings.map(booking => 
+          booking._id === selectedBooking._id 
+            ? { ...booking, status: newStatus }
+            : booking
+        );
+        // Trigger a re-render with the updated bookings
+        onStatusChange(null, null, updatedBookings);
+      } catch (error) {
+        console.error('Failed to update booking status:', error);
+        // You can add a toast notification here to show error
+      }
     }
     handleMenuClose();
   };
@@ -140,18 +153,28 @@ const BookingList = ({ bookings, onStatusChange }) => {
             sx={{
               p: 2,
               mb: 2,
-              cursor: 'pointer',
               '&:hover': {
                 boxShadow: 3,
                 transform: 'translateY(-2px)',
                 transition: 'all 0.2s ease-in-out'
               }
             }}
-            onClick={() => navigate(`/bookings/${booking._id}`)}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box>
-                <Typography variant="h6" gutterBottom>
+                <Typography 
+                  variant="h6" 
+                  gutterBottom 
+                  sx={{ 
+                    cursor: 'pointer',
+                    '&:hover': { textDecoration: 'underline' },
+                    display: 'inline-block'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/bookings/${booking._id}`);
+                  }}
+                >
                   {booking.customerName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
