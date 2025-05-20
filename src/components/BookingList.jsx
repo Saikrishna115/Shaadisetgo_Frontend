@@ -40,20 +40,41 @@ const BookingList = ({ bookings, onStatusChange }) => {
   };
 
   const handleStatusChange = async (newStatus) => {
-    if (selectedBooking && onStatusChange) {
+    if (selectedBooking) {
       try {
-        await onStatusChange(selectedBooking._id, newStatus);
+        const response = await fetch(`/api/bookings/${selectedBooking._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: newStatus,
+            vendorResponse: newStatus === 'rejected' ? 'Booking rejected by vendor' : undefined
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update booking status');
+        }
+
+        const updatedBooking = await response.json();
+        
         // Update the local state to reflect the change
         const updatedBookings = bookings.map(booking => 
           booking._id === selectedBooking._id 
-            ? { ...booking, status: newStatus }
+            ? { ...booking, status: updatedBooking.status }
             : booking
         );
-        // Trigger a re-render with the updated bookings
-        onStatusChange(null, null, updatedBookings);
+
+        // Call the parent component's onStatusChange if it exists
+        if (onStatusChange) {
+          onStatusChange(null, null, updatedBookings);
+        }
       } catch (error) {
         console.error('Failed to update booking status:', error);
         // You can add a toast notification here to show error
+        alert(error.message || 'Failed to update booking status');
       }
     }
     handleMenuClose();
