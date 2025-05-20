@@ -42,10 +42,12 @@ const BookingList = ({ bookings, onStatusChange }) => {
   const handleStatusChange = async (newStatus) => {
     if (selectedBooking) {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vendor/bookings/${selectedBooking._id}`, {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}/status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             status: newStatus,
