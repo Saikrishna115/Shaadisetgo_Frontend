@@ -3,7 +3,8 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'https://shaadisetgo-backend.onrender.com/api',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
   withCredentials: true // Enable sending cookies with requests
 });
@@ -22,10 +23,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Prevent caching
-    config.headers['Cache-Control'] = 'no-cache';
-    config.headers['Pragma'] = 'no-cache';
-    config.headers['Expires'] = '0';
+    // Set cache control headers only for GET requests
+    if (config.method === 'get') {
+      config.headers['Cache-Control'] = 'no-cache';
+      config.headers['Pragma'] = 'no-cache';
+    }
 
     return config;
   },
