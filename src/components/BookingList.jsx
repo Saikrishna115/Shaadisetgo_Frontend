@@ -43,6 +43,14 @@ const BookingList = ({ bookings, onStatusChange }) => {
     if (selectedBooking) {
       try {
         const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication token is missing');
+        }
+
+        if (!selectedBooking?._id) {
+          throw new Error('Booking ID is missing');
+        }
+
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}/status`, {
           method: 'PUT',
           headers: {
@@ -55,12 +63,17 @@ const BookingList = ({ bookings, onStatusChange }) => {
           })
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to update booking status');
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          console.error('Failed to parse response:', e);
+          throw new Error('Invalid server response');
         }
 
-        const updatedBooking = await response.json();
+        if (!response.ok) {
+          throw new Error(errorData.error || errorData.message || 'Failed to update booking status');
+        }
         
         // Update the local state to reflect the change
         const updatedBookings = bookings.map(booking => 
