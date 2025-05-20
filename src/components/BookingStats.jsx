@@ -53,21 +53,30 @@ const StatCard = ({ title, value, icon, color, percentage }) => (
   </Card>
 );
 
-const BookingStats = ({ bookings }) => {
-  const totalBookings = bookings.length;
-  const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
-  const pendingBookings = bookings.filter(b => b.status === 'pending').length;
-  const rejectedBookings = bookings.filter(b => b.status === 'rejected').length;
-  const completedBookings = bookings.filter(b => b.status === 'completed').length;
+const BookingStats = ({ bookings = [] }) => {
+  // Ensure bookings is an array
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
+  
+  const totalBookings = safeBookings.length;
+  const confirmedBookings = safeBookings.filter(b => b?.status === 'confirmed').length;
+  const pendingBookings = safeBookings.filter(b => b?.status === 'pending').length;
+  const rejectedBookings = safeBookings.filter(b => b?.status === 'rejected').length;
+  const completedBookings = safeBookings.filter(b => b?.status === 'completed').length;
 
-  const totalRevenue = bookings
-    .filter(b => ['confirmed', 'completed'].includes(b.status))
-    .reduce((sum, b) => sum + b.budget, 0);
+  const totalRevenue = safeBookings
+    .filter(b => b && ['confirmed', 'completed'].includes(b.status))
+    .reduce((sum, b) => sum + (b.budget || 0), 0);
 
-  const upcomingEvents = bookings
-    .filter(b => ['confirmed', 'pending'].includes(b.status))
+  const upcomingEvents = safeBookings
+    .filter(b => b && ['confirmed', 'pending'].includes(b.status))
     .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
     .slice(0, 5);
+
+  // Calculate percentages safely
+  const getPercentage = (value) => {
+    if (totalBookings === 0) return 0;
+    return (value / totalBookings) * 100;
+  };
 
   return (
     <Box>
@@ -87,7 +96,7 @@ const BookingStats = ({ bookings }) => {
             value={confirmedBookings}
             icon={<CheckCircleIcon sx={{ color: 'success.main', fontSize: 30 }} />}
             color="success.main"
-            percentage={(confirmedBookings / totalBookings) * 100}
+            percentage={getPercentage(confirmedBookings)}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -96,7 +105,7 @@ const BookingStats = ({ bookings }) => {
             value={pendingBookings}
             icon={<PendingIcon sx={{ color: 'warning.main', fontSize: 30 }} />}
             color="warning.main"
-            percentage={(pendingBookings / totalBookings) * 100}
+            percentage={getPercentage(pendingBookings)}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -105,7 +114,7 @@ const BookingStats = ({ bookings }) => {
             value={rejectedBookings}
             icon={<CancelIcon sx={{ color: 'error.main', fontSize: 30 }} />}
             color="error.main"
-            percentage={(rejectedBookings / totalBookings) * 100}
+            percentage={getPercentage(rejectedBookings)}
           />
         </Grid>
       </Grid>
@@ -136,10 +145,10 @@ const BookingStats = ({ bookings }) => {
                 upcomingEvents.map((booking) => (
                   <Box key={booking._id} sx={{ mb: 2 }}>
                     <Typography variant="subtitle1">
-                      {booking.customerName}
+                      {booking.customerName || 'Unnamed Customer'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {new Date(booking.eventDate).toLocaleDateString()} - {booking.guestCount} Guests
+                      {booking.eventDate ? new Date(booking.eventDate).toLocaleDateString() : 'No date'} - {booking.guestCount || 0} Guests
                     </Typography>
                   </Box>
                 ))
