@@ -42,7 +42,7 @@ const BookingList = ({ bookings, onStatusChange }) => {
   const handleStatusChange = async (newStatus) => {
     if (selectedBooking) {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/${selectedBooking._id}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vendor/bookings/${selectedBooking._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
