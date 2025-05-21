@@ -16,7 +16,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 
 const BookingForm = () => {
   const { id } = useParams();
@@ -36,7 +36,7 @@ const BookingForm = () => {
     const fetchVendorDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/vendors/${id}`);
+        const response = await api.get(`/vendors/${id}`);
         if (!response.data) {
           throw new Error('No data received from server');
         }
@@ -76,7 +76,7 @@ const BookingForm = () => {
     setLoading(true);
 
     try {
-      await axios.post('/bookings', formData);
+      await api.post('/bookings', formData);
       navigate('/bookings');
     } catch (err) {
       console.error('Booking error:', err);

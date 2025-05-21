@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 import {
   Container,
   Typography,
@@ -106,8 +106,8 @@ const VendorDashboard = () => {
     try {
       setLoading(true);
       const [bookingsResponse, statsResponse] = await Promise.all([
-        axios.get('/bookings/vendor'),
-        axios.get('/vendors/stats')
+        api.get('/bookings/vendor'),
+        api.get('/vendors/stats')
       ]);
       setBookings(bookingsResponse.data);
       setStats(statsResponse.data);
@@ -142,12 +142,12 @@ const VendorDashboard = () => {
     try {
       let response;
       if (userInfo.vendorInfo) {
-        response = await axios.put(
+        response = await api.put(
           `/vendors/${userInfo.vendorInfo._id}`,
           profileData
         );
       } else {
-        response = await axios.post(
+        response = await api.post(
           '/vendors',
           profileData
         );

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 
 const useAdminData = () => {
   const [data, setData] = useState({
@@ -25,9 +25,9 @@ const useAdminData = () => {
       };
 
       const [usersResponse, vendorsResponse, bookingsResponse] = await Promise.all([
-        axios.get('/admin/users', config),
-        axios.get('/admin/vendors', config),
-        axios.get('/admin/bookings', config)
+        api.get('/admin/users', config),
+        api.get('/admin/vendors', config),
+        api.get('/admin/bookings', config)
       ]);
 
       if (usersResponse.status === 401 || vendorsResponse.status === 401 || bookingsResponse.status === 401) {
@@ -62,7 +62,7 @@ const useAdminData = () => {
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      const response = await axios.put(`/admin/users/${userId}/status`, { status }, config);
+      const response = await api.put(`/admin/users/${userId}/status`, { status }, config);
       
       if (response.status === 401) {
         setError('Unauthorized access');
@@ -86,7 +86,7 @@ const useAdminData = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      await axios.put(`/admin/vendors/${vendorId}/status`, { status }, config);
+      await api.put(`/admin/vendors/${vendorId}/status`, { status }, config);
       setData(prev => ({
         ...prev,
         vendors: prev.vendors.map(vendor => vendor._id === vendorId ? { ...vendor, status } : vendor)
@@ -102,7 +102,7 @@ const useAdminData = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      await axios.put(`/admin/bookings/${bookingId}/status`, { status }, config);
+      await api.put(`/admin/bookings/${bookingId}/status`, { status }, config);
       setData(prev => ({
         ...prev,
         bookings: prev.bookings.map(booking => booking._id === bookingId ? { ...booking, status } : booking)

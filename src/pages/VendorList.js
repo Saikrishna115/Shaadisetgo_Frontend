@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 import {
   Container,
   Box,
@@ -26,7 +26,7 @@ const VendorList = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await axios.get('/vendors');
+      const response = await api.get('/vendors');
       if (!response.data) {
         throw new Error('No data received from server');
       }

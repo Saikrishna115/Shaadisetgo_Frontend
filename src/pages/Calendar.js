@@ -22,7 +22,7 @@ import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 import BookingCalendar from '../components/BookingCalendar';
 
 const locales = {
@@ -59,7 +59,7 @@ const Calendar = () => {
 
   const fetchVendorData = useCallback(async () => {
     try {
-      const response = await axios.get('/vendors/profile');
+      const response = await api.get('/vendors/profile');
       const vendorData = response.data.vendor;
       setVendorSettings({
         maxEventsPerDay: vendorData.maxEventsPerDay || 1,
@@ -77,7 +77,7 @@ const Calendar = () => {
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/bookings');
+      const response = await api.get('/bookings');
       const formattedEvents = response.data.map(booking => ({
         id: booking._id,
         title: booking.title || 'Booking',
@@ -122,7 +122,7 @@ const Calendar = () => {
 
   const handleSaveAvailability = async () => {
     try {
-      await axios.post('/vendors/availability', {
+      await api.post('/vendors/availability', {
         date: selectedDate,
         ...selectedDateData
       });
@@ -137,7 +137,7 @@ const Calendar = () => {
 
   const handleUpdateSettings = async () => {
     try {
-      await axios.put('/vendors/settings', vendorSettings);
+      await api.put('/vendors/settings', vendorSettings);
       fetchEvents(); // Refresh calendar data
     } catch (err) {
       console.error('Error updating vendor settings:', err);

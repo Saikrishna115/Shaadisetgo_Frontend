@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 import {
   Container,
   Typography,
@@ -84,9 +84,9 @@ const CustomerDashboard = () => {
 
       // Fetch all required data in parallel
       const [profileRes, bookingsRes, favoritesRes] = await Promise.all([
-        axios.get('/users/profile', config),
-        axios.get('/bookings/customer', config),
-        axios.get('/favorites', config)
+        api.get('/users/profile', config),
+        api.get('/bookings/customer', config),
+        api.get('/favorites', config)
       ]);
 
       // Calculate analytics
@@ -141,7 +141,7 @@ const CustomerDashboard = () => {
 
   const handleCancelBooking = async (bookingId) => {
     try {
-      await axios.put(`/bookings/${bookingId}/cancel`);
+      await api.put(`/bookings/${bookingId}/cancel`);
       fetchDashboardData(); // Refresh data after cancellation
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to cancel booking');
@@ -160,7 +160,7 @@ const CustomerDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      const response = await axios.put('/users/profile', editProfileData, config);
+      const response = await api.put('/users/profile', editProfileData, config);
       
       if (response.data) {
         setDashboardData(prev => ({

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import axios from '../utils/axios';
+import api from '../services/api/config';
 import {
   Container,
   Box,
@@ -86,8 +86,8 @@ const Dashboard = () => {
       };
 
       const [profileRes, bookingsRes] = await Promise.all([
-        axios.get('/users/profile', config),
-        axios.get('/bookings', config)
+        api.get('/users/profile', config),
+        api.get('/bookings', config)
       ]);
 
       setUserInfo(profileRes.data);
@@ -138,7 +138,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await axios.put('/users/profile', profileData, config);
+      const response = await api.put('/users/profile', profileData, config);
       setUserInfo(response.data);
       setProfileData(response.data);
       setError('');
