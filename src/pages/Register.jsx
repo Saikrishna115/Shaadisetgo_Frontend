@@ -157,15 +157,42 @@ const Register = () => {
       setError('');
       setLoading(true);
 
+      // Validate required fields
+      const requiredFields = ['fullName', 'email', 'password', 'phone'];
+      const missingFields = requiredFields.filter(field => !formData[field]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Validate password match
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      // Validate email format
+      if (!validateEmail(formData.email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
+      // Validate phone format
+      if (!validatePhone(formData.phone)) {
+        throw new Error('Please enter a valid 10-digit phone number');
+      }
+
+      // Format the registration data
       const userData = {
-        fullName: formData.fullName,
-        email: formData.email.toLowerCase(),
-        phone: formData.phone,
+        fullName: formData.fullName.trim(),
+        email: formData.email.toLowerCase().trim(),
+        phone: formData.phone.trim(),
         password: formData.password,
         role: formData.role
       };
 
+      console.log('Sending registration data:', userData);
+
       const response = await api.post('/api/auth/register', userData);
+      console.log('Registration response:', response.data);
 
       if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -183,20 +210,20 @@ const Register = () => {
             serviceDescription: formData.serviceDescription
           };
 
-          const vendorResponse = await api.post('/vendors', vendorData);
+          const vendorResponse = await api.post('/api/vendors', vendorData);
           localStorage.setItem('user', JSON.stringify({
-            ...response.data.data.user,
+            ...response.data.user,
             vendorProfile: vendorResponse.data.vendor
           }));
           navigate('/vendor/dashboard');
         } else {
-          localStorage.setItem('user', JSON.stringify(response.data.data.user));
+          localStorage.setItem('user', JSON.stringify(response.data.user));
           navigate('/dashboard');
         }
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

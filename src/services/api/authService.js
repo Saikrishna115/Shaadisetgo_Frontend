@@ -15,12 +15,35 @@ class AuthService {
 
   async register(userData) {
     try {
-      const response = await api.post('/api/auth/register', userData);
+      // Log the request data for debugging
+      console.log('Registration request data:', userData);
+
+      // Ensure required fields are present
+      const requiredFields = ['fullName', 'email', 'password', 'role'];
+      const missingFields = requiredFields.filter(field => !userData[field]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Format the request data
+      const formattedData = {
+        fullName: userData.fullName,
+        email: userData.email.toLowerCase(),
+        password: userData.password,
+        role: userData.role,
+        phone: userData.phone || ''
+      };
+
+      const response = await api.post('/api/auth/register', formattedData);
+      console.log('Registration response:', response.data);
+
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
       }
       return response.data;
     } catch (error) {
+      console.error('Registration error details:', error.response?.data);
       throw this.handleError(error);
     }
   }
@@ -70,7 +93,7 @@ class AuthService {
       localStorage.removeItem('token');
     }
     return {
-      message: error.response?.data?.message || 'An error occurred',
+      message: error.response?.data?.message || error.message || 'An error occurred',
       status: error.response?.status,
       data: error.response?.data
     };
