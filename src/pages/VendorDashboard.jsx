@@ -40,6 +40,8 @@ import {
   TrendingUp as TrendingUpIcon,
   People as PeopleIcon
 } from '@mui/icons-material';
+import BookingList from '../components/BookingList';
+import BookingCalendar from '../components/BookingCalendar';
 import api from '../services/api';
 import './VendorDashboard.css';
 

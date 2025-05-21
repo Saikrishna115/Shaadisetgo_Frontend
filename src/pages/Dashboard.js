@@ -17,6 +17,8 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
+import VendorProfileForm from '../components/VendorProfileForm/VendorProfileForm';
+import UserProfileForm from '../components/UserProfileForm/UserProfileForm';
 import './Dashboard.css';
 
 const initialProfileState = {
@@ -41,7 +43,7 @@ const initialProfileState = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -51,6 +53,8 @@ const Dashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchBookings = async () => {
