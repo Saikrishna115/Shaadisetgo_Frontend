@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com/api';
+const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
 
 const api = axios.create({
-  baseURL,
+  baseURL: `${baseURL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -18,6 +18,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Ensure URL starts with forward slash
+    if (!config.url.startsWith('/')) {
+      config.url = '/' + config.url;
+    }
+    
     return config;
   },
   (error) => {

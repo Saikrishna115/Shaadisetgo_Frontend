@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
+
 const api = axios.create({
-  baseURL: 'https://shaadisetgo-backend.onrender.com/api',
+  baseURL: `${baseURL}/api`,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
