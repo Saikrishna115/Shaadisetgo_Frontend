@@ -139,4 +139,16 @@ const authSlice = createSlice({
 });
 
 export const { setUser, clearError } = authSlice.actions;
-export default authSlice.reducer; 
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const data = await authService.updateProfile(profileData);
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+export default authSlice.reducer;
