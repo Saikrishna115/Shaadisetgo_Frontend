@@ -42,7 +42,7 @@ import {
 } from '@mui/icons-material';
 import BookingList from '../components/BookingList';
 import BookingCalendar from '../components/BookingCalendar';
-import api from '../services/api';
+import api from '../services/api/config';
 import './VendorDashboard.css';
 
 const VendorDashboard = () => {

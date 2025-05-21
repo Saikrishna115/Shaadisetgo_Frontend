@@ -36,7 +36,7 @@ import {
   Message as MessageIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
-import api from '../services/api';
+import api from '../services/api/config';
 import './BookingDetails.css';
 
 const BookingDetails = () => {
