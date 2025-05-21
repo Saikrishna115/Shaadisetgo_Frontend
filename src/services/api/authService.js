@@ -4,6 +4,9 @@ class AuthService {
   async login(credentials) {
     try {
       const response = await api.post('/auth/login', credentials);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -13,6 +16,9 @@ class AuthService {
   async register(userData) {
     try {
       const response = await api.post('/auth/register', userData);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -22,7 +28,9 @@ class AuthService {
   async logout() {
     try {
       await api.post('/auth/logout');
+      localStorage.removeItem('token');
     } catch (error) {
+      localStorage.removeItem('token');
       throw this.handleError(error);
     }
   }
@@ -39,6 +47,9 @@ class AuthService {
   async refreshToken() {
     try {
       const response = await api.post('/auth/refresh-token');
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -55,6 +66,9 @@ class AuthService {
   }
 
   handleError(error) {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+    }
     return {
       message: error.response?.data?.message || 'An error occurred',
       status: error.response?.status,

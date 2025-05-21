@@ -8,6 +8,9 @@ import PrivateRoute from './components/PrivateRoute';
 import Notification from './components/common/Notification';
 import LoadingOverlay from './components/common/LoadingOverlay';
 import routes from './routes';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
 
 // Always loaded components
 import Navbar from './components/Navbar';
@@ -22,39 +25,42 @@ const PageLoadingFallback = () => (
 const App = () => {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <Router>
-          <ErrorBoundary>
-            <Notification />
-            <Navbar />
-            <main className="main-content">
-              <Suspense fallback={<PageLoadingFallback />}>
-                <Routes>
-                  {routes.map((route) => {
-                    const Component = route.component;
-                    return (
-                      <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                          route.protected ? (
-                            <PrivateRoute roles={route.roles}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <Router>
+            <ErrorBoundary>
+              <Notification />
+              <Navbar />
+              <main className="main-content">
+                <Suspense fallback={<PageLoadingFallback />}>
+                  <Routes>
+                    {routes.map((route) => {
+                      const Component = route.component;
+                      return (
+                        <Route
+                          key={route.path}
+                          path={route.path}
+                          element={
+                            route.protected ? (
+                              <PrivateRoute roles={route.roles}>
+                                <Component />
+                              </PrivateRoute>
+                            ) : (
                               <Component />
-                            </PrivateRoute>
-                          ) : (
-                            <Component />
-                          )
-                        }
-                      />
-                    );
-                  })}
-                </Routes>
-              </Suspense>
-            </main>
-            <Footer />
-          </ErrorBoundary>
-        </Router>
-      </AuthProvider>
+                            )
+                          }
+                        />
+                      );
+                    })}
+                  </Routes>
+                </Suspense>
+              </main>
+              <Footer />
+            </ErrorBoundary>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
     </Provider>
   );
 };

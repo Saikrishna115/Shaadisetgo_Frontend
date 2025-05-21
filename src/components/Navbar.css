@@ -8,8 +8,18 @@
 }
 
 .navbar-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
+  text-decoration: none !important;
+  color: inherit;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: transform 0.2s ease-in-out;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.05);
 }
 
 .brand-link {
@@ -88,6 +98,72 @@
 .dropdown-link:hover {
   background-color: #f8f9fa;
   color: #E91E63;
+}
+
+/* Active link styles */
+.active-link {
+  position: relative;
+}
+
+.active-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  transform: scaleX(1);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Button hover effects */
+.MuiButton-root:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar border animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(25, 118, 210, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0);
+  }
+}
+
+.MuiAvatar-root {
+  transition: transform 0.2s ease-in-out;
+}
+
+.MuiAvatar-root:hover {
+  transform: scale(1.1);
+  animation: pulse 1.5s infinite;
+}
+
+/* Menu item hover effect */
+.MuiMenuItem-root {
+  transition: background-color 0.2s ease-in-out !important;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: rgba(25, 118, 210, 0.08) !important;
+}
+
+/* Mobile menu styles */
+@media (max-width: 600px) {
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  
+  .MuiToolbar-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
 }
 
 @media (max-width: 768px) {
