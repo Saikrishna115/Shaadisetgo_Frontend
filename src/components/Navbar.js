@@ -118,13 +118,20 @@ const Navbar = () => {
 
   const handleDashboard = () => {
     handleClose();
-    if (!user || !user.role) {
-      console.error('User or user role is undefined');
+    if (!user) {
+      console.error('User is not defined');
       navigate('/login', { replace: true });
       return;
     }
 
-    switch (user.role) {
+    const userRole = user.role || localStorage.getItem('userRole');
+    if (!userRole) {
+      console.error('User role is not defined');
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    switch (userRole) {
       case 'vendor':
         navigate('/vendor/dashboard', { replace: true });
         break;
@@ -135,15 +142,18 @@ const Navbar = () => {
         navigate('/dashboard', { replace: true });
         break;
       default:
-        console.error('Unknown user role:', user.role);
-        navigate('/', { replace: true });
+        console.error('Invalid user role:', userRole);
+        navigate('/login', { replace: true });
     }
   };
 
   const getDashboardPath = () => {
-    if (!user || !user.role) return '/login';
+    if (!user) return '/login';
     
-    switch (user.role) {
+    const userRole = user.role || localStorage.getItem('userRole');
+    if (!userRole) return '/login';
+    
+    switch (userRole) {
       case 'vendor':
         return '/vendor/dashboard';
       case 'admin':

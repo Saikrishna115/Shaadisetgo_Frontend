@@ -47,6 +47,7 @@ const routes = [
     roles: ['customer'],
     group: 'bookings',
   },
+  // Dashboard routes
   {
     path: '/dashboard',
     component: lazyWithRetry('pages/CustomerDashboard'),
@@ -66,14 +67,22 @@ const routes = [
     component: lazyWithRetry('pages/AdminDashboard'),
     protected: true,
     roles: ['admin'],
-    group: 'admin',
+    group: 'dashboard',
   },
+  // Profile routes
   {
     path: '/profile',
     component: lazyWithRetry('pages/UserProfile'),
     protected: true,
-    roles: ['vendor', 'customer'],
+    roles: ['vendor', 'customer', 'admin'],
     group: 'profile',
+  },
+  {
+    path: '/vendor/bookings',
+    component: lazyWithRetry('pages/VendorBookings'),
+    protected: true,
+    roles: ['vendor'],
+    group: 'bookings',
   },
   {
     path: '/calendar',

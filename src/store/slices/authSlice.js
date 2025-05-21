@@ -1,15 +1,29 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../../services/api/authService';
 
-// Initialize state from localStorage
-const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-const token = localStorage.getItem('token');
+// Initialize state from localStorage with proper role handling
+const getUserFromStorage = () => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    const storedRole = localStorage.getItem('userRole');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      // Ensure user has a role, prioritize stored role
+      user.role = storedRole || user.role;
+      return user;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error parsing stored user:', error);
+    return null;
+  }
+};
 
 const initialState = {
-  user,
+  user: getUserFromStorage(),
   loading: false,
   error: null,
-  isAuthenticated: !!token,
+  isAuthenticated: !!localStorage.getItem('token'),
 };
 
 export const register = createAsyncThunk(
@@ -29,13 +43,16 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const data = await authService.login(credentials);
+      if (!data.user || !data.user.role) {
+        throw new Error('Invalid user data received');
+      }
       // Store auth data in localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('userRole', data.user.role);
       localStorage.setItem('user', JSON.stringify(data.user));
       return data;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.response?.data || { message: error.message });
     }
   }
 );
@@ -95,6 +112,12 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
+      if (action.payload) {
+        localStorage.setItem('user', JSON.stringify(action.payload));
+        if (action.payload.role) {
+          localStorage.setItem('userRole', action.payload.role);
+        }
+      }
     },
     clearError: (state) => {
       state.error = null;
@@ -131,6 +154,8 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Login failed';
+        state.user = null;
+        state.isAuthenticated = false;
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {

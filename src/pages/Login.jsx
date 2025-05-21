@@ -43,7 +43,7 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && user.role) {
       // Ensure proper role-based navigation
       switch (user.role) {
         case 'vendor':
@@ -56,8 +56,8 @@ const Login = () => {
           navigate('/dashboard', { replace: true });
           break;
         default:
-          console.error('Unknown user role:', user.role);
-          navigate('/');
+          setError(`Invalid user role: ${user.role}`);
+          console.error('Invalid user role:', user.role);
       }
     }
   }, [isAuthenticated, user, navigate]);
@@ -74,33 +74,24 @@ const Login = () => {
     if (isSubmitting || loading) return;
     
     setIsSubmitting(true);
+    setError(''); // Clear any previous errors
+    
     try {
-      const response = await api.post('/api/auth/login', { email, password });
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userRole', response.data.user.role);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        // Redirect based on user role
-        const userRole = response.data.user.role;
-        switch (userRole) {
-          case 'vendor':
-            navigate('/vendor/dashboard', { replace: true });
-            break;
-          case 'admin':
-            navigate('/admin', { replace: true });
-            break;
-          case 'customer':
-            navigate('/dashboard', { replace: true });
-            break;
-          default:
-            console.error('Unknown user role:', userRole);
-            navigate('/', { replace: true });
-        }
+      // Use the login action from authSlice
+      const result = await dispatch(login({ email, password })).unwrap();
+      
+      if (!result.user || !result.user.role) {
+        throw new Error('Invalid user data received');
       }
+
+      // Role-based navigation will be handled by the useEffect above
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.message || 'Login failed. Please try again.');
+      // Clear any stored data in case of error
+      localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('user');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { CircularProgress, Container } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { getCurrentUser } from '../store/slices/authSlice';
 
 const PrivateRoute = ({ children, roles }) => {
@@ -17,9 +17,21 @@ const PrivateRoute = ({ children, roles }) => {
 
   if (loading) {
     return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          gap: 2
+        }}
+      >
         <CircularProgress />
-      </Container>
+        <Typography variant="body1" color="text.secondary">
+          Loading...
+        </Typography>
+      </Box>
     );
   }
 
