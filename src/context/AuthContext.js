@@ -91,8 +91,18 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       
-      if (!userData || !userData.role) {
-        throw new Error('Invalid user data received');
+      if (!userData || !userData.role || !userData.email || !userData.password) {
+        throw new Error('Invalid user data received. Please provide email, password and role.');
+      }
+
+      // Validate email format
+      if (!emailRegex.test(userData.email)) {
+        throw new Error('Invalid email format');
+      }
+
+      // Validate password length
+      if (userData.password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
       }
       
       const response = await api.post('/auth/login', { email: userData.email, password: userData.password });
@@ -102,8 +112,18 @@ export const AuthProvider = ({ children }) => {
 
       
 
-      if (!userData || !userData.role) {
-        throw new Error('Invalid user data received');
+      if (!userData || !userData.role || !userData.email || !userData.password) {
+        throw new Error('Invalid user data received. Please provide email, password and role.');
+      }
+
+      // Validate email format
+      if (!emailRegex.test(userData.email)) {
+        throw new Error('Invalid email format');
+      }
+
+      // Validate password length
+      if (userData.password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
       }
 
       // Reset login attempts on successful login
