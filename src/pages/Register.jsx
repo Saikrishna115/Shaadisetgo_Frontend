@@ -91,7 +91,7 @@ const Register = () => {
       hasUpperCase: /[A-Z]/.test(password),
       hasLowerCase: /[a-z]/.test(password),
       hasNumber: /\d/.test(password),
-      hasSpecial: /[@$!%*?&]/.test(password),
+      hasSpecial: /[^a-zA-Z0-9]/.test(password),
       hasLength: password.length >= 8
     };
     setValidations(prev => ({ ...prev, password: validations }));
@@ -170,6 +170,11 @@ const Register = () => {
         throw new Error('Passwords do not match');
       }
 
+      // Validate password strength
+      if (!validatePassword(formData.password)) {
+        throw new Error('Password must be at least 8 characters long and contain uppercase, lowercase, number and special character');
+      }
+
       // Validate email format
       if (!validateEmail(formData.email)) {
         throw new Error('Please enter a valid email address');
@@ -180,9 +185,18 @@ const Register = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
+      // Split fullName into firstName and lastName
+      const [firstName, ...lastNameParts] = formData.fullName.trim().split(' ');
+      const lastName = lastNameParts.join(' ');
+
+      if (!firstName || !lastName) {
+        throw new Error('Please enter both first name and last name');
+      }
+
       // Format the registration data
       const userData = {
-        fullName: formData.fullName.trim(),
+        firstName,
+        lastName,
         email: formData.email.toLowerCase().trim(),
         phone: formData.phone.trim(),
         password: formData.password,

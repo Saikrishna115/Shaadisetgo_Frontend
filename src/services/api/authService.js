@@ -25,7 +25,7 @@ class AuthService {
       console.log('Registration request data:', userData);
 
       // Ensure required fields are present
-      const requiredFields = ['fullName', 'email', 'password', 'role'];
+      const requiredFields = ['firstName', 'lastName', 'email', 'password', 'role'];
       const missingFields = requiredFields.filter(field => !userData[field]);
       
       if (missingFields.length > 0) {
@@ -34,8 +34,9 @@ class AuthService {
 
       // Format the request data
       const formattedData = {
-        fullName: userData.fullName,
-        email: userData.email.toLowerCase(),
+        firstName: userData.firstName.trim(),
+        lastName: userData.lastName.trim(),
+        email: userData.email.toLowerCase().trim(),
         password: userData.password,
         role: userData.role,
         phone: userData.phone || ''
@@ -44,19 +45,27 @@ class AuthService {
       const response = await api.post('/api/auth/register', formattedData);
       console.log('Registration response:', response.data);
 
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        if (response.data.user) {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          if (response.data.user.role) {
-            localStorage.setItem('userRole', response.data.user.role);
+      if (response.data.success && response.data.data.token) {
+        localStorage.setItem('token', response.data.data.token);
+        if (response.data.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.data.user));
+          if (response.data.data.user.role) {
+            localStorage.setItem('userRole', response.data.data.user.role);
           }
         }
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Registration failed');
       }
-      return response.data;
     } catch (error) {
-      console.error('Registration error details:', error.response?.data);
-      throw this.handleError(error);
+      console.error('Registration error details:', error.response?.data || error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('An unexpected error occurred during registration');
+      }
     }
   }
 
