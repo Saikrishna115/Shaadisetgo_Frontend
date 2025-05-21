@@ -85,7 +85,7 @@ const Register = () => {
       navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || err.response?.data?.fields?.join(', ') || 'Registration failed');
     } finally {
       setLoading(false);
     }
