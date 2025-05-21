@@ -27,7 +27,6 @@ import {
   Login as LoginIcon
 } from '@mui/icons-material';
 import './Login.css';
-import api from '../services/api/config';
 
 const Login = () => {
   const theme = useTheme();
@@ -39,6 +38,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   // Redirect if already logged in
   useEffect(() => {
@@ -68,16 +69,52 @@ const Login = () => {
     };
   }, [dispatch]);
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting || loading) return;
     
+    // Reset errors
+    setError('');
+    setEmailError('');
+    setPasswordError('');
+    
+    // Trim and validate credentials
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    
+    // Validate email
+    if (!trimmedEmail) {
+      setEmailError('Email is required');
+      return;
+    }
+    if (!validateEmail(trimmedEmail)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    
+    // Validate password
+    if (!trimmedPassword) {
+      setPasswordError('Password is required');
+      return;
+    }
+    if (trimmedPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters long');
+      return;
+    }
+    
     setIsSubmitting(true);
-    setError(''); // Clear any previous errors
     
     try {
-      // Use the login action from authSlice
-      const result = await dispatch(login({ email, password })).unwrap();
+      // Use the login action from authSlice with trimmed credentials
+      const result = await dispatch(login({ 
+        email: trimmedEmail.toLowerCase(), 
+        password: trimmedPassword 
+      })).unwrap();
       
       if (!result.user || !result.user.role) {
         throw new Error('Invalid user data received');
@@ -103,8 +140,8 @@ const Login = () => {
         minHeight: '100vh', 
         display: 'flex', 
         alignItems: 'center',
-        mt: { xs: 8, sm: 12 }, // Add top margin to prevent navbar overlap
-        mb: { xs: 4, sm: 6 }   // Add bottom margin for better spacing
+        mt: { xs: 8, sm: 12 },
+        mb: { xs: 4, sm: 6 }
       }}
     >
       <Fade in timeout={800}>
@@ -186,12 +223,17 @@ const Login = () => {
                   autoComplete="email"
                   autoFocus
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setEmailError('');
+                  }}
                   disabled={loading}
+                  error={!!emailError}
+                  helperText={emailError}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <EmailIcon color="primary" />
+                        <EmailIcon color={emailError ? "error" : "primary"} />
                       </InputAdornment>
                     ),
                   }}
@@ -212,12 +254,17 @@ const Login = () => {
                   id="password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError('');
+                  }}
                   disabled={loading}
+                  error={!!passwordError}
+                  helperText={passwordError}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <LockIcon color="primary" />
+                        <LockIcon color={passwordError ? "error" : "primary"} />
                       </InputAdornment>
                     ),
                     endAdornment: (
@@ -253,7 +300,7 @@ const Login = () => {
                     position: 'relative'
                   }}
                 >
-                  {loading ? (
+                  {loading || isSubmitting ? (
                     <CircularProgress size={24} sx={{ color: 'white' }} />
                   ) : (
                     <>
@@ -280,7 +327,7 @@ const Login = () => {
                   }}
                 >
                   <Link 
-                    to="/forgot-password" 
+                    to="/forgot-password"
                     style={{ 
                       textDecoration: 'none',
                       color: theme.palette.primary.main
