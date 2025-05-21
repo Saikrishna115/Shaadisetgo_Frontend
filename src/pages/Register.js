@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -7,7 +8,11 @@ import {
   Button,
   Box,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/axios';
@@ -15,15 +20,28 @@ import './Register.css';
 
 const Register = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const [role, setRole] = useState('customer');
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'user'
+    phone: '',
+    businessName: '',
+    ownerName: '',
+    serviceCategory: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleRoleChange = (e) => {
+    setRole(e.target.value);
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -44,14 +62,27 @@ const Register = () => {
     }
 
     try {
-      const response = await api.post('/auth/register', {
-        name: formData.name,
+      const payload = {
+        fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
-        role: formData.role
-      });
+        phone: formData.phone,
+        role
+      };
 
+      if (role === 'vendor') {
+        payload.businessName = formData.businessName;
+        payload.ownerName = formData.ownerName;
+        payload.serviceCategory = formData.serviceCategory;
+        payload.address = formData.address;
+        payload.city = formData.city;
+        payload.state = formData.state;
+        payload.zipCode = formData.zipCode;
+      }
+
+      const response = await api.post('/auth/register', payload);
       login(response.data.token, response.data.user);
+      navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
       setError(err.response?.data?.message || 'Registration failed');
@@ -66,6 +97,18 @@ const Register = () => {
         <Typography variant="h4" component="h1" align="center" gutterBottom>
           Register
         </Typography>
+
+        <FormControl fullWidth sx={{ mb: 3 }}>
+          <InputLabel>Role</InputLabel>
+          <Select
+            value={role}
+            label="Role"
+            onChange={handleRoleChange}
+          >
+            <MenuItem value="customer">Customer</MenuItem>
+            <MenuItem value="vendor">Vendor</MenuItem>
+          </Select>
+        </FormControl>
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -116,6 +159,90 @@ const Register = () => {
             margin="normal"
             required
           />
+
+          <TextField
+            fullWidth
+            label="Phone Number"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+
+          {role === 'vendor' && (
+            <>
+              <TextField
+                fullWidth
+                label="Business Name"
+                name="businessName"
+                value={formData.businessName}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="Owner Name"
+                name="ownerName"
+                value={formData.ownerName}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="Service Category"
+                name="serviceCategory"
+                value={formData.serviceCategory}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="State"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="Zip Code"
+                name="zipCode"
+                value={formData.zipCode}
+                onChange={handleChange}
+                margin="normal"
+                required
+              />
+            </>
+          )}
 
           <Button
             type="submit"
