@@ -9,7 +9,7 @@ import {
   CircularProgress,
   Paper
 } from '@mui/material';
-import api from '../services/api';
+import api from '../services/api/config';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');

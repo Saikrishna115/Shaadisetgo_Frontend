@@ -27,7 +27,7 @@ import {
   Login as LoginIcon
 } from '@mui/icons-material';
 import './Login.css';
-import api from '../services/api';
+import api from '../services/api/config';
 
 const Login = () => {
   const theme = useTheme();

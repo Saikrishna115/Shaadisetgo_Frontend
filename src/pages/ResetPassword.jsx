@@ -15,7 +15,7 @@ import {
   ListItemText
 } from '@mui/material';
 import { Check as CheckIcon, Close as CloseIcon } from '@mui/icons-material';
-import api from '../services/api';
+import api from '../services/api/config';
 
 const ResetPassword = () => {
   const navigate = useNavigate();

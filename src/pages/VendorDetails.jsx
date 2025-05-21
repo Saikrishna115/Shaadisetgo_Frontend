@@ -31,7 +31,7 @@ import {
   Close as RejectIcon,
   Group as GroupIcon
 } from '@mui/icons-material';
-import api from '../services/api';
+import api from '../services/api/config';
 import './VendorDetails.css';
 
 const VendorDetails = () => {

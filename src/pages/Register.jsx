@@ -25,7 +25,7 @@ import {
   Chip
 } from '@mui/material';
 import { Check as CheckIcon } from '@mui/icons-material';
-import api from '../services/api';
+import api from '../services/api/config';
 
 const Register = () => {
   const theme = useTheme();
