@@ -8,6 +8,18 @@ const initialState = {
   isAuthenticated: false,
 };
 
+export const register = createAsyncThunk(
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const data = await authService.register(userData);
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
@@ -70,6 +82,21 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Register
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Registration failed';
+      })
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
