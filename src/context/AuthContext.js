@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback
+} from 'react';
 import api from '../services/api';
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AuthContext = createContext(null);
 
@@ -18,31 +25,36 @@ export const AuthProvider = ({ children }) => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockUntil, setLockUntil] = useState(null);
 
+  const handleLogout = (errorMessage = null) => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
+    if (errorMessage) setError(errorMessage);
+  };
+
   const checkAuthStatus = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
-      
+
       if (!token || !storedUser) {
         handleLogout();
         return;
       }
 
-      // Set token in API headers
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Parse stored user data
       const userData = JSON.parse(storedUser);
 
       try {
         const response = await api.get('/auth/me');
-        if (response.data && response.data.success) {
+        if (response.data?.success) {
           const updatedUser = { ...userData, ...response.data.user };
           setUser(updatedUser);
           setIsAuthenticated(true);
-          // Update stored user data
           localStorage.setItem('user', JSON.stringify(updatedUser));
-          // Reset login attempts on successful auth check
           setLoginAttempts(0);
           setLockUntil(null);
         } else {
@@ -53,7 +65,6 @@ export const AuthProvider = ({ children }) => {
         if (err.response?.status === 401) {
           handleLogout('Session expired. Please login again.');
         } else {
-          // For other errors, keep the user logged in but show error
           setError(err.response?.data?.message || 'Authentication check failed');
         }
       }
@@ -69,78 +80,46 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, [checkAuthStatus]);
 
-  const handleLogout = (errorMessage = null) => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('user');
-    delete api.defaults.headers.common['Authorization'];
-    if (errorMessage) {
-      setError(errorMessage);
-    }
-  };
-
   const login = async (token, userData) => {
     try {
-      // Check if account is locked
       if (lockUntil && new Date(lockUntil) > new Date()) {
-        const timeLeft = Math.ceil((new Date(lockUntil) - new Date()) / 1000 / 60);
+        const timeLeft = Math.ceil((new Date(lockUntil) - new Date()) / 60000);
         throw new Error(`Account is temporarily locked. Please try again in ${timeLeft} minutes.`);
       }
 
       setError(null);
       setLoading(true);
-      
-      if (!userData || !userData.role || !userData.email || !userData.password) {
-        throw new Error('Invalid user data received. Please provide email, password and role.');
+
+      if (!userData?.role || !userData?.email || !userData?.password) {
+        throw new Error('Invalid user data received. Please provide email, password, and role.');
       }
 
-      // Validate email format
       if (!emailRegex.test(userData.email)) {
         throw new Error('Invalid email format');
       }
 
-      // Validate password length
       if (userData.password.length < 8) {
         throw new Error('Password must be at least 8 characters long');
       }
-      
-      const response = await api.post('/auth/login', { email: userData.email, password: userData.password });
+
+      const response = await api.post('/auth/login', {
+        email: userData.email,
+        password: userData.password
+      });
+
       if (!response.data.success) {
         throw new Error(response.data.message || 'Login failed');
       }
 
-      
-
-      if (!userData || !userData.role || !userData.email || !userData.password) {
-        throw new Error('Invalid user data received. Please provide email, password and role.');
-      }
-
-      // Validate email format
-      if (!emailRegex.test(userData.email)) {
-        throw new Error('Invalid email format');
-      }
-
-      // Validate password length
-      if (userData.password.length < 8) {
-        throw new Error('Password must be at least 8 characters long');
-      }
-
-      // Reset login attempts on successful login
       setLoginAttempts(0);
       setLockUntil(null);
 
-      // Store auth data
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', userData.role);
       localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Update auth state
+
       setUser(userData);
       setIsAuthenticated(true);
-      
-      // Update API headers
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       return { success: true, role: userData.role };
@@ -151,22 +130,19 @@ export const AuthProvider = ({ children }) => {
         status: err.response?.status
       });
 
-      // Handle account locking
       if (err.response?.data?.message?.includes('locked')) {
-        setLockUntil(new Date(Date.now() + 60 * 60 * 1000)); // 1 hour lock
+        setLockUntil(new Date(Date.now() + 60 * 60 * 1000));
       } else {
-        // Increment login attempts
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
-        
-        // Lock account after 5 failed attempts
+
         if (newAttempts >= 5) {
-          setLockUntil(new Date(Date.now() + 60 * 60 * 1000)); // 1 hour lock
+          setLockUntil(new Date(Date.now() + 60 * 60 * 1000));
           setError('Too many failed attempts. Account is locked for 1 hour.');
           throw new Error('Too many failed attempts. Account is locked for 1 hour.');
         }
       }
-      
+
       setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
       setIsAuthenticated(false);
       throw err;
