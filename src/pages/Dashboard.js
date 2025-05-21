@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
-import VendorProfileForm from '../components/VendorProfileForm';
-import UserProfileForm from '../components/UserProfileForm';
+import VendorProfileForm from '../components/VendorProfileForm/VendorProfileForm';
+import UserProfileForm from '../components/UserProfileForm/UserProfileForm';
 import {
   Container,
   Box,
