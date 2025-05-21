@@ -1,8 +1,8 @@
 /* Navbar Container */
 .navbar {
-  background: linear-gradient(to right, rgba(255, 75, 43, 0.95), rgba(255, 65, 108, 0.95));
+  background: linear-gradient(to right, rgba(147, 112, 219, 0.95), rgba(183, 132, 167, 0.95));
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   position: fixed;
   top: 0;
@@ -12,17 +12,18 @@
 }
 
 .navbar.scrolled {
-  box-shadow: 0 2px 12px rgba(255, 75, 43, 0.2);
+  box-shadow: 0 2px 12px rgba(147, 112, 219, 0.2);
+  background: linear-gradient(to right, rgba(147, 112, 219, 0.98), rgba(183, 132, 167, 0.98));
 }
 
 /* Main content adjustment */
 .main-content {
-  padding-top: 70px; /* Adjust based on navbar height */
+  padding-top: 70px;
 }
 
 @media (max-width: 600px) {
   .main-content {
-    padding-top: 56px; /* Adjust for mobile navbar height */
+    padding-top: 56px;
   }
 }
 
@@ -101,21 +102,23 @@
 
 /* Avatar and User Menu */
 .MuiAvatar-root {
-  border: 2px solid transparent;
+  border: 2px solid rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
 }
 
 .MuiAvatar-root:hover {
   transform: scale(1.1);
-  border-color: #FF4B2B;
+  border-color: white;
 }
 
 /* Menu Styling */
 .MuiMenu-paper {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 32px rgba(147, 112, 219, 0.15);
   border-radius: 12px;
   overflow: hidden;
   animation: menuFadeIn 0.2s ease;
+  border: 1px solid rgba(147, 112, 219, 0.1);
 }
 
 @keyframes menuFadeIn {
@@ -134,16 +137,18 @@
   transition: all 0.2s ease;
   border-radius: 6px;
   margin: 0.25rem;
+  color: #666;
 }
 
 .MuiMenuItem-root:hover {
-  background: rgba(255, 75, 43, 0.04);
+  background: rgba(147, 112, 219, 0.08);
+  color: rgb(147, 112, 219);
   padding-left: 2rem;
 }
 
 /* Notification Badge */
 .MuiBadge-badge {
-  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  background: linear-gradient(45deg, #9370DB, #B784A7);
   transition: all 0.3s ease;
 }
 
@@ -153,14 +158,13 @@
 
 /* Mobile Menu */
 .MuiDrawer-paper {
-  width: 280px;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
 }
 
 .mobile-menu-header {
   padding: 1.5rem;
-  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  background: linear-gradient(45deg, #9370DB, #B784A7);
   color: white;
 }
 
@@ -173,47 +177,85 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  background: rgba(255, 75, 43, 0.1);
-  color: #FF4B2B;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
 }
 
 .search-button:hover {
-  background: rgba(255, 75, 43, 0.15);
+  background: rgba(255, 255, 255, 0.25);
   transform: rotate(90deg);
 }
 
-/* Toolbar */
-.MuiToolbar-root {
-  height: 70px;
-  transition: height 0.3s ease;
+/* Notification Menu */
+.notification-menu {
+  min-width: 320px;
+  max-width: 400px;
 }
 
-.MuiToolbar-root.scrolled {
-  height: 60px;
+.notification-header {
+  padding: 1rem;
+  background: linear-gradient(45deg, #9370DB, #B784A7);
+  color: white;
 }
 
-/* Dark Mode Support */
+.notification-item {
+  padding: 1rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.notification-item.unread {
+  border-left-color: #9370DB;
+  background: rgba(147, 112, 219, 0.04);
+}
+
+.notification-item:hover {
+  background: rgba(147, 112, 219, 0.08);
+}
+
+/* Profile Menu */
+.profile-menu-header {
+  padding: 1.5rem;
+  background: linear-gradient(45deg, #9370DB, #B784A7);
+  color: white;
+  text-align: center;
+}
+
+.profile-menu-avatar {
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 auto 1rem;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dividers */
+.MuiDivider-root {
+  margin: 0.5rem 0;
+  opacity: 0.6;
+}
+
+/* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .navbar {
-    background: rgba(18, 18, 18, 0.95);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  .MuiMenu-paper {
+    background: rgba(30, 30, 30, 0.98);
   }
 
-  .MuiButton-outlined {
-    border-color: #FF4B2B;
-    color: #FF4B2B;
+  .MuiMenuItem-root {
+    color: #ccc;
   }
 
   .MuiMenuItem-root:hover {
-    background: rgba(255, 75, 43, 0.15);
+    background: rgba(147, 112, 219, 0.15);
+    color: #fff;
   }
 
-  .search-button {
-    background: rgba(255, 75, 43, 0.2);
+  .notification-item.unread {
+    background: rgba(147, 112, 219, 0.15);
   }
 
-  .MuiDrawer-paper {
-    background: rgba(18, 18, 18, 0.98);
+  .notification-item:hover {
+    background: rgba(147, 112, 219, 0.2);
   }
 }
 
@@ -247,53 +289,4 @@
 
 .navbar-content {
   animation: fadeIn 0.3s ease;
-}
-
-/* Notification Menu */
-.notification-menu {
-  min-width: 320px;
-  max-width: 400px;
-}
-
-.notification-header {
-  padding: 1rem;
-  background: linear-gradient(45deg, #FF4B2B, #FF416C);
-  color: white;
-}
-
-.notification-item {
-  padding: 1rem;
-  border-left: 3px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.notification-item.unread {
-  border-left-color: #FF4B2B;
-  background: rgba(255, 75, 43, 0.04);
-}
-
-.notification-item:hover {
-  background: rgba(255, 75, 43, 0.08);
-}
-
-/* Profile Menu */
-.profile-menu-header {
-  padding: 1.5rem;
-  background: linear-gradient(45deg, #FF4B2B, #FF416C);
-  color: white;
-  text-align: center;
-}
-
-.profile-menu-avatar {
-  width: 64px !important;
-  height: 64px !important;
-  margin: 0 auto 1rem;
-  border: 3px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Dividers */
-.MuiDivider-root {
-  margin: 0.5rem 0;
-  opacity: 0.6;
 }
