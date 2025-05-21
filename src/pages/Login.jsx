@@ -26,7 +26,6 @@ import {
   VisibilityOff as VisibilityOffIcon,
   Login as LoginIcon
 } from '@mui/icons-material';
-import Logo from '../components/Logo';
 import './Login.css';
 import api from '../services/api';
 
@@ -98,7 +97,16 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="xs" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+    <Container 
+      maxWidth="xs" 
+      sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center',
+        mt: { xs: 8, sm: 12 }, // Add top margin to prevent navbar overlap
+        mb: { xs: 4, sm: 6 }   // Add bottom margin for better spacing
+      }}
+    >
       <Fade in timeout={800}>
         <Card 
           elevation={8}
@@ -118,9 +126,18 @@ const Login = () => {
                 gap: 2
               }}
             >
-              <Box sx={{ mb: 4, transform: 'scale(1.2)' }}>
-                <Logo />
-              </Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontWeight: 600,
+                  color: theme.palette.primary.main,
+                  letterSpacing: '0.5px',
+                  mb: 2
+                }}
+              >
+                ShaadiSetGo
+              </Typography>
 
               <Typography
                 component="h1"

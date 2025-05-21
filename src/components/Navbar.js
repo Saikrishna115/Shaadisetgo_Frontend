@@ -45,7 +45,6 @@ import {
   Help as HelpIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
-import Logo from './Logo';
 import './Navbar.css';
 
 const HideOnScroll = (props) => {
@@ -310,7 +309,17 @@ const Navbar = () => {
     >
       <Box className="mobile-menu-header">
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Logo variant="small" />
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
+              color: 'white',
+              letterSpacing: '0.5px'
+            }}
+          >
+            ShaadiSetGo
+          </Typography>
           <IconButton 
             color="inherit" 
             onClick={() => setMobileMenuOpen(false)}
@@ -433,11 +442,22 @@ const Navbar = () => {
               </IconButton>
             )}
 
-            <Link
+            <Link 
               to="/"
               className="navbar-brand"
+              style={{ textDecoration: 'none' }}
             >
-              <Logo variant="small" />
+              <Typography
+                variant={isMobile ? "h6" : "h5"}
+                sx={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontWeight: 600,
+                  color: 'white',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                ShaadiSetGo
+              </Typography>
             </Link>
 
             <Box sx={{ flexGrow: 1 }} />

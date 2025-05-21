@@ -4,10 +4,26 @@
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
 }
 
 .navbar.scrolled {
   box-shadow: 0 2px 12px rgba(255, 75, 43, 0.2);
+}
+
+/* Main content adjustment */
+.main-content {
+  padding-top: 70px; /* Adjust based on navbar height */
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding-top: 56px; /* Adjust for mobile navbar height */
+  }
 }
 
 /* Logo styles */
