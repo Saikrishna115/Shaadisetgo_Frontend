@@ -82,15 +82,20 @@ const Login = () => {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
         // Redirect based on user role
-        switch (response.data.user.role) {
+        const userRole = response.data.user.role;
+        switch (userRole) {
           case 'vendor':
-            navigate('/vendor/dashboard');
+            navigate('/vendor/dashboard', { replace: true });
             break;
           case 'admin':
-            navigate('/admin');
+            navigate('/admin', { replace: true });
+            break;
+          case 'customer':
+            navigate('/dashboard', { replace: true });
             break;
           default:
-            navigate('/dashboard');
+            console.error('Unknown user role:', userRole);
+            navigate('/', { replace: true });
         }
       }
     } catch (err) {

@@ -6,6 +6,7 @@ const authService = {
       const response = await api.post('/api/auth/login', { email, password });
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userRole', response.data.user.role);
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
       return response.data;
@@ -27,12 +28,14 @@ const authService = {
     try {
       await api.post('/api/auth/logout');
       localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
       localStorage.removeItem('user');
       window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
       // Still clear local storage and redirect even if the API call fails
       localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
