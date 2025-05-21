@@ -8,7 +8,8 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: true // Enable sending cookies with requests
+  withCredentials: true, // Enable sending cookies with requests
+  timeout: 10000 // 10 second timeout
 });
 
 // Request interceptor for handling requests
@@ -45,8 +46,15 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Handle network errors
+    if (!error.response) {
+      return Promise.reject({
+        message: 'Network error. Please check your internet connection.'
+      });
+    }
+
     // If the error is 401 (Unauthorized)
-    if (error.response?.status === 401) {
+    if (error.response.status === 401) {
       // Only clear auth data if we're not already on the login page
       if (!window.location.pathname.includes('/login')) {
         localStorage.removeItem('token');
@@ -59,7 +67,7 @@ api.interceptors.response.use(
     // Return the error with the backend's error message if available
     return Promise.reject({
       ...error,
-      message: error.response?.data?.message || error.message
+      message: error.response?.data?.message || error.message || 'An unexpected error occurred'
     });
   }
 );
