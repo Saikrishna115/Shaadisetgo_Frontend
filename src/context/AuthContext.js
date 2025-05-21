@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid user data received');
       }
       
+      const response = await api.post('/auth/login', { email: userData.email, password: userData.password });
       if (!response.data.success) {
         throw new Error(response.data.message || 'Login failed');
       }
