@@ -85,7 +85,9 @@ const Register = () => {
       navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.message || err.response?.data?.fields?.join(', ') || 'Registration failed');
+      const errorMessage = err.response?.data?.message || 'Registration failed';
+      const errorFields = err.response?.data?.fields || [];
+      setError(errorFields.length > 0 ? `${errorMessage}: ${errorFields.join(', ')}` : errorMessage);
     } finally {
       setLoading(false);
     }
@@ -120,8 +122,8 @@ const Register = () => {
           <TextField
             fullWidth
             label="Name"
-            name="name"
-            value={formData.name}
+            name="fullName"
+            value={formData.fullName}
             onChange={handleChange}
             margin="normal"
             required
