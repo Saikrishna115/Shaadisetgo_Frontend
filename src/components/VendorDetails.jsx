@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api/config';
 
 const VendorDetails = ({ vendorId }) => {
   const [vendor, setVendor] = useState(null);
@@ -8,7 +8,7 @@ const VendorDetails = ({ vendorId }) => {
   useEffect(() => {
     const fetchVendorDetails = async () => {
       try {
-        const response = await axios.get(`https://shaadisetgo-backend.onrender.com/api/vendors/profile`);
+        const response = await api.get('/vendors/profile');
         console.log('Vendor details:', response.data);
         setVendor(response.data);
       } catch (error) {
@@ -18,7 +18,7 @@ const VendorDetails = ({ vendorId }) => {
 
     const fetchVendorBookings = async () => {
       try {
-        const response = await axios.get(`https://shaadisetgo-backend.onrender.com/api/bookings/vendor`);
+        const response = await api.get('/bookings/vendor');
         console.log('Vendor bookings:', response.data);
         setBookings(response.data);
       } catch (error) {

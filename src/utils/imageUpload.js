@@ -3,6 +3,14 @@ import axios from 'axios';
 const IMGBB_API_KEY = process.env.REACT_APP_IMGBB_API_KEY;
 const IMGBB_UPLOAD_URL = 'https://api.imgbb.com/1/upload';
 
+// Create a separate axios instance for external API calls
+const externalApi = axios.create({
+  timeout: 30000, // 30 second timeout for image uploads
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
 if (!IMGBB_API_KEY) {
   console.error('IMGBB_API_KEY is not defined in environment variables');
 }
@@ -22,7 +30,7 @@ export const uploadImage = async (file, retries = 3) => {
       formData.append('image', file);
 
       // Make the request to ImgBB
-      const response = await axios.post(IMGBB_UPLOAD_URL, formData, {
+      const response = await externalApi.post(IMGBB_UPLOAD_URL, formData, {
         params: {
           key: IMGBB_API_KEY
         },
@@ -102,7 +110,7 @@ export const compressImage = async (file, maxSizeMB = 5) => {
 
 export const deleteImage = async (deleteUrl) => {
   try {
-    await axios.delete(deleteUrl);
+    await externalApi.delete(deleteUrl);
     return { success: true };
   } catch (error) {
     console.error('Error deleting image:', error);
