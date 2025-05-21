@@ -6,6 +6,12 @@ class AuthService {
       const response = await api.post('/api/auth/login', credentials);
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          if (response.data.user.role) {
+            localStorage.setItem('userRole', response.data.user.role);
+          }
+        }
       }
       return response.data;
     } catch (error) {
@@ -40,6 +46,12 @@ class AuthService {
 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          if (response.data.user.role) {
+            localStorage.setItem('userRole', response.data.user.role);
+          }
+        }
       }
       return response.data;
     } catch (error) {
@@ -51,10 +63,10 @@ class AuthService {
   async logout() {
     try {
       await api.post('/api/auth/logout');
+    } finally {
       localStorage.removeItem('token');
-    } catch (error) {
-      localStorage.removeItem('token');
-      throw this.handleError(error);
+      localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
     }
   }
 
@@ -72,6 +84,12 @@ class AuthService {
       const response = await api.post('/api/auth/refresh-token');
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          if (response.data.user.role) {
+            localStorage.setItem('userRole', response.data.user.role);
+          }
+        }
       }
       return response.data;
     } catch (error) {
@@ -90,7 +108,12 @@ class AuthService {
 
   handleError(error) {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
+      // Don't remove token here as it's handled by the API interceptor
+      return {
+        message: error.response?.data?.message || 'Authentication failed',
+        status: error.response?.status,
+        data: error.response?.data
+      };
     }
     return {
       message: error.response?.data?.message || error.message || 'An error occurred',

@@ -3,13 +3,27 @@ import axios from 'axios';
 const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
 
 const api = axios.create({
-  baseURL: baseURL,  // Base URL without /api since it's included in the endpoints
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
-  // Enable sending cookies with requests
   withCredentials: true,
 });
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request interceptor for adding auth token
 api.interceptors.request.use(
@@ -19,7 +33,6 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Ensure URL starts with forward slash
     if (!config.url.startsWith('/')) {
       config.url = '/' + config.url;
     }
@@ -37,19 +50,42 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        // Try to refresh the token
-        await api.post('/api/auth/refresh-token');
-        // Retry the original request
-        return api(originalRequest);
+        const response = await api.post('/api/auth/refresh-token');
+        const { token } = response.data;
+        
+        if (token) {
+          localStorage.setItem('token', token);
+          api.defaults.headers.common.Authorization = `Bearer ${token}`;
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          
+          processQueue(null, token);
+          return api(originalRequest);
+        }
       } catch (refreshError) {
-        // If refresh token is also expired, redirect to login
+        processQueue(refreshError, null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
         window.location.href = '/login';
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
