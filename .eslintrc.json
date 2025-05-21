@@ -1,7 +1,13 @@
 {
   "extends": [
     "react-app",
-    "react-app/jest"
+    "react-app/jest",
+    "plugin:react-hooks/recommended"
+  ],
+  "plugins": [
+    "react",
+    "react-hooks",
+    "jsx-a11y"
   ],
   "rules": {
     "no-unused-vars": "warn",
@@ -10,7 +16,11 @@
     "no-console": "warn",
     "no-debugger": "warn",
     "no-var": "error",
-    "prefer-const": "error"
+    "prefer-const": "error",
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-has-content": "error",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn"
   },
   "env": {
     "browser": true,
