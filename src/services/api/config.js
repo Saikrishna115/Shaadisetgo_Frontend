@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com/api';
+const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
 
 const api = axios.create({
   baseURL: baseURL,
@@ -33,9 +33,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Remove double slashes in URL
-    if (config.url.startsWith('/') && config.baseURL.endsWith('/')) {
-      config.url = config.url.substring(1);
+    // Ensure URL starts with /api
+    if (!config.url.startsWith('/api/')) {
+      config.url = '/api' + (config.url.startsWith('/') ? config.url : '/' + config.url);
     }
     
     return config;
@@ -54,7 +54,7 @@ api.interceptors.response.use(
     // If the error is 401 and we haven't tried refreshing yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't try to refresh if this is a login request
-      if (originalRequest.url.includes('/auth/login')) {
+      if (originalRequest.url.includes('/api/auth/login')) {
         return Promise.reject(error);
       }
 
@@ -74,7 +74,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post('/auth/refresh-token');
+        const response = await api.post('/api/auth/refresh-token');
         const { token } = response.data;
         
         if (token) {

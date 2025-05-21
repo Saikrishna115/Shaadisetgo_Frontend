@@ -11,8 +11,8 @@ const authService = {
         throw new Error('Email and password are required');
       }
 
-      // Make the login request
-      const response = await api.post('/auth/login', { email, password });
+      // Make the login request with correct endpoint
+      const response = await api.post('/api/auth/login', { email, password });
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -33,7 +33,7 @@ const authService = {
 
   register: async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         if (response.data.user) {
@@ -50,7 +50,7 @@ const authService = {
 
   logout: async () => {
     try {
-      await api.post('/auth/logout');
+      await api.post('/api/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -64,7 +64,7 @@ const authService = {
 
   getCurrentUser: async () => {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get('/api/auth/me');
       // Update local storage with latest user data
       if (response.data.user) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
