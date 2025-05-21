@@ -1,14 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Grid,
-  Typography,
-  Paper,
-  Container,
-  Alert,
-} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const UserProfileForm = ({ initialData, onSubmit }) => {
@@ -56,83 +46,99 @@ const UserProfileForm = ({ initialData, onSubmit }) => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Profile Information
-        </Typography>
+    <div className="container mt-4">
+      <div className="rounded shadow p-4">
+        <h1 className="mb-4">Profile Information</h1>
 
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {error && <div className="message message-error mb-3">{error}</div>}
+        {success && <div className="message message-success mb-3">{success}</div>}
 
-        <Box component="form" onSubmit={handleSubmit} noValidate>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                label="Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Event Preferences"
-                name="preferences"
-                multiline
-                rows={4}
-                value={formData.preferences}
-                onChange={handleChange}
-                placeholder="Enter your event preferences and requirements"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                size="large"
-                fullWidth
-              >
-                Save Profile
-              </Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-    </Container>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="d-flex flex-wrap">
+            <div className="w-50 p-2">
+              <div className="form-group">
+                <label htmlFor="name">Name</label>
+                <input
+                  id="name"
+                  type="text"
+                  className="form-control"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="w-50 p-2">
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  className="form-control"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="w-50 p-2">
+              <div className="form-group">
+                <label htmlFor="phone">Phone</label>
+                <input
+                  id="phone"
+                  type="tel"
+                  className="form-control"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="w-50 p-2">
+              <div className="form-group">
+                <label htmlFor="location">Location</label>
+                <input
+                  id="location"
+                  type="text"
+                  className="form-control"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="w-100 p-2">
+              <div className="form-group">
+                <label htmlFor="preferences">Preferences</label>
+                <textarea
+                  id="preferences"
+                  className="form-control"
+                  name="preferences"
+                  value={formData.preferences}
+                  onChange={handleChange}
+                  rows="3"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between mt-4">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>
+              Back
+            </button>
+            <button type="submit" className="btn btn-primary">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

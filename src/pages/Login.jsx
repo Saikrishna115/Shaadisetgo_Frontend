@@ -12,6 +12,7 @@ import {
   Paper,
   LinearProgress
 } from '@mui/material';
+import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -89,100 +90,85 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8, mb: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" align="center" gutterBottom>
-            Login
-          </Typography>
+    <div className="login-container d-flex">
+      <div className="login-image-section d-flex align-items-center justify-content-center"></div>
+      
+      <div className="login-form-wrapper d-flex flex-column justify-content-center">
+        <Typography variant="h4" className="text-center mb-4">
+          Login
+        </Typography>
 
-          {(error || authError) && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error || authError}
-            </Alert>
-          )}
+        {(error || authError) && (
+          <div className="message message-error mb-3">
+            {error || authError}
+          </div>
+        )}
 
-          {loginAttempts > 0 && loginAttempts < 5 && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
-              Failed login attempts: {loginAttempts}/5
-              {loginAttempts === 4 && ' - Next failed attempt will lock your account for 1 hour'}
-            </Alert>
-          )}
+        {loginAttempts > 0 && loginAttempts < 5 && (
+          <div className="message message-warning mb-3">
+            Failed login attempts: {loginAttempts}/5
+            {loginAttempts === 4 && ' - Next failed attempt will lock your account for 1 hour'}
+          </div>
+        )}
 
-          {lockUntil && (
-            <Box sx={{ mb: 2 }}>
-              <Alert severity="error">
-                {getRemainingLockTime()}
-              </Alert>
-              <LinearProgress sx={{ mt: 1 }} />
-            </Box>
-          )}
+        {lockUntil && (
+          <Box className="mb-3">
+            <div className="message message-error">
+              {getRemainingLockTime()}
+            </div>
+            <LinearProgress className="mt-2" />
+          </Box>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email"
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
               type="email"
+              className="form-control"
               value={email}
               onChange={(e) => setEmail(e.target.value.toLowerCase())}
-              margin="normal"
               required
               autoComplete="username"
               disabled={isSubmitting || authLoading || !!lockUntil}
-              error={!!error && !email}
-              helperText={!!error && !email ? 'Email is required' : ''}
-              InputProps={{
-                autoCapitalize: 'none'
-              }}
+              autoCapitalize="none"
             />
-            <TextField
-              fullWidth
-              label="Password"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
               type="password"
+              className="form-control"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              margin="normal"
               required
               autoComplete="current-password"
               disabled={isSubmitting || authLoading || !!lockUntil}
-              error={!!error && !password}
-              helperText={!!error && !password ? 'Password is required' : ''}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={isSubmitting || authLoading || !!lockUntil}
-            >
-              {(isSubmitting || authLoading) ? <CircularProgress size={24} /> : 'Login'}
-            </Button>
+          </div>
 
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Button
-                component={Link}
-                to="/forgot-password"
-                color="primary"
-                disabled={isSubmitting || authLoading}
-                sx={{ mb: 1 }}
-              >
-                Forgot Password?
-              </Button>
-              <br />
-              <Button
-                component={Link}
-                to="/register"
-                color="primary"
-                disabled={isSubmitting || authLoading}
-              >
-                Don't have an account? Register
-              </Button>
-            </Box>
-          </form>
-        </Paper>
-      </Box>
-    </Container>
+          <button
+            type="submit"
+            className="btn btn-primary w-100 mt-4 mb-3"
+            disabled={isSubmitting || authLoading || !!lockUntil}
+          >
+            {(isSubmitting || authLoading) ? <CircularProgress size={24} /> : 'Login'}
+          </button>
+
+          <div className="text-center mt-3">
+            <Link to="/forgot-password" className="d-block mb-2">
+              Forgot Password?
+            </Link>
+            <Link to="/register">
+              Don't have an account? Register
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

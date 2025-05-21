@@ -1,0 +1,46 @@
+:root {
+  /* Primary Colors */
+  --primary-color: #FF4B91;
+  --secondary-color: #FF9EAA;
+  --accent-color: #FFD0D0;
+  --background-color: #FFF5E4;
+  
+  /* Text Colors */
+  --text-color: #333333;
+  --heading-color: #222222;
+  
+  /* State Colors */
+  --error-color: #dc3545;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  
+  /* Form Colors */
+  --input-border: #ddd;
+  --input-focus-shadow: rgba(255, 75, 145, 0.2);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  
+  /* Container Widths */
+  --container-max-width: 1200px;
+  
+  /* Transitions */
+  --transition-speed: 0.3s;
+  
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+} 
