@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
+const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com/api';
 
 const api = axios.create({
   baseURL: baseURL,
@@ -33,8 +33,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    if (!config.url.startsWith('/')) {
-      config.url = '/' + config.url;
+    // Remove double slashes in URL
+    if (config.url.startsWith('/') && config.baseURL.endsWith('/')) {
+      config.url = config.url.substring(1);
     }
     
     return config;
@@ -44,29 +45,36 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for handling common errors
+// Response interceptor for handling token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
+    // If the error is 401 and we haven't tried refreshing yet
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't try to refresh if this is a login request
+      if (originalRequest.url.includes('/auth/login')) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(token => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
-          })
-          .catch(err => Promise.reject(err));
+        try {
+          const token = await new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          });
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        } catch (err) {
+          return Promise.reject(err);
+        }
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const response = await api.post('/api/auth/refresh-token');
+        const response = await api.post('/auth/refresh-token');
         const { token } = response.data;
         
         if (token) {
@@ -76,13 +84,23 @@ api.interceptors.response.use(
           
           processQueue(null, token);
           return api(originalRequest);
+        } else {
+          processQueue(new Error('No token received'), null);
+          throw new Error('No token received');
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
+        
+        // Clear auth data if refresh token is invalid
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
-        window.location.href = '/login';
+        
+        // Only redirect to login if we're not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
