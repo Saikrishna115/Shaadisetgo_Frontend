@@ -69,7 +69,7 @@ const ResetPassword = () => {
     setSuccess('');
 
     try {
-      const response = await api.post('/auth/reset-password', {
+      const response = await api.post('/users/reset-password', {
         token,
         password
       });

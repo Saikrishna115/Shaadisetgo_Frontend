@@ -165,7 +165,7 @@ const Register = () => {
         role: formData.role
       };
 
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('/users/register', userData);
 
       if (response.data && response.data.data.token) {
         localStorage.setItem('token', response.data.data.token);
