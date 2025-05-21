@@ -165,12 +165,12 @@ const Register = () => {
         role: formData.role
       };
 
-      const response = await api.post('/users/register', userData);
+      const response = await api.post('/auth/register', userData);
 
-      if (response.data && response.data.data.token) {
-        localStorage.setItem('token', response.data.data.token);
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
         localStorage.setItem('userRole', formData.role);
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.token}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
         if (formData.role === 'vendor') {
           const vendorData = {

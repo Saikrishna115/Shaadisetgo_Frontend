@@ -3,7 +3,7 @@ import axios from 'axios';
 const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
 
 const api = axios.create({
-  baseURL: `${baseURL}/api`,
+  baseURL: baseURL,  // Remove /api prefix since it's already in the endpoints
   headers: {
     'Content-Type': 'application/json',
   },
