@@ -9,12 +9,15 @@ export const AuthProvider = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Check authentication status on mount
-    dispatch(getCurrentUser());
+    // Only check authentication if there's a token
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(getCurrentUser());
+    }
 
     // Set up token refresh interval if authenticated
     let refreshInterval;
-    if (isAuthenticated) {
+    if (isAuthenticated && token) {
       refreshInterval = setInterval(() => {
         dispatch(refreshToken());
       }, REFRESH_INTERVAL);

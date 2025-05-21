@@ -3,7 +3,7 @@ import axios from 'axios';
 const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
 
 const api = axios.create({
-  baseURL: baseURL,  // Remove /api prefix since it's already in the endpoints
+  baseURL: baseURL,  // Base URL without /api since it's included in the endpoints
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,7 +43,7 @@ api.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        await api.post('/auth/refresh-token');
+        await api.post('/api/auth/refresh-token');
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {

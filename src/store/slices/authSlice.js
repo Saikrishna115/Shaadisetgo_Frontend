@@ -48,6 +48,11 @@ export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
+      // Check if token exists
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue({ message: 'No authentication token' });
+      }
       const data = await authService.getCurrentUser();
       return data;
     } catch (error) {
@@ -60,6 +65,10 @@ export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
   async (_, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue({ message: 'No authentication token' });
+      }
       const data = await authService.refreshToken();
       return data.user;
     } catch (error) {
@@ -118,22 +127,37 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       })
       // Get Current User
+      .addCase(getCurrentUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
+        state.error = null;
       })
-      .addCase(getCurrentUser.rejected, (state) => {
+      .addCase(getCurrentUser.rejected, (state, action) => {
+        state.loading = false;
         state.user = null;
         state.isAuthenticated = false;
+        // Only set error if it's not a "No authentication token" message
+        if (action.payload?.message !== 'No authentication token') {
+          state.error = action.payload?.message || 'Failed to get user data';
+        }
       })
       // Refresh Token
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.user = action.payload;
         state.isAuthenticated = true;
       })
-      .addCase(refreshToken.rejected, (state) => {
+      .addCase(refreshToken.rejected, (state, action) => {
         state.user = null;
         state.isAuthenticated = false;
+        // Only set error if it's not a "No authentication token" message
+        if (action.payload?.message !== 'No authentication token') {
+          state.error = action.payload?.message || 'Failed to refresh token';
+        }
       });
   },
 });

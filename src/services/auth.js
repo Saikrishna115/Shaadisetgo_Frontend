@@ -3,7 +3,7 @@ import api from './api';
 const authService = {
   login: async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/api/auth/login', { email, password });
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -16,7 +16,7 @@ const authService = {
 
   register: async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'An error occurred during registration' };
@@ -25,7 +25,7 @@ const authService = {
 
   logout: async () => {
     try {
-      await api.post('/auth/logout');
+      await api.post('/api/auth/logout');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -40,7 +40,7 @@ const authService = {
 
   getCurrentUser: async () => {
     try {
-      const response = await api.get('/auth/user');
+      const response = await api.get('/api/auth/me');
       return response.data;
     } catch (error) {
       // If the API call fails, fall back to local storage

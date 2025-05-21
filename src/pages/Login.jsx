@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import Logo from '../components/Logo';
 import './Login.css';
+import api from '../services/api';
 
 const Login = () => {
   const theme = useTheme();
@@ -38,6 +39,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setError] = useState('');
 
   // Redirect if already logged in
   useEffect(() => {
@@ -73,9 +75,27 @@ const Login = () => {
     
     setIsSubmitting(true);
     try {
-      await dispatch(login({ email, password })).unwrap();
+      const response = await api.post('/api/auth/login', { email, password });
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userRole', response.data.user.role);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Redirect based on user role
+        switch (response.data.user.role) {
+          case 'vendor':
+            navigate('/vendor/dashboard');
+            break;
+          case 'admin':
+            navigate('/admin');
+            break;
+          default:
+            navigate('/dashboard');
+        }
+      }
     } catch (err) {
       console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -127,7 +147,7 @@ const Login = () => {
                 Sign in to continue to your account
               </Typography>
 
-              {error && (
+              {errorMessage && (
                 <Fade in>
                   <Alert 
                     severity="error" 
@@ -137,7 +157,7 @@ const Login = () => {
                       '& .MuiAlert-message': { width: '100%' }
                     }}
                   >
-                    {error}
+                    {errorMessage}
                   </Alert>
                 </Fade>
               )}
