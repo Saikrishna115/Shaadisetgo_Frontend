@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, clearError } from '../store/slices/authSlice';
 import {
   Container,
   Box,
@@ -16,15 +17,15 @@ import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, user, loading: authLoading, error: authError, loginAttempts, lockUntil } = useAuth();
+  const dispatch = useDispatch();
+  const { user, loading, error, isAuthenticated } = useSelector((state) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user && !authLoading) {
+    if (isAuthenticated && user) {
       // Ensure proper role-based navigation
       switch (user.role) {
         case 'vendor':
@@ -41,134 +42,100 @@ const Login = () => {
           navigate('/');
       }
     }
-  }, [user, authLoading, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
-  // Calculate remaining lock time
-  const getRemainingLockTime = () => {
-    if (!lockUntil) return null;
-    const now = new Date();
-    const lockTime = new Date(lockUntil);
-    if (lockTime <= now) return null;
-    
-    const minutes = Math.ceil((lockTime - now) / 1000 / 60);
-    return `Account is locked. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`;
-  };
+  // Clear error when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting || authLoading) return;
+    if (isSubmitting || loading) return;
     
-    // Check if account is locked
-    const lockMessage = getRemainingLockTime();
-    if (lockMessage) {
-      setError(lockMessage);
-      return;
-    }
-
-    setError('');
     setIsSubmitting(true);
-
     try {
-      // Basic validation
-      if (!email || !password) {
-        throw new Error('Please fill in all fields');
-      }
-
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      await login(email, password);
-      // Navigation is handled by useEffect
+      await dispatch(login({ email, password })).unwrap();
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials and try again.');
+      console.error('Login error:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="login-container d-flex">
-      <div className="login-image-section d-flex align-items-center justify-content-center"></div>
-      
-      <div className="login-form-wrapper d-flex flex-column justify-content-center">
-        <Typography variant="h4" className="text-center mb-4">
-          Login
-        </Typography>
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
+          <Typography component="h1" variant="h5" align="center" gutterBottom>
+            Sign In
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-        {(error || authError) && (
-          <div className="message message-error mb-3">
-            {error || authError}
-          </div>
-        )}
-
-        {loginAttempts > 0 && loginAttempts < 5 && (
-          <div className="message message-warning mb-3">
-            Failed login attempts: {loginAttempts}/5
-            {loginAttempts === 4 && ' - Next failed attempt will lock your account for 1 hour'}
-          </div>
-        )}
-
-        {lockUntil && (
-          <Box className="mb-3">
-            <div className="message message-error">
-              {getRemainingLockTime()}
-            </div>
-            <LinearProgress className="mt-2" />
-          </Box>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className="form-control"
-              value={email}
-              onChange={(e) => setEmail(e.target.value.toLowerCase())}
+          <form onSubmit={handleSubmit}>
+            <TextField
+              margin="normal"
               required
-              autoComplete="username"
-              disabled={isSubmitting || authLoading || !!lockUntil}
-              autoCapitalize="none"
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
               type="password"
-              className="form-control"
+              id="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              disabled={isSubmitting || authLoading || !!lockUntil}
+              disabled={loading}
             />
-          </div>
+            
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading || isSubmitting}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Sign In'}
+            </Button>
 
-          <button
-            type="submit"
-            className="btn btn-primary w-100 mt-4 mb-3"
-            disabled={isSubmitting || authLoading || !!lockUntil}
-          >
-            {(isSubmitting || authLoading) ? <CircularProgress size={24} /> : 'Login'}
-          </button>
-
-          <div className="text-center mt-3">
-            <Link to="/forgot-password" className="d-block mb-2">
-              Forgot Password?
-            </Link>
-            <Link to="/register">
-              Don't have an account? Register
-            </Link>
-          </div>
-        </form>
-      </div>
-    </div>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+              <Link to="/forgot-password" style={{ textDecoration: 'none' }}>
+                Forgot password?
+              </Link>
+              <Link to="/register" style={{ textDecoration: 'none' }}>
+                Don't have an account? Sign Up
+              </Link>
+            </Box>
+          </form>
+        </Paper>
+      </Box>
+    </Container>
   );
 };
 

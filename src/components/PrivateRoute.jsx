@@ -1,10 +1,10 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
 import { CircularProgress, Container } from '@mui/material';
 
 const PrivateRoute = ({ children, roles }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated } = useSelector((state) => state.auth);
   const location = useLocation();
 
   if (loading) {

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { register } from '../store/slices/authSlice';
 import {
   Container,
   Paper,
@@ -14,12 +16,10 @@ import {
   FormControl,
   InputLabel
 } from '@mui/material';
-import { useAuth } from '../context/AuthContext';
-import api from '../utils/axios';
 import './Register.css';
 
 const Register = () => {
-  const { login } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [role, setRole] = useState('customer');
   const [formData, setFormData] = useState({
@@ -52,213 +52,210 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setError('');
     setLoading(true);
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const payload = {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      const userData = {
+        ...formData,
         role
       };
 
-      if (role === 'vendor') {
-        payload.businessName = formData.businessName;
-        payload.ownerName = formData.ownerName;
-        payload.serviceCategory = formData.serviceCategory;
-        payload.address = formData.address;
-        payload.city = formData.city;
-        payload.state = formData.state;
-        payload.zipCode = formData.zipCode;
-      }
-
-      const response = await api.post('/auth/register', payload);
-      login(response.data.token, response.data.user);
-      navigate('/');
+      await dispatch(register(userData)).unwrap();
+      navigate('/login', { state: { message: 'Registration successful! Please login.' } });
     } catch (err) {
-      console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.message || 'Registration failed';
-      const errorFields = err.response?.data?.fields || [];
-      setError(errorFields.length > 0 ? `${errorMessage}: ${errorFields.join(', ')}` : errorMessage);
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Register
-        </Typography>
+    <Container component="main" maxWidth="md">
+      <Box sx={{ mt: 8, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography component="h1" variant="h4" align="center" gutterBottom>
+            Register
+          </Typography>
 
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel>Role</InputLabel>
-          <Select
-            value={role}
-            label="Role"
-            onChange={handleRoleChange}
-          >
-            <MenuItem value="customer">Customer</MenuItem>
-            <MenuItem value="vendor">Vendor</MenuItem>
-          </Select>
-        </FormControl>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+          <form onSubmit={handleSubmit}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="role-label">Register as</InputLabel>
+              <Select
+                labelId="role-label"
+                id="role"
+                value={role}
+                label="Register as"
+                onChange={handleRoleChange}
+                disabled={loading}
+              >
+                <MenuItem value="customer">Customer</MenuItem>
+                <MenuItem value="vendor">Vendor</MenuItem>
+              </Select>
+            </FormControl>
 
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Name"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Full Name"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              disabled={loading}
+            />
 
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={loading}
+            />
 
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={loading}
+            />
 
-          <TextField
-            fullWidth
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              disabled={loading}
+            />
 
-          <TextField
-            fullWidth
-            label="Phone Number"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            margin="normal"
-            required
-          />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={loading}
+            />
 
-          {role === 'vendor' && (
-            <>
+            {role === 'vendor' && (
+              <>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Business Name"
+                  name="businessName"
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Owner Name"
+                  name="ownerName"
+                  value={formData.ownerName}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Service Category"
+                  name="serviceCategory"
+                  value={formData.serviceCategory}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </>
+            )}
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              disabled={loading}
+            />
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <TextField
-                fullWidth
-                label="Business Name"
-                name="businessName"
-                value={formData.businessName}
-                onChange={handleChange}
-                margin="normal"
                 required
-              />
-
-              <TextField
-                fullWidth
-                label="Owner Name"
-                name="ownerName"
-                value={formData.ownerName}
-                onChange={handleChange}
-                margin="normal"
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Service Category"
-                name="serviceCategory"
-                value={formData.serviceCategory}
-                onChange={handleChange}
-                margin="normal"
-                required
-              />
-
-              <TextField
-                fullWidth
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                margin="normal"
-                required
-              />
-
-              <TextField
                 fullWidth
                 label="City"
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
-                margin="normal"
-                required
+                disabled={loading}
               />
 
               <TextField
+                required
                 fullWidth
                 label="State"
                 name="state"
                 value={formData.state}
                 onChange={handleChange}
-                margin="normal"
-                required
+                disabled={loading}
               />
 
               <TextField
+                required
                 fullWidth
-                label="Zip Code"
+                label="ZIP Code"
                 name="zipCode"
                 value={formData.zipCode}
                 onChange={handleChange}
-                margin="normal"
-                required
+                disabled={loading}
               />
-            </>
-          )}
+            </Box>
 
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            size="large"
-            disabled={loading}
-            sx={{ mt: 3 }}
-          >
-            {loading ? <CircularProgress size={24} /> : 'Register'}
-          </Button>
-        </Box>
-      </Paper>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Register'}
+            </Button>
+          </form>
+        </Paper>
+      </Box>
     </Container>
   );
 };
