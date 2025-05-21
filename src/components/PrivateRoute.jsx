@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { CircularProgress, Container } from '@mui/material';
+import { getCurrentUser } from '../store/slices/authSlice';
 
 const PrivateRoute = ({ children, roles }) => {
   const { user, loading, isAuthenticated } = useSelector((state) => state.auth);
   const location = useLocation();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!user && !loading && localStorage.getItem('token')) {
+      dispatch(getCurrentUser());
+    }
+  }, [dispatch, user, loading]);
 
   if (loading) {
     return (

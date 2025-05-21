@@ -68,15 +68,36 @@ const Navbar = () => {
 
   const handleDashboard = () => {
     handleClose();
-    switch (user?.role) {
+    if (!user) return;
+
+    switch (user.role) {
       case 'vendor':
-        navigate('/vendor/dashboard');
+        navigate('/vendor/dashboard', { replace: true });
         break;
       case 'admin':
-        navigate('/admin');
+        navigate('/admin', { replace: true });
+        break;
+      case 'customer':
+        navigate('/dashboard', { replace: true });
         break;
       default:
-        navigate('/dashboard');
+        console.error('Unknown user role:', user.role);
+        navigate('/', { replace: true });
+    }
+  };
+
+  const getDashboardPath = () => {
+    if (!user) return '/dashboard';
+    
+    switch (user.role) {
+      case 'vendor':
+        return '/vendor/dashboard';
+      case 'admin':
+        return '/admin';
+      case 'customer':
+        return '/dashboard';
+      default:
+        return '/';
     }
   };
 
@@ -193,10 +214,10 @@ const Navbar = () => {
                 color="inherit"
                 startIcon={<DashboardIcon />}
                 component={Link}
-                to="/dashboard"
+                to={getDashboardPath()}
                 sx={{
-                  fontWeight: isActive('/dashboard') ? 700 : 400,
-                  borderBottom: isActive('/dashboard') ? 2 : 0,
+                  fontWeight: isActive(getDashboardPath()) ? 700 : 400,
+                  borderBottom: isActive(getDashboardPath()) ? 2 : 0,
                   borderRadius: 0,
                 }}
               >

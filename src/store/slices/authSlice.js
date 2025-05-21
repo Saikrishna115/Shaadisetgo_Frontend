@@ -1,11 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../../services/api/authService';
 
+// Initialize state from localStorage
+const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+const token = localStorage.getItem('token');
+
 const initialState = {
-  user: null,
+  user,
   loading: false,
   error: null,
-  isAuthenticated: false,
+  isAuthenticated: !!token,
 };
 
 export const register = createAsyncThunk(
@@ -25,7 +29,11 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const data = await authService.login(credentials);
-      return data.user;
+      // Store auth data in localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userRole', data.user.role);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -37,6 +45,10 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('user');
       return null;
     } catch (error) {
       return rejectWithValue(error);
@@ -48,7 +60,6 @@ export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
-      // Check if token exists
       const token = localStorage.getItem('token');
       if (!token) {
         return rejectWithValue({ message: 'No authentication token' });
@@ -140,10 +151,11 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.loading = false;
-        state.user = null;
-        state.isAuthenticated = false;
-        // Only set error if it's not a "No authentication token" message
-        if (action.payload?.message !== 'No authentication token') {
+        if (action.payload?.message === 'No authentication token') {
+          state.user = null;
+          state.isAuthenticated = false;
+          state.error = null;
+        } else {
           state.error = action.payload?.message || 'Failed to get user data';
         }
       })
