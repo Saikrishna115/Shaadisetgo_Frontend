@@ -1,9 +1,19 @@
 import api from './api/config';
 
 const authService = {
-  login: async (email, password) => {
+  login: async (credentials) => {
     try {
+      // Destructure email and password from credentials
+      const { email, password } = credentials;
+      
+      // Validate credentials
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
+      // Make the login request
       const response = await api.post('/auth/login', { email, password });
+      
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         if (response.data.user) {
@@ -17,7 +27,7 @@ const authService = {
       if (error.response?.status === 401) {
         throw { message: 'Invalid email or password' };
       }
-      throw error.response?.data || { message: 'An error occurred during login' };
+      throw error.response?.data || { message: error.message || 'An error occurred during login' };
     }
   },
 

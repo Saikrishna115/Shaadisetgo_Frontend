@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import authService from '../../services/api/authService';
+import authService from '../../services/auth';
 
 // Initialize state from localStorage with proper role handling
 const getUserFromStorage = () => {
@@ -31,9 +31,9 @@ export const register = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const data = await authService.register(userData);
-      return data.user;
+      return data;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.response?.data || { message: error.message || 'Registration failed' });
     }
   }
 );
@@ -42,17 +42,21 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const data = await authService.login(credentials);
-      if (!data.user || !data.user.role) {
-        throw new Error('Invalid user data received');
+      // Validate credentials
+      if (!credentials?.email || !credentials?.password) {
+        return rejectWithValue({ message: 'Email and password are required' });
       }
-      // Store auth data in localStorage
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userRole', data.user.role);
-      localStorage.setItem('user', JSON.stringify(data.user));
+
+      const data = await authService.login(credentials);
+      
+      if (!data.user || !data.user.role) {
+        return rejectWithValue({ message: 'Invalid user data received' });
+      }
+
       return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: error.message });
+      console.error('Login thunk error:', error);
+      return rejectWithValue(error.response?.data || { message: error.message || 'Login failed' });
     }
   }
 );
@@ -62,10 +66,6 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
-      // Clear localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('user');
       return null;
     } catch (error) {
       return rejectWithValue(error);
@@ -125,21 +125,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
-      .addCase(register.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(register.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isAuthenticated = true;
-        state.error = null;
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload?.message || 'Registration failed';
-      })
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -156,6 +141,25 @@ const authSlice = createSlice({
         state.error = action.payload?.message || 'Login failed';
         state.user = null;
         state.isAuthenticated = false;
+        // Clear any stored data in case of error
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('user');
+      })
+      // Register
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Registration failed';
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {
