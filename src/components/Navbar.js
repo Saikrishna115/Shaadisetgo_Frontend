@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { logout } from '../store/slices/authSlice';
+import { logout, getCurrentUser } from '../store/slices/authSlice';
 import {
   AppBar,
   Toolbar,
@@ -42,6 +42,13 @@ const Navbar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMenuAnchor, setMobileMenuAnchor] = React.useState(null);
 
+  // Fetch user data if authenticated but no user data
+  useEffect(() => {
+    if (isAuthenticated && !user && localStorage.getItem('token')) {
+      dispatch(getCurrentUser());
+    }
+  }, [isAuthenticated, user, dispatch]);
+
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -58,17 +65,21 @@ const Navbar = () => {
   const handleLogout = async () => {
     handleClose();
     await dispatch(logout());
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const handleProfile = () => {
     handleClose();
-    navigate('/profile');
+    navigate('/profile', { replace: true });
   };
 
   const handleDashboard = () => {
     handleClose();
-    if (!user) return;
+    if (!user || !user.role) {
+      console.error('User or user role is undefined');
+      navigate('/login', { replace: true });
+      return;
+    }
 
     switch (user.role) {
       case 'vendor':
@@ -87,7 +98,9 @@ const Navbar = () => {
   };
 
   const getDashboardPath = () => {
-    if (!user) return '/dashboard';
+    if (!user || !user.role) {
+      return '/login';
+    }
     
     switch (user.role) {
       case 'vendor':
@@ -140,35 +153,39 @@ const Navbar = () => {
         </Typography>
       </Box>
       <Divider />
-      <MenuItem onClick={handleDashboard}>
-        <ListItemIcon>
-          <DashboardIcon fontSize="small" />
-        </ListItemIcon>
-        Dashboard
-      </MenuItem>
-      <MenuItem onClick={handleProfile}>
-        <ListItemIcon>
-          <PersonIcon fontSize="small" />
-        </ListItemIcon>
-        Profile
-      </MenuItem>
-      {user?.role === 'vendor' && (
-        <MenuItem onClick={() => { handleClose(); navigate('/vendor/bookings'); }}>
-          <ListItemIcon>
-            <EventIcon fontSize="small" />
-          </ListItemIcon>
-          Bookings
-        </MenuItem>
+      {user && user.role && (
+        <>
+          <MenuItem onClick={handleDashboard}>
+            <ListItemIcon>
+              <DashboardIcon fontSize="small" />
+            </ListItemIcon>
+            Dashboard
+          </MenuItem>
+          <MenuItem onClick={handleProfile}>
+            <ListItemIcon>
+              <PersonIcon fontSize="small" />
+            </ListItemIcon>
+            Profile
+          </MenuItem>
+          {user.role === 'vendor' && (
+            <MenuItem onClick={() => { handleClose(); navigate('/vendor/bookings', { replace: true }); }}>
+              <ListItemIcon>
+                <EventIcon fontSize="small" />
+              </ListItemIcon>
+              Bookings
+            </MenuItem>
+          )}
+          {user.role === 'customer' && (
+            <MenuItem onClick={() => { handleClose(); navigate('/favorites', { replace: true }); }}>
+              <ListItemIcon>
+                <FavoriteIcon fontSize="small" />
+              </ListItemIcon>
+              Favorites
+            </MenuItem>
+          )}
+          <Divider />
+        </>
       )}
-      {user?.role === 'user' && (
-        <MenuItem onClick={() => { handleClose(); navigate('/favorites'); }}>
-          <ListItemIcon>
-            <FavoriteIcon fontSize="small" />
-          </ListItemIcon>
-          Favorites
-        </MenuItem>
-      )}
-      <Divider />
       <MenuItem onClick={handleLogout}>
         <ListItemIcon>
           <LogoutIcon fontSize="small" color="error" />
@@ -208,7 +225,7 @@ const Navbar = () => {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          {!isMobile && isAuthenticated && (
+          {!isMobile && isAuthenticated && user && user.role && (
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mr: 2 }}>
               <Button
                 color="inherit"
@@ -223,7 +240,7 @@ const Navbar = () => {
               >
                 Dashboard
               </Button>
-              {user?.role === 'vendor' && (
+              {user.role === 'vendor' && (
                 <Button
                   color="inherit"
                   startIcon={<EventIcon />}
