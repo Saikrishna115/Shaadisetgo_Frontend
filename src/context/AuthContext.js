@@ -90,8 +90,10 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
 
-      if (!userData?.role || !userData?.email || !userData?.password) {
-        throw new Error('Invalid user data received. Please provide email, password, and role.');
+      const requiredFields = ['email', 'password', 'role'];
+      const missingFields = requiredFields.filter(field => !userData?.[field]);
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
 
       if (!emailRegex.test(userData.email)) {
