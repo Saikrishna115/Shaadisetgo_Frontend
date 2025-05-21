@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (token, userData) => {
     try {
       // Check if account is locked
       if (lockUntil && new Date(lockUntil) > new Date()) {
@@ -91,13 +91,15 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       
-      const response = await api.post('/auth/login', { email, password });
+      if (!userData || !userData.role) {
+        throw new Error('Invalid user data received');
+      }
       
       if (!response.data.success) {
         throw new Error(response.data.message || 'Login failed');
       }
 
-      const { token, user: userData } = response.data;
+      
 
       if (!userData || !userData.role) {
         throw new Error('Invalid user data received');
