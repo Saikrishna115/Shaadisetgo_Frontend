@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 import api from '../services/api';
 
 const AuthContext = createContext(null);
