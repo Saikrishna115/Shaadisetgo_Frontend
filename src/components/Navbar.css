@@ -1,277 +1,281 @@
+/* Navbar Container */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
 
+.navbar.scrolled {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Logo styles */
 .navbar-brand {
-  text-decoration: none !important;
-  color: inherit;
-  font-weight: 700;
-  letter-spacing: 1px;
-  background: linear-gradient(45deg, #FF4B2B, #FF416C);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  transition: transform 0.2s ease-in-out;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  transition: transform 0.3s ease;
 }
 
 .navbar-brand:hover {
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
 
-.brand-link {
-  text-decoration: none;
-  color: #E91E63;
-}
-
+/* Navigation Links */
 .nav-links {
   display: flex;
-  gap: 1.5rem;
   align-items: center;
+  gap: 1.5rem;
 }
 
-.nav-link {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.nav-link:hover {
-  color: #E91E63;
-}
-
-.logout-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 0;
-}
-
-/* Dropdown styles */
-.nav-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
-  transition: color 0.3s ease;
-  padding: 0;
-}
-
-.dropdown-btn:hover {
-  color: #E91E63;
-}
-
-.dropdown-content {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #fff;
-  min-width: 180px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  z-index: 1;
-  border-radius: 4px;
-  padding: 0.5rem 0;
-  margin-top: 0.5rem;
-}
-
-.dropdown-link {
-  color: #333;
-  padding: 0.75rem 1rem;
-  text-decoration: none;
-  display: block;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  font-weight: 500;
-}
-
-.dropdown-link:hover {
-  background-color: #f8f9fa;
-  color: #E91E63;
-}
-
-/* Active link styles */
-.active-link {
-  position: relative;
-}
-
-.active-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: currentColor;
-  transform: scaleX(1);
-  transition: transform 0.2s ease-in-out;
-}
-
-/* Button hover effects */
+/* Button Styles */
 .MuiButton-root {
   position: relative;
-  overflow: hidden;
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.MuiButton-root::after {
+.MuiButton-contained {
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  box-shadow: 0 4px 15px rgba(255, 75, 43, 0.2);
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(45deg, #FF416C, #FF4B2B);
+  box-shadow: 0 6px 20px rgba(255, 75, 43, 0.3);
+  transform: translateY(-2px);
+}
+
+.MuiButton-outlined {
+  border: 2px solid #FF4B2B;
+  color: #FF4B2B;
+}
+
+.MuiButton-outlined:hover {
+  background: rgba(255, 75, 43, 0.04);
+  border: 2px solid #FF416C;
+  transform: translateY(-2px);
+}
+
+/* Active Navigation Item */
+.nav-item-active {
+  position: relative;
+  color: #FF4B2B;
+}
+
+.nav-item-active::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
   height: 2px;
-  background-color: currentColor;
-  transition: width 0.3s ease, left 0.3s ease;
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  border-radius: 2px;
 }
 
-.MuiButton-root:hover::after {
-  width: 100%;
-  left: 0;
-}
-
-/* Active button styles */
-.MuiButton-root.active::after {
-  width: 100%;
-  left: 0;
-}
-
-/* Avatar animations */
+/* Avatar and User Menu */
 .MuiAvatar-root {
-  transition: all 0.3s ease-in-out;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .MuiAvatar-root:hover {
   transform: scale(1.1);
-  box-shadow: 0 0 0 2px #1976d2;
+  border-color: #FF4B2B;
 }
 
-/* Notification badge pulse animation */
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4);
+/* Menu Styling */
+.MuiMenu-paper {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: menuFadeIn 0.2s ease;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(244, 67, 54, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.MuiBadge-badge {
-  animation: pulse 2s infinite;
-}
-
-/* Mobile menu transition */
-.MuiDrawer-paper {
-  transition: transform 0.3s ease-in-out !important;
-}
-
-/* Menu item hover effects */
 .MuiMenuItem-root {
-  transition: background-color 0.2s ease, padding-left 0.2s ease !important;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  margin: 0.25rem;
 }
 
 .MuiMenuItem-root:hover {
-  padding-left: 24px !important;
-  background-color: rgba(25, 118, 210, 0.08) !important;
+  background: rgba(255, 75, 43, 0.04);
+  padding-left: 2rem;
 }
 
-/* Notification menu items */
-.notification-item {
-  transition: background-color 0.2s ease, border-left-width 0.2s ease;
+/* Notification Badge */
+.MuiBadge-badge {
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  transition: all 0.3s ease;
 }
 
-.notification-item:hover {
-  background-color: rgba(25, 118, 210, 0.04);
+.MuiBadge-badge:hover {
+  transform: scale(1.1);
 }
 
-.notification-item.unread {
-  border-left: 3px solid #1976d2;
+/* Mobile Menu */
+.MuiDrawer-paper {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
 }
 
-/* Search icon rotation */
-.search-icon {
-  transition: transform 0.3s ease;
+.mobile-menu-header {
+  padding: 1.5rem;
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  color: white;
 }
 
-.search-icon:hover {
+/* Search Button */
+.search-button {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background: rgba(255, 75, 43, 0.1);
+  color: #FF4B2B;
+}
+
+.search-button:hover {
+  background: rgba(255, 75, 43, 0.15);
   transform: rotate(90deg);
 }
 
-/* Login/Register buttons hover effect */
-.auth-button {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.auth-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Mobile menu icon animation */
-.menu-icon {
-  transition: transform 0.3s ease;
-}
-
-.menu-icon.open {
-  transform: rotate(180deg);
-}
-
-/* Toolbar height transition */
+/* Toolbar */
 .MuiToolbar-root {
-  transition: min-height 0.2s ease-in-out;
+  height: 70px;
+  transition: height 0.3s ease;
 }
 
-/* Responsive styles */
-@media (max-width: 600px) {
+.MuiToolbar-root.scrolled {
+  height: 60px;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
   .navbar {
-    padding: 0.5rem 1rem;
+    background: rgba(18, 18, 18, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
+  .MuiButton-outlined {
+    border-color: #FF4B2B;
+    color: #FF4B2B;
+  }
+
+  .MuiMenuItem-root:hover {
+    background: rgba(255, 75, 43, 0.15);
+  }
+
+  .search-button {
+    background: rgba(255, 75, 43, 0.2);
+  }
+
+  .MuiDrawer-paper {
+    background: rgba(18, 18, 18, 0.98);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .MuiToolbar-root {
+    height: 60px;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
   .MuiButton-root {
-    padding: 6px 12px;
+    padding: 0.4rem 1rem;
     font-size: 0.875rem;
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .navbar {
-    background-color: #1a1a1a;
-    color: #fff;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  
-  .MuiButton-root::after {
-    background-color: #fff;
-  }
-  
-  .notification-item:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Mobile menu styles */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 1rem;
-  }
-  
-  .nav-links {
-    gap: 1rem;
-  }
-  
-  .dropdown-content {
-    right: -50px;
-  }
+.navbar-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Notification Menu */
+.notification-menu {
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.notification-header {
+  padding: 1rem;
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  color: white;
+}
+
+.notification-item {
+  padding: 1rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.notification-item.unread {
+  border-left-color: #FF4B2B;
+  background: rgba(255, 75, 43, 0.04);
+}
+
+.notification-item:hover {
+  background: rgba(255, 75, 43, 0.08);
+}
+
+/* Profile Menu */
+.profile-menu-header {
+  padding: 1.5rem;
+  background: linear-gradient(45deg, #FF4B2B, #FF416C);
+  color: white;
+  text-align: center;
+}
+
+.profile-menu-avatar {
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 auto 1rem;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dividers */
+.MuiDivider-root {
+  margin: 0.5rem 0;
+  opacity: 0.6;
 }

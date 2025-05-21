@@ -2,6 +2,18 @@
   max-width: 1200px;
   margin: 2rem auto;
   padding: 2rem 0;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-header {
@@ -351,10 +363,23 @@
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }
 
 .stats-card:hover {
   transform: translateY(-4px);
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  pointer-events: none;
 }
 
 .stats-icon {
@@ -426,9 +451,28 @@
 
 .loading-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 400px;
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: rgba(0, 0, 0, 0.6);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }
 
 .error-container {
@@ -439,6 +483,18 @@
 
 .profile-section {
   margin-top: 2rem;
+  animation: slideIn 0.5s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .profile-header {
@@ -477,5 +533,114 @@
   .profile-header {
     flex-direction: column;
     text-align: center;
+  }
+
+  .MuiCard-root {
+    margin-bottom: 16px;
+  }
+
+  .MuiTab-root {
+    min-width: auto;
+    padding: 8px 12px;
+  }
+
+  .stats-card {
+    margin-bottom: 16px;
+  }
+}
+
+/* Card hover effects */
+.MuiCard-root {
+  transition: all 0.3s ease-in-out;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Progress bars */
+.MuiLinearProgress-root {
+  height: 6px !important;
+  border-radius: 3px;
+}
+
+.MuiLinearProgress-bar {
+  border-radius: 3px;
+}
+
+/* Tabs */
+.MuiTab-root {
+  transition: all 0.3s ease;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.MuiTab-root:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.MuiTab-root.Mui-selected {
+  font-weight: 600;
+}
+
+/* List items */
+.MuiListItem-root {
+  transition: background-color 0.2s ease;
+}
+
+.MuiListItem-root:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Avatar */
+.MuiAvatar-root {
+  transition: transform 0.3s ease;
+}
+
+.MuiAvatar-root:hover {
+  transform: scale(1.1);
+}
+
+/* Chips */
+.MuiChip-root {
+  transition: all 0.2s ease;
+}
+
+.MuiChip-root:hover {
+  transform: scale(1.05);
+}
+
+/* Icons */
+.MuiSvgIcon-root {
+  transition: transform 0.2s ease;
+}
+
+.icon-rotate:hover {
+  transform: rotate(15deg);
+}
+
+/* Buttons */
+.MuiButton-root {
+  transition: all 0.2s ease;
+}
+
+.MuiButton-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .MuiCard-root {
+    background-color: #1a1a1a;
+  }
+
+  .MuiListItem-root:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .loading-text {
+    color: rgba(255, 255, 255, 0.7);
   }
 }
