@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Container,
   Typography,
@@ -35,37 +36,38 @@ import {
   Message as MessageIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
-import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import './BookingDetails.css';
 
 const BookingDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [responseDialog, setResponseDialog] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
   const [responseType, setResponseType] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
+    const fetchBookingDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/bookings/${id}`);
+        setBooking(response.data.data || response.data);
+        setError('');
+      } catch (err) {
+        console.error('Error fetching booking details:', err);
+        setError(err.response?.data?.message || 'Failed to fetch booking details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBookingDetails();
   }, [id]);
-
-  const fetchBookingDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`/bookings/${id}`);
-      setBooking(response.data.data || response.data);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching booking details:', err);
-      setError(err.response?.data?.message || 'Failed to fetch booking details');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleResponse = (type) => {
     setResponseType(type);
@@ -74,9 +76,11 @@ const BookingDetails = () => {
   };
 
   const submitResponse = async () => {
+    if (actionLoading) return;
+
     try {
-      setLoading(true);
-      const response = await axios.put(`/bookings/${id}`, {
+      setActionLoading(true);
+      const response = await api.put(`/bookings/${id}`, {
         status: responseType === 'accept' ? 'confirmed' : 
                 responseType === 'reject' ? 'rejected' : 
                 undefined,
@@ -91,7 +95,7 @@ const BookingDetails = () => {
       console.error('Error updating booking:', err);
       setError(err.response?.data?.message || 'Failed to update booking');
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
@@ -120,6 +124,9 @@ const BookingDetails = () => {
       </Container>
     );
   }
+
+  const isVendor = user?.role === 'vendor';
+  const canRespond = isVendor && booking.status === 'pending';
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -260,14 +267,18 @@ const BookingDetails = () => {
               <Typography variant="h6" gutterBottom>
                 Actions
               </Typography>
-              {booking.status === 'pending' && (
+              {canRespond && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Button
                     variant="contained"
                     color="success"
                     startIcon={<AcceptIcon />}
-                    onClick={() => handleResponse('accept')}
+                    onClick={() => {
+                      setResponseMessage('');
+                      setResponseDialog(true);
+                    }}
                     fullWidth
+                    disabled={actionLoading}
                   >
                     Accept Booking
                   </Button>
@@ -275,8 +286,12 @@ const BookingDetails = () => {
                     variant="contained"
                     color="error"
                     startIcon={<RejectIcon />}
-                    onClick={() => handleResponse('reject')}
+                    onClick={() => {
+                      setResponseMessage('');
+                      setResponseDialog(true);
+                    }}
                     fullWidth
+                    disabled={actionLoading}
                   >
                     Reject Booking
                   </Button>
@@ -362,7 +377,7 @@ const BookingDetails = () => {
             color={responseType === 'accept' ? 'success' : 
                    responseType === 'reject' ? 'error' : 
                    'primary'}
-            disabled={!responseMessage.trim()}
+            disabled={!responseMessage.trim() || actionLoading}
           >
             {responseType === 'accept' ? 'Accept Booking' : 
              responseType === 'reject' ? 'Reject Booking' :

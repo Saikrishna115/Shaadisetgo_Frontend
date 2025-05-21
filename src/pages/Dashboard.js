@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
-import VendorProfileForm from '../components/VendorProfileForm/VendorProfileForm';
-import UserProfileForm from '../components/UserProfileForm/UserProfileForm';
 import {
   Container,
   Box,
@@ -19,6 +17,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
+import './Dashboard.css';
 
 const initialProfileState = {
   name: '',
@@ -42,10 +41,9 @@ const initialProfileState = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading } = useSelector((state) => state.auth);
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loadingBookings, setLoadingBookings] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(initialProfileState);
   const [successMessage, setSuccessMessage] = useState('');
@@ -54,7 +52,23 @@ const Dashboard = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [bookingsLoading, setBookingsLoading] = useState(true);
 
-  const fetchDashboardData = useCallback(async () => {
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        // Implement your booking fetch logic here
+        setLoadingBookings(false);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        setLoadingBookings(false);
+      }
+    };
+
+    if (user) {
+      fetchBookings();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -84,7 +98,7 @@ const Dashboard = () => {
       setProfileLoading(false);
       setBookingsLoading(false);
     }
-  }, [navigate]);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');

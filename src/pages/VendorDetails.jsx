@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Container,
   Typography,
@@ -30,13 +31,13 @@ import {
   Close as RejectIcon,
   Group as GroupIcon
 } from '@mui/icons-material';
-import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import './VendorDetails.css';
 
 const VendorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user: { role } } = useAuth();
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -49,7 +50,7 @@ const VendorDetails = () => {
   const fetchVendorDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/vendors/${id}`);
+      const response = await api.get(`/vendors/${id}`);
       if (!response.data) {
         throw new Error('No data received from server');
       }
@@ -66,7 +67,7 @@ const VendorDetails = () => {
 
   const fetchBookings = useCallback(async () => {
     try {
-      const response = await axios.get(`/bookings/vendor/${id}`);
+      const response = await api.get(`/bookings/vendor/${id}`);
       setBookings(response.data);
     } catch (err) {
       console.error('Error fetching bookings:', err);
@@ -77,11 +78,11 @@ const VendorDetails = () => {
   useEffect(() => {
     if (id) {
       fetchVendorDetails();
-      if (role === 'vendor') {
+      if (user?.role === 'vendor') {
         fetchBookings();
       }
     }
-  }, [id, role, fetchVendorDetails, fetchBookings]);
+  }, [id, user?.role, fetchVendorDetails, fetchBookings]);
 
   const handleResponse = (booking, type) => {
     setSelectedBooking(booking);
@@ -93,7 +94,7 @@ const VendorDetails = () => {
   const submitResponse = async () => {
     try {
       setLoading(true);
-      const response = await axios.put(`/bookings/${selectedBooking._id}`, {
+      const response = await api.put(`/bookings/${selectedBooking._id}`, {
         status: responseType === 'accept' ? 'confirmed' : 
                 responseType === 'reject' ? 'rejected' : 
                 undefined,
@@ -114,7 +115,11 @@ const VendorDetails = () => {
     }
   };
 
-  const handleBookNow = () => {
+  const handleBooking = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `/vendors/${id}` } });
+      return;
+    }
     navigate(`/booking/${id}`);
   };
 
@@ -272,7 +277,7 @@ const VendorDetails = () => {
                 color="primary"
                 fullWidth
                 size="large"
-                onClick={handleBookNow}
+                onClick={handleBooking}
                 sx={{ mt: 2 }}
               >
                 Book Now
@@ -295,7 +300,7 @@ const VendorDetails = () => {
           )}
 
           {/* Booking management section for vendors */}
-          {role === 'vendor' && (
+          {user?.role === 'vendor' && (
             <Card sx={{ mt: 3 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

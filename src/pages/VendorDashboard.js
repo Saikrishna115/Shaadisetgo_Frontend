@@ -29,11 +29,14 @@ import {
   Tab
 } from '@mui/material';
 import DashboardAnalytics from '../components/DashboardAnalytics/DashboardAnalytics';
-import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
 import {
   Edit as EditIcon,
   Event as EventIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  AttachMoney as MoneyIcon,
+  Star as StarIcon,
+  People as PeopleIcon
 } from '@mui/icons-material';
 import './Dashboard.css';
 import BookingStats from '../components/BookingStats';
@@ -41,7 +44,7 @@ import BookingList from '../components/BookingList';
 import BookingCalendar from '../components/BookingCalendar';
 
 const VendorDashboard = () => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [view, setView] = useState('list');
 
@@ -91,10 +94,12 @@ const VendorDashboard = () => {
     serviceDescription: ''
   });
   const [stats, setStats] = useState({
-    total: 0,
-    pending: 0,
-    confirmed: 0,
-    rejected: 0
+    totalBookings: 0,
+    pendingBookings: 0,
+    completedBookings: 0,
+    totalRevenue: 0,
+    averageRating: 0,
+    totalReviews: 0
   });
 
   const fetchDashboardData = useCallback(async () => {
@@ -102,7 +107,7 @@ const VendorDashboard = () => {
       setLoading(true);
       const [bookingsResponse, statsResponse] = await Promise.all([
         axios.get('/bookings/vendor'),
-        axios.get('/bookings/stats')
+        axios.get('/vendors/stats')
       ]);
       setBookings(bookingsResponse.data);
       setStats(statsResponse.data);
@@ -246,7 +251,7 @@ const VendorDashboard = () => {
 
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Welcome, {userInfo?.vendorInfo?.businessName || user?.name || 'Vendor'}
+          Welcome, {userInfo?.vendorInfo?.businessName || user?.businessName || 'Vendor'}
         </Typography>
 
         <Box sx={{ mb: 4 }}>

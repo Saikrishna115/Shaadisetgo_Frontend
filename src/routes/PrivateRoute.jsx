@@ -1,11 +1,11 @@
 // src/routes/PrivateRoute.js
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
 import { Box, CircularProgress, Typography } from '@mui/material';
 
 const PrivateRoute = ({ children, roles }) => {
-  const { user, loading, error } = useAuth();
+  const { user, loading, error } = useSelector((state) => state.auth);
 
   if (loading) {
     return (

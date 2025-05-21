@@ -1,51 +1,53 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile } from '../store/slices/authSlice';
 import {
   Container,
-  Typography,
-  Box,
   Paper,
+  Typography,
   TextField,
   Button,
-  CircularProgress,
+  Box,
   Alert,
-  Grid
+  CircularProgress,
+  Avatar
 } from '@mui/material';
-import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import './UserProfile.css';
 
 const UserProfile = () => {
-  const { updateUser } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [profileData, setProfileData] = useState({
-    name: '',
+  const dispatch = useDispatch();
+  const { user, loading: authLoading } = useSelector((state) => state.auth);
+  const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    ...(user?.role === 'vendor' ? {
+      businessName: '',
+      ownerName: '',
+      serviceCategory: ''
+    } : {})
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('/users/profile');
-        setProfileData(response.data);
-        setError('');
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-        setError(err.response?.data?.message || 'Failed to fetch profile');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (user) {
+      setFormData(prevState => ({
+        ...prevState,
+        ...user
+      }));
+    }
+  }, [user]);
 
-    fetchProfile();
-  }, []);
-
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value
     }));
@@ -53,23 +55,23 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    if (loading) return;
+
     setLoading(true);
+    setError(null);
+    setSuccess(false);
 
     try {
-      const response = await axios.put('/users/profile', profileData);
-      updateUser(response.data);
-      setSuccess('Profile updated successfully');
+      await dispatch(updateProfile(formData)).unwrap();
+      setSuccess(true);
     } catch (err) {
-      console.error('Error updating profile:', err);
-      setError(err.response?.data?.message || 'Failed to update profile');
+      setError(err.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
         <CircularProgress />
@@ -78,83 +80,159 @@ const UserProfile = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Profile
-      </Typography>
+    <Container component="main" maxWidth="md">
+      <Box sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+            <Avatar
+              src={user?.avatar}
+              alt={user?.fullName}
+              sx={{ width: 100, height: 100, mr: 3 }}
+            />
+            <Typography component="h1" variant="h4">
+              Profile Settings
+            </Typography>
+          </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {success}
-        </Alert>
-      )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              Profile updated successfully!
+            </Alert>
+          )}
 
-      <Paper sx={{ p: 3 }}>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Full Name"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              disabled={loading}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={true}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={loading}
+            />
+
+            {user?.role === 'vendor' && (
+              <>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Business Name"
+                  name="businessName"
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Owner Name"
+                  name="ownerName"
+                  value={formData.ownerName}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Service Category"
+                  name="serviceCategory"
+                  value={formData.serviceCategory}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </>
+            )}
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              disabled={loading}
+            />
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <TextField
                 required
                 fullWidth
-                label="Name"
-                name="name"
-                value={profileData.name}
-                onChange={handleInputChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={profileData.email}
-                onChange={handleInputChange}
-                disabled
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={profileData.phone}
-                onChange={handleInputChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Address"
-                name="address"
-                multiline
-                rows={3}
-                value={profileData.address}
-                onChange={handleInputChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                size="large"
-                fullWidth
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
                 disabled={loading}
-              >
-                {loading ? 'Updating...' : 'Update Profile'}
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
+              />
+
+              <TextField
+                required
+                fullWidth
+                label="State"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                disabled={loading}
+              />
+
+              <TextField
+                required
+                fullWidth
+                label="ZIP Code"
+                name="zipCode"
+                value={formData.zipCode}
+                onChange={handleChange}
+                disabled={loading}
+              />
+            </Box>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3 }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Update Profile'}
+            </Button>
+          </form>
+        </Paper>
+      </Box>
     </Container>
   );
 };

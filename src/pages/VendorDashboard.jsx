@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -36,20 +37,26 @@ import {
   Group as GroupIcon,
   Person as PersonIcon,
   Star as StarIcon,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  People as PeopleIcon
 } from '@mui/icons-material';
-import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
-import BookingStats from '../components/BookingStats';
-import BookingList from '../components/BookingList';
-import BookingCalendar from '../components/BookingCalendar';
+import api from '../services/api';
+import './VendorDashboard.css';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const [bookings, setBookings] = useState([]);
   const [vendorProfile, setVendorProfile] = useState(null);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    pendingBookings: 0,
+    completedBookings: 0,
+    totalRevenue: 0,
+    averageRating: 0,
+    totalReviews: 0
+  });
+  const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -59,29 +66,25 @@ const VendorDashboard = () => {
   const [view, setView] = useState('list');
 
   useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [statsResponse, bookingsResponse] = await Promise.all([
+          api.get('/vendors/stats'),
+          api.get('/vendors/bookings/recent')
+        ]);
+
+        setStats(statsResponse.data);
+        setRecentBookings(bookingsResponse.data);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchDashboardData();
   }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [bookingsRes, profileRes, statsRes] = await Promise.all([
-        axios.get('/bookings/vendor'),
-        axios.get('/vendors/profile'),
-        axios.get('/bookings/stats')
-      ]);
-      
-      setBookings(bookingsRes.data.data || []);
-      setVendorProfile(profileRes.data.data);
-      setStats(statsRes.data.data);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching dashboard data:', err);
-      setError(err.response?.data?.message || 'Failed to fetch dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleResponse = (booking, type) => {
     setSelectedBooking(booking);
@@ -93,7 +96,7 @@ const VendorDashboard = () => {
   const submitResponse = async () => {
     try {
       setLoading(true);
-      const response = await axios.put(`/bookings/${selectedBooking._id}`, {
+      const response = await api.put(`/bookings/${selectedBooking._id}`, {
         status: responseType === 'accept' ? 'confirmed' : 'rejected',
         vendorResponse: responseMessage
       });
@@ -132,13 +135,109 @@ const VendorDashboard = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Container>
+        <Alert severity="error" sx={{ mt: 4 }}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Welcome back, {user?.businessName}!
       </Typography>
 
-      <BookingStats bookings={bookings} />
+      <Grid container spacing={3}>
+        {/* Stats Cards */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <EventIcon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h6">Total Bookings</Typography>
+              </Box>
+              <Typography variant="h4">{stats.totalBookings}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <MoneyIcon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h6">Revenue</Typography>
+              </Box>
+              <Typography variant="h4">₹{stats.totalRevenue}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <StarIcon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h6">Rating</Typography>
+              </Box>
+              <Typography variant="h4">{stats.averageRating.toFixed(1)}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                ({stats.totalReviews} reviews)
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <PeopleIcon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h6">Pending</Typography>
+              </Box>
+              <Typography variant="h4">{stats.pendingBookings}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Recent Bookings */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Recent Bookings
+            </Typography>
+            <List>
+              {recentBookings.map((booking, index) => (
+                <React.Fragment key={booking._id}>
+                  {index > 0 && <Divider />}
+                  <ListItem>
+                    <ListItemText
+                      primary={booking.customerName}
+                      secondary={`Date: ${new Date(booking.date).toLocaleDateString()} - Status: ${booking.status}`}
+                    />
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => navigate(`/bookings/${booking._id}`)}
+                    >
+                      View Details
+                    </Button>
+                  </ListItem>
+                </React.Fragment>
+              ))}
+              {recentBookings.length === 0 && (
+                <ListItem>
+                  <ListItemText primary="No recent bookings" />
+                </ListItem>
+              )}
+            </List>
+          </Paper>
+        </Grid>
+      </Grid>
 
       <Paper sx={{ mt: 4 }}>
         <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
@@ -152,7 +251,7 @@ const VendorDashboard = () => {
               onStatusChange={async (bookingId, newStatus) => {
                 try {
                   setLoading(true);
-                  const response = await axios.put(`/bookings/${bookingId}`, {
+                  const response = await api.put(`/bookings/${bookingId}`, {
                     status: newStatus
                   });
                   setBookings(bookings.map(booking => 

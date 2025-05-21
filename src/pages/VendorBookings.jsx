@@ -1,60 +1,58 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Container,
+  Paper,
   Typography,
   Box,
-  Grid,
-  Tab,
-  Tabs,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
   CircularProgress,
-  Alert
+  Alert,
+  Chip
 } from '@mui/material';
-import axios from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
-import BookingList from '../components/BookingList';
-import BookingStats from '../components/BookingStats';
-import BookingCalendar from '../components/BookingCalendar';
+import api from '../services/api';
+import './VendorBookings.css';
 
 const VendorBookings = () => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [view, setView] = useState('list');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/vendors/bookings');
+        setBookings(response.data);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBookings();
   }, []);
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/bookings/vendor');
-      setBookings(response.data);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setError(err.response?.data?.message || 'Failed to fetch bookings');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      setLoading(true);
-      const response = await axios.put(`/bookings/${bookingId}`, {
-        status: newStatus
-      });
-      setBookings(bookings.map(booking => 
-        booking._id === bookingId ? response.data : booking
-      ));
-      setError('');
+      await api.put(`/bookings/${bookingId}`, { status: newStatus });
+      setBookings(prevBookings =>
+        prevBookings.map(booking =>
+          booking._id === bookingId
+            ? { ...booking, status: newStatus }
+            : booking
+        )
+      );
     } catch (err) {
-      console.error('Error updating booking:', err);
-      setError(err.response?.data?.message || 'Failed to update booking');
-    } finally {
-      setLoading(false);
+      setError(err.response?.data?.message || 'Failed to update booking status');
     }
   };
 
@@ -66,41 +64,92 @@ const VendorBookings = () => {
     );
   }
 
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Booking Management
-      </Typography>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+  if (error) {
+    return (
+      <Container>
+        <Alert severity="error" sx={{ mt: 4 }}>
           {error}
         </Alert>
-      )}
+      </Container>
+    );
+  }
 
-      <Box sx={{ mb: 4 }}>
-        <BookingStats bookings={bookings} />
-      </Box>
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        My Bookings
+      </Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs
-          value={view}
-          onChange={(e, newValue) => setView(newValue)}
-          aria-label="booking view tabs"
-        >
-          <Tab label="List View" value="list" />
-          <Tab label="Calendar View" value="calendar" />
-        </Tabs>
-      </Box>
-
-      {view === 'list' ? (
-        <BookingList
-          bookings={bookings}
-          onStatusChange={handleStatusChange}
-        />
-      ) : (
-        <BookingCalendar bookings={bookings} />
-      )}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Customer</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Time</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {bookings.map((booking) => (
+              <TableRow key={booking._id}>
+                <TableCell>{booking.customerName}</TableCell>
+                <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
+                <TableCell>{booking.time}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={booking.status.toUpperCase()}
+                    color={
+                      booking.status === 'confirmed' ? 'success' :
+                      booking.status === 'rejected' ? 'error' :
+                      'warning'
+                    }
+                  />
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      href={`/bookings/${booking._id}`}
+                    >
+                      View Details
+                    </Button>
+                    {booking.status === 'pending' && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          onClick={() => handleStatusChange(booking._id, 'confirmed')}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          onClick={() => handleStatusChange(booking._id, 'rejected')}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+            {bookings.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  No bookings found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Container>
   );
 };
