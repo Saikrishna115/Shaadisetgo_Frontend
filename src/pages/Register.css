@@ -1,97 +1,169 @@
 .register-container {
+  min-height: calc(100vh - 64px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 70vh;
-  background-color: #f5f6fa;
-  padding: 16px;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f5f5f5;
+}
+
+.register-paper {
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.register-title {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+  color: #666;
 }
 
 .register-form {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
-  padding: 2.5rem 2rem;
-  max-width: 350px;
-  width: 100%;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-field {
+  flex: 1;
+}
+
+.role-selector {
+  margin: 1.5rem 0;
+}
+
+.role-group {
+  display: flex;
+  gap: 1rem;
   justify-content: center;
+  margin-top: 0.5rem;
 }
 
-.register-form h2 {
+.role-button {
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  max-width: 200px;
   text-align: center;
-  color: #333;
-  margin-bottom: 1.5rem;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
+.role-button:hover {
+  border-color: #1976d2;
+  background-color: #f5f5f5;
 }
 
-.form-group label {
-  display: block;
+.role-button.selected {
+  border-color: #1976d2;
+  background-color: #e3f2fd;
+}
+
+.role-icon {
+  font-size: 2rem;
   margin-bottom: 0.5rem;
-  color: #555;
+  color: #1976d2;
+}
+
+.role-label {
   font-weight: 500;
 }
 
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background: #fafbfc;
-  transition: border 0.2s;
+.submit-button {
+  margin-top: 1rem !important;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #8e44ad;
-  outline: none;
-}
-
-.error-message {
-  color: #e74c3c;
-  margin-bottom: 1rem;
+.login-prompt {
   text-align: center;
+  margin-top: 2rem;
+  color: #666;
 }
 
-.success-message {
-  color: #27ae60;
+.login-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+.error-alert {
   margin-bottom: 1rem;
-  text-align: center;
 }
 
-.register-form button {
-  width: 100%;
-  padding: 0.75rem;
-  background: #1976D2;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+.success-alert {
+  margin-bottom: 1rem;
 }
 
-.register-form button:hover {
-  background: #6c3483;
+.loading-button {
+  position: relative;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.terms-checkbox {
+  margin-top: 1rem;
+}
+
+.terms-text {
+  color: #666;
+}
+
+.terms-link {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {
   .register-container {
-    padding: 8px;
-    min-height: 100vh;
+    padding: 1rem;
   }
 
-  .register-form {
-    padding: 1.5rem 0.5rem;
-    max-width: 95vw;
+  .register-paper {
+    padding: 1.5rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .role-group {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .role-button {
+    max-width: 100%;
   }
 }
 

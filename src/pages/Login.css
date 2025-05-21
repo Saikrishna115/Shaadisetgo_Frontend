@@ -1,7 +1,11 @@
 /* Login page specific styles */
 .login-container {
-  min-height: 60vh;
-  background-color: white;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f5f5f5;
 }
 
 .login-image-section {
@@ -24,6 +28,162 @@
   max-width: 275px;
   margin: 0 auto;
   padding: calc(2 * var(--spacing-xl));
+}
+
+.login-paper {
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-title {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  color: #666;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-field {
+  width: 100%;
+}
+
+.submit-button {
+  margin-top: 1rem !important;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -0.5rem;
+}
+
+.forgot-password a {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.register-prompt {
+  text-align: center;
+  margin-top: 2rem;
+  color: #666;
+}
+
+.register-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+.error-alert {
+  margin-bottom: 1rem;
+}
+
+.success-alert {
+  margin-bottom: 1rem;
+}
+
+.loading-button {
+  position: relative;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.social-login {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.social-login-title {
+  color: #666;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.social-login-title::before,
+.social-login-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.social-login-title::before {
+  left: 0;
+}
+
+.social-login-title::after {
+  right: 0;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.social-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.social-button:hover {
+  background-color: #f5f5f5;
+}
+
+.social-icon {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 600px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .login-paper {
+    padding: 1.5rem;
+  }
+
+  .social-buttons {
+    flex-direction: column;
+  }
 }
 
 /* Note: Most form styles are now handled by shared components.css */

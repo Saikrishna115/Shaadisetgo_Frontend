@@ -1,39 +1,63 @@
 .not-found {
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  padding: 2rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  justify-content: center;
   text-align: center;
-  min-height: 60vh;
+  padding: 2rem;
+  background-color: #f5f5f5;
 }
 
-.not-found h2 {
+.not-found-content {
+  max-width: 600px;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-code {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 1rem;
+}
+
+.error-title {
   font-size: 2rem;
   color: #333;
   margin-bottom: 1rem;
 }
 
-.not-found p {
-  font-size: 1.1rem;
+.error-message {
   color: #666;
   margin-bottom: 2rem;
 }
 
-.not-found-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: #E91E63;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: 1rem;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.home-button {
+  margin-top: 1rem !important;
 }
 
-.not-found-btn:hover {
-  background-color: #d81557;
+.error-illustration {
+  max-width: 300px;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 600px) {
+  .not-found {
+    padding: 1rem;
+  }
+
+  .error-code {
+    font-size: 4rem;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+
+  .error-illustration {
+    max-width: 200px;
+  }
 }
