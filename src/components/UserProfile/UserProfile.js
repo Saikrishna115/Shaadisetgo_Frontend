@@ -64,9 +64,9 @@ const UserProfile = ({
                     <TextField
                       required
                       fullWidth
-                      name="name"
+                      name="fullName"
                       label="Full Name"
-                      value={profileData.name}
+                      value={profileData.fullName}
                       onChange={handleInputChange}
                       variant="outlined"
                     />
@@ -231,7 +231,7 @@ const UserProfile = ({
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle1" color="text.secondary">Full Name</Typography>
-                    <Typography variant="body1">{profileData.name || 'Not specified'}</Typography>
+                    <Typography variant="body1">{profileData.fullName || 'Not specified'}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle1" color="text.secondary">Email</Typography>

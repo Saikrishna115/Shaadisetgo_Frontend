@@ -185,18 +185,21 @@ const Register = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      // Split fullName into firstName and lastName
-      const [firstName, ...lastNameParts] = formData.fullName.trim().split(' ');
-      const lastName = lastNameParts.join(' ');
+      // Validate fullName format
+      const nameRegex = /^[a-zA-Z\s]{3,100}$/;
+      if (!nameRegex.test(formData.fullName)) {
+        throw new Error('Full name must be between 3 and 100 characters and contain only letters and spaces');
+      }
 
-      if (!firstName || !lastName) {
+      // Validate that fullName has at least two parts
+      const nameParts = formData.fullName.trim().split(' ');
+      if (nameParts.length < 2) {
         throw new Error('Please enter both first name and last name');
       }
 
       // Format the registration data
       const userData = {
-        firstName,
-        lastName,
+        fullName: formData.fullName.trim(),
         email: formData.email.toLowerCase().trim(),
         phone: formData.phone.trim(),
         password: formData.password,
