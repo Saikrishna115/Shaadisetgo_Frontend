@@ -18,7 +18,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
-    "date-fns": "^3.3.1",
+    "date-fns": "2.30.0",
     "formik": "^2.4.5",
     "framer-motion": "^11.0.8",
     "jwt-decode": "^4.0.0",
@@ -94,7 +94,8 @@
   "resolutions": {
     "typescript": "^4.9.5",
     "@typescript-eslint/typescript-estree": "^5.0.0",
-    "prettier-plugin-tailwindcss": "^0.4.1"
+    "prettier-plugin-tailwindcss": "^0.4.1",
+    "date-fns": "2.30.0"
   },
   "reactSnap": {
     "inlineCss": true,
@@ -102,5 +103,6 @@
       "collapseWhitespace": false,
       "removeComments": false
     }
-  }
+  },
+  "moduleResolution": "node"
 }
