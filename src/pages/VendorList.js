@@ -6,7 +6,8 @@ import {
   Box,
   CircularProgress,
   Alert,
-  Button
+  Button,
+  Skeleton
 } from '@mui/material';
 import './VendorList.css';
 
@@ -50,11 +51,37 @@ const VendorList = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const renderSkeletonCards = () => (
+    <div className="vendors-grid">
+      {[1, 2, 3, 4, 5, 6].map((item) => (
+        <div key={item} className="vendor-card">
+          <Skeleton variant="rectangular" height={200} />
+          <div className="vendor-info">
+            <Skeleton variant="text" height={32} width="60%" />
+            <Skeleton variant="text" height={24} width="40%" />
+            <Skeleton variant="text" height={60} />
+            <div className="vendor-footer">
+              <Skeleton variant="text" width="30%" />
+              <Skeleton variant="rectangular" width={100} height={36} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-        <CircularProgress />
-      </Box>
+      <div className="vendor-list-container">
+        <div className="vendor-list-header">
+          <h1>Find Your Perfect Vendor</h1>
+          <div className="search-filters">
+            <Skeleton variant="rectangular" height={48} className="search-input" />
+            <Skeleton variant="rectangular" height={48} className="category-select" />
+          </div>
+        </div>
+        {renderSkeletonCards()}
+      </div>
     );
   }
 
@@ -82,7 +109,7 @@ const VendorList = () => {
         <div className="search-filters">
           <input
             type="text"
-            placeholder="Search vendors..."
+            placeholder="Search vendors by name or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
@@ -98,21 +125,25 @@ const VendorList = () => {
             <option value="Photography">Photography</option>
             <option value="Decoration">Decoration</option>
             <option value="Music">Music</option>
+            <option value="Mehendi">Mehendi</option>
+            <option value="Makeup">Makeup</option>
           </select>
         </div>
       </div>
 
-      <div className="vendor-grid">
+      <div className="vendors-grid">
         {filteredVendors.map(vendor => (
           <div key={vendor._id} className="vendor-card">
-            {vendor.images && vendor.images.length > 0 && (
-              <div className="vendor-image">
+            <div className="vendor-image">
+              {vendor.images && vendor.images.length > 0 ? (
                 <img src={vendor.images[0]} alt={vendor.businessName} />
-              </div>
-            )}
+              ) : (
+                <img src="/images/vendor-placeholder.jpg" alt="Vendor" />
+              )}
+            </div>
             <div className="vendor-info">
               <h3>{vendor.businessName}</h3>
-              <p className="vendor-category">{vendor.serviceType}</p>
+              <div className="vendor-category">{vendor.serviceType}</div>
               <p className="vendor-description">{vendor.description}</p>
               <div className="vendor-footer">
                 <span className="vendor-price">
@@ -120,18 +151,32 @@ const VendorList = () => {
                     ? `₹${vendor.priceRange.min || 0} - ₹${vendor.priceRange.max || 0}`
                     : vendor.priceRange || 'Price not specified'}
                 </span>
-                <button className="book-btn" onClick={() => navigate(`/vendors/${vendor._id}`)}>View Details</button>
+                <button 
+                  className="book-btn"
+                  onClick={() => navigate(`/vendors/${vendor._id}`)}
+                >
+                  View Details
+                </button>
               </div>
             </div>
           </div>
         ))}
-      </div>
 
-      {filteredVendors.length === 0 && (
-        <div className="no-results">
-          <p>No vendors found matching your criteria</p>
-        </div>
-      )}
+        {filteredVendors.length === 0 && (
+          <div className="no-results">
+            <p>No vendors found matching your criteria</p>
+            <button 
+              className="book-btn"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('all');
+              }}
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
