@@ -10,7 +10,7 @@ import Home from '../pages/Home.js';
 import Login from '../pages/Login.jsx';
 import Register from '../pages/Register.jsx';
 import Profile from '../pages/Profile.jsx';
-import VendorList from '../pages/VendorList.jsx';
+import VendorList from '../pages/Services/VendorList';
 import AdminDashboard from '../pages/AdminDashboard.js';
 import NotFound from '../pages/NotFound.js';
 
