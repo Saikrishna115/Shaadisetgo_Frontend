@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ExclamationCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 export const FormGroup = ({ children, className = '', ...props }) => (
   <div className={`space-y-2 ${className}`} {...props}>
@@ -41,7 +41,7 @@ export const FormInput = React.forwardRef(
           className="absolute inset-y-0 right-0 flex items-center pr-3"
         >
           {error ? (
-            <ExclamationCircle className="h-5 w-5 text-destructive" />
+            <AlertCircle className="h-5 w-5 text-destructive" />
           ) : (
             <CheckCircle className="h-5 w-5 text-green-500" />
           )}
@@ -152,7 +152,7 @@ export const FormSelect = React.forwardRef(
           className="absolute inset-y-0 right-8 flex items-center"
         >
           {error ? (
-            <ExclamationCircle className="h-5 w-5 text-destructive" />
+            <AlertCircle className="h-5 w-5 text-destructive" />
           ) : (
             <CheckCircle className="h-5 w-5 text-green-500" />
           )}
@@ -185,7 +185,7 @@ export const FormTextarea = React.forwardRef(
           className="absolute top-2 right-2"
         >
           {error ? (
-            <ExclamationCircle className="h-5 w-5 text-destructive" />
+            <AlertCircle className="h-5 w-5 text-destructive" />
           ) : (
             <CheckCircle className="h-5 w-5 text-green-500" />
           )}
