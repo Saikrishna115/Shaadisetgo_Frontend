@@ -6,13 +6,13 @@ import { useAuth } from '../context/AuthContext';
 import MainLayout from '../layouts/MainLayout';
 
 // Pages
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import Profile from '../pages/Profile';
-import VendorList from '../pages/Services/VendorList';
-import AdminDashboard from '../pages/Dashboard/AdminDashboard';
-import NotFound from '../pages/NotFound';
+import Home from '../pages/Home.js';
+import Login from '../pages/Login.jsx';
+import Register from '../pages/Register.jsx';
+import Profile from '../pages/Profile.jsx';
+import VendorList from '../pages/VendorList.jsx';
+import AdminDashboard from '../pages/AdminDashboard.js';
+import NotFound from '../pages/NotFound.js';
 
 // Route Guards
 const PrivateRoute = ({ children }) => {
