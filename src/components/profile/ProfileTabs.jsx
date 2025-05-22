@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { TabsContainer } from '../ui/TabsContainer';
+import TabsContainer from '../ui/TabsContainer';
 
 const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
   const [loading, setLoading] = useState(false);
