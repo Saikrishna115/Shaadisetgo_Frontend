@@ -543,7 +543,7 @@ const Navbar = () => {
               ) : (
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     component={Link}
                     to="/login"
                   >
