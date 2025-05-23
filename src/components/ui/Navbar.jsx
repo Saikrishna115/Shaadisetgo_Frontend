@@ -345,19 +345,20 @@ const Navbar = () => {
     </SwipeableDrawer>
   );
 
-  return (
-    <HideOnScroll>
-      <AppBar 
-        position="fixed" 
-        color="inherit" 
-        elevation={isScrolled ? 4 : 0}
-        className={`navbar ${isScrolled ? 'scrolled' : ''}`}
-      >
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-              <Link to="/" className="logo-link">
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+  const renderNavbar = () => {
+    return (
+      <HideOnScroll>
+        <AppBar 
+          position="fixed" 
+          color="inherit" 
+          elevation={isScrolled ? 4 : 0}
+          className={`navbar ${isScrolled ? 'scrolled' : ''}`}
+        >
+          <Container maxWidth="xl">
+            <Toolbar disableGutters>
+              <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                <Link to="/" className="logo-link">
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <img
                     src="/logo.png"
                     alt="ShaadiSetGo"
