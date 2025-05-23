@@ -329,8 +329,7 @@ const Navbar = () => {
     </SwipeableDrawer>
   );
 
-  const renderNavbar = () => {
-    return (
+  return (
       <HideOnScroll>
         <AppBar 
           position="fixed" 
@@ -476,6 +475,6 @@ const Navbar = () => {
       </AppBar>
     </HideOnScroll>
   );
-}
+};
 
 export default Navbar;
