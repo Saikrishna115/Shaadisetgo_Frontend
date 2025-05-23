@@ -492,6 +492,6 @@ const Navbar = () => {
       </AppBar>
     </HideOnScroll>
   );
-;
+  }
 
 export default Navbar;
