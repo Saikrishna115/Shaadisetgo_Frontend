@@ -137,23 +137,7 @@ const Navbar = () => {
     }
   };
 
-  
-    if (!user) return '/login';
-    
-    const userRole = user.role || localStorage.getItem('userRole');
-    if (!userRole) return '/login';
-    
-    switch (userRole) {
-      case 'vendor':
-        return '/vendor/dashboard';
-      case 'admin':
-        return '/admin';
-      case 'customer':
-        return '/dashboard';
-      default:
-        return '/';
-    }
-  };
+
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -492,6 +476,6 @@ const Navbar = () => {
       </AppBar>
     </HideOnScroll>
   );
-  }
+}
 
 export default Navbar;
