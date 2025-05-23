@@ -1,215 +1,504 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { logout, getCurrentUser } from '../../store/slices/authSlice';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Box,
+  Menu,
+  MenuItem,
+  Avatar,
+  Container,
+  Tooltip,
+  Divider,
+  ListItemIcon,
+  useTheme,
+  useMediaQuery,
+  Badge,
+  Fade,
+  SwipeableDrawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  useScrollTrigger,
+  Slide,
+  Paper
+} from '@mui/material';
+import {
+  AccountCircle,
+  Dashboard as DashboardIcon,
+  Person as PersonIcon,
+  ExitToApp as LogoutIcon,
+  Menu as MenuIcon,
+  Favorite as FavoriteIcon,
+  EventNote as EventIcon,
+  Settings as SettingsIcon,
+  Notifications as NotificationsIcon,
+  Search as SearchIcon,
+  Home as HomeIcon,
+  Store as StoreIcon,
+  Help as HelpIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
+import './Navbar.css';
 
-const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+const HideOnScroll = (props) => {
+  const { children } = props;
+  const trigger = useScrollTrigger();
 
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <img
-                className="h-8 w-auto"
-                src="/logo.png"
-                alt="ShaadiSetGo"
-              />
-              <span className="ml-2 text-xl font-bold text-pink-600">ShaadiSetGo</span>
-            </Link>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                to="/"
-                className="text-gray-900 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Home
-              </Link>
-              <Link
-                to="/vendors"
-                className="text-gray-900 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Vendors
-              </Link>
-              <Link
-                to="/services"
-                className="text-gray-900 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Services
-              </Link>
-            </div>
-          </div>
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
+};
 
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="text-gray-900 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium"
+const Navbar = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notificationAnchor, setNotificationAnchor] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [notifications] = useState([
+    { id: 1, message: 'New booking request', unread: true },
+    { id: 2, message: 'Profile update reminder', unread: false }
+  ]);
+
+  useEffect(() => {
+    if (isAuthenticated && !user && localStorage.getItem('token')) {
+      dispatch(getCurrentUser());
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isAuthenticated, user, dispatch]);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationClick = (event) => {
+    setNotificationAnchor(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setNotificationAnchor(null);
+  };
+
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    handleClose();
+    await dispatch(logout());
+    navigate('/login', { replace: true });
+  };
+
+  const handleProfile = () => {
+    handleClose();
+    navigate('/profile', { replace: true });
+  };
+
+  const handleDashboard = () => {
+    handleClose();
+    if (!user) {
+      console.error('User is not defined');
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const userRole = user.role || localStorage.getItem('userRole');
+    if (!userRole) {
+      console.error('User role is not defined');
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    switch (userRole) {
+      case 'vendor':
+        navigate('/vendor/dashboard', { replace: true });
+        break;
+      case 'admin':
+        navigate('/admin', { replace: true });
+        break;
+      case 'customer':
+        navigate('/dashboard', { replace: true });
+        break;
+      default:
+        console.error('Invalid user role:', userRole);
+        navigate('/login', { replace: true });
+    }
+  };
+
+  const getDashboardPath = () => {
+    if (!user) return '/login';
+    
+    const userRole = user.role || localStorage.getItem('userRole');
+    if (!userRole) return '/login';
+    
+    switch (userRole) {
+      case 'vendor':
+        return '/vendor/dashboard';
+      case 'admin':
+        return '/admin';
+      case 'customer':
+        return '/dashboard';
+      default:
+        return '/';
+    }
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  const renderNotificationMenu = (
+    <Menu
+      anchorEl={notificationAnchor}
+      open={Boolean(notificationAnchor)}
+      onClose={handleClose}
+      TransitionComponent={Fade}
+      className="notification-menu"
+      PaperProps={{
+        elevation: 3,
+        sx: {
+          mt: 1.5,
+          overflow: 'hidden'
+        }
+      }}
+    >
+      <Box className="notification-header">
+        <Typography variant="h6">Notifications</Typography>
+      </Box>
+      {notifications.map((notification) => (
+        <MenuItem 
+          key={notification.id} 
+          className={`notification-item ${notification.unread ? 'unread' : ''}`}
+        >
+          <ListItemIcon>
+            <NotificationsIcon color={notification.unread ? 'primary' : 'action'} />
+          </ListItemIcon>
+          <ListItemText 
+            primary={notification.message}
+            secondary={notification.unread ? 'New' : null}
+          />
+        </MenuItem>
+      ))}
+      <Divider />
+      <MenuItem sx={{ justifyContent: 'center' }}>
+        <Typography color="primary">View All</Typography>
+      </MenuItem>
+    </Menu>
+  );
+
+  const renderMenu = (
+    <Menu
+      id="menu-appbar"
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={Boolean(anchorEl)}
+      onClose={handleClose}
+      TransitionComponent={Fade}
+      PaperProps={{
+        elevation: 3,
+        sx: {
+          mt: 1.5,
+          overflow: 'hidden'
+        }
+      }}
+    >
+      <Box className="profile-menu-header">
+        <Avatar
+          src={user?.avatar}
+          alt={user?.fullName}
+          className="profile-menu-avatar"
+        >
+          {user?.fullName?.[0]?.toUpperCase() || <AccountCircle />}
+        </Avatar>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {user?.fullName || 'User'}
+        </Typography>
+        <Typography variant="body2">
+          {user?.email}
+        </Typography>
+      </Box>
+      <Divider />
+      <MenuItem onClick={handleDashboard}>
+        <ListItemIcon>
+          <DashboardIcon fontSize="small" />
+        </ListItemIcon>
+        Dashboard
+      </MenuItem>
+      <MenuItem onClick={handleProfile}>
+        <ListItemIcon>
+          <PersonIcon fontSize="small" />
+        </ListItemIcon>
+        Profile
+      </MenuItem>
+      <MenuItem onClick={handleLogout}>
+        <ListItemIcon>
+          <LogoutIcon fontSize="small" />
+        </ListItemIcon>
+        Logout
+      </MenuItem>
+    </Menu>
+  );
+
+  const renderMobileMenu = (
+    <SwipeableDrawer
+      anchor="right"
+      open={mobileMenuOpen}
+      onClose={() => setMobileMenuOpen(false)}
+      onOpen={() => setMobileMenuOpen(true)}
+      PaperProps={{
+        sx: {
+          width: '80%',
+          maxWidth: 300
+        }
+      }}
+    >
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <IconButton onClick={() => setMobileMenuOpen(false)}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <List>
+        <ListItem>
+          <ListItemButton component={Link} to="/" onClick={() => setMobileMenuOpen(false)}>
+            <ListItemIcon>
+              <HomeIcon />
+            </ListItemIcon>
+            <ListItemText primary="Home" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
+          <ListItemButton component={Link} to="/vendors" onClick={() => setMobileMenuOpen(false)}>
+            <ListItemIcon>
+              <StoreIcon />
+            </ListItemIcon>
+            <ListItemText primary="Vendors" />
+          </ListItemButton>
+        </ListItem>
+        {isAuthenticated ? (
+          <>
+            <ListItem>
+              <ListItemButton onClick={handleDashboard}>
+                <ListItemIcon>
+                  <DashboardIcon />
+                </ListItemIcon>
+                <ListItemText primary="Dashboard" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton onClick={handleProfile}>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        ) : (
+          <>
+            <ListItem>
+              <ListItemButton component={Link} to="/login" onClick={() => setMobileMenuOpen(false)}>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText primary="Login" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton component={Link} to="/register" onClick={() => setMobileMenuOpen(false)}>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText primary="Register" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+      </List>
+    </SwipeableDrawer>
+  );
+
+  return (
+    <HideOnScroll>
+      <AppBar 
+        position="fixed" 
+        color="inherit" 
+        elevation={isScrolled ? 4 : 0}
+        className={`navbar ${isScrolled ? 'scrolled' : ''}`}
+      >
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+              <Link to="/" className="logo-link">
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <img
+                    src="/logo.png"
+                    alt="ShaadiSetGo"
+                    className="logo-image"
+                  />
+                  <Typography
+                    variant="h6"
+                    noWrap
+                    sx={{
+                      ml: 1,
+                      fontFamily: 'monospace',
+                      fontWeight: 700,
+                      color: 'inherit',
+                      textDecoration: 'none',
+                    }}
                   >
-                    Admin Dashboard
-                  </Link>
-                )}
-                <Link
-                  to="/profile"
-                  className="text-gray-900 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-pink-700"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link
-                  to="/login"
-                  className="text-gray-900 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-pink-700"
-                >
-                  Register
-                </Link>
-              </div>
-            )}
-          </div>
+                    ShaadiSetGo
+                  </Typography>
+                </Box>
+              </Link>
 
-          {/* Mobile menu button */}
-          <div className="flex items-center sm:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              aria-expanded="false"
-            >
-              <span className="sr-only">Open main menu</span>
-              {/* Icon when menu is closed */}
-              {!isMenuOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              ) : (
-                /* Icon when menu is open */
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+              {!isMobile && (
+                <Box sx={{ ml: 4, display: 'flex' }}>
+                  <Button
+                    component={Link}
+                    to="/"
+                    color={isActive('/') ? 'primary' : 'inherit'}
+                    sx={{ mx: 1 }}
+                  >
+                    Home
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/vendors"
+                    color={isActive('/vendors') ? 'primary' : 'inherit'}
+                    sx={{ mx: 1 }}
+                  >
+                    Vendors
+                  </Button>
+                </Box>
               )}
-            </button>
-          </div>
-        </div>
-      </div>
+            </Box>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
-            <Link
-              to="/"
-              className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/vendors"
-              className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Vendors
-            </Link>
-            <Link
-              to="/services"
-              className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Services
-            </Link>
-            {isAuthenticated ? (
-              <>
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
-                <Link
-                  to="/profile"
-                  className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-                  onClick={() => setIsMenuOpen(false)}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {!isMobile && isAuthenticated && (
+                <>
+                  <Tooltip title="Notifications">
+                    <IconButton
+                      size="large"
+                      color="inherit"
+                      onClick={handleNotificationClick}
+                    >
+                      <Badge badgeContent={notifications.filter(n => n.unread).length} color="error">
+                        <NotificationsIcon />
+                      </Badge>
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Dashboard">
+                    <IconButton
+                      size="large"
+                      color="inherit"
+                      onClick={handleDashboard}
+                    >
+                      <DashboardIcon />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+
+              {isAuthenticated ? (
+                <>
+                  {!isMobile && (
+                    <Tooltip title="Account settings">
+                      <IconButton
+                        size="large"
+                        edge="end"
+                        onClick={handleMenu}
+                        color="inherit"
+                      >
+                        <Avatar
+                          src={user?.avatar}
+                          alt={user?.fullName}
+                          sx={{ width: 32, height: 32 }}
+                        >
+                          {user?.fullName?.[0]?.toUpperCase() || <AccountCircle />}
+                        </Avatar>
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </>
+              ) : (
+                !isMobile && (
+                  <>
+                    <Button
+                      component={Link}
+                      to="/login"
+                      color="inherit"
+                      sx={{ mx: 1 }}
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/register"
+                      variant="contained"
+                      color="primary"
+                      sx={{ mx: 1 }}
+                    >
+                      Register
+                    </Button>
+                  </>
+                )
+              )}
+
+              {isMobile && (
+                <IconButton
+                  size="large"
+                  edge="start"
+                  color="inherit"
+                  onClick={handleMobileMenuToggle}
                 >
-                  Profile
-                </Link>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="block px-3 py-2 text-base font-medium text-gray-900 hover:text-pink-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Register
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </nav>
+                  <MenuIcon />
+                </IconButton>
+              )}
+            </Box>
+          </Toolbar>
+        </Container>
+        {renderNotificationMenu}
+        {renderMenu}
+        {renderMobileMenu}
+      </AppBar>
+    </HideOnScroll>
   );
 };
 
