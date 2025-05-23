@@ -1,5 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { login as loginService, register as registerService, logout as logoutService } from '../../services/auth';
+import {
+  login as loginService,
+  register as registerService,
+  logout as logoutService,
+  getCurrentUser as getCurrentUserService,
+  refreshToken as refreshTokenService,
+  updateProfile as updateProfileService
+} from '../../services/auth';
 
 // Initialize state from localStorage with proper role handling
 const getUserFromStorage = () => {
@@ -70,7 +77,7 @@ export const getCurrentUser = createAsyncThunk(
       if (!token) {
         return rejectWithValue({ message: 'No authentication token' });
       }
-      const data = await authService.getCurrentUser();
+      const data = await getCurrentUserService();
       return data;
     } catch (error) {
       return rejectWithValue(error);
@@ -86,7 +93,19 @@ export const refreshToken = createAsyncThunk(
       if (!token) {
         return rejectWithValue({ message: 'No authentication token' });
       }
-      const data = await authService.refreshToken();
+      const data = await refreshTokenService();
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const data = await updateProfileService(profileData);
       return data.user;
     } catch (error) {
       return rejectWithValue(error);
@@ -197,16 +216,4 @@ const authSlice = createSlice({
 });
 
 export const { setUser, clearError } = authSlice.actions;
-
-export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
-  async (profileData, { rejectWithValue }) => {
-    try {
-      const data = await authService.updateProfile(profileData);
-      return data.user;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  }
-);
 export default authSlice.reducer;
