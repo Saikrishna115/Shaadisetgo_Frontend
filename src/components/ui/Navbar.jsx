@@ -26,8 +26,7 @@ import {
   ListItemText,
   ListItemButton,
   useScrollTrigger,
-  Slide,
-  Paper
+  Slide
 } from '@mui/material';
 import {
   AccountCircle,
@@ -35,14 +34,9 @@ import {
   Person as PersonIcon,
   ExitToApp as LogoutIcon,
   Menu as MenuIcon,
-  Favorite as FavoriteIcon,
-  EventNote as EventIcon,
-  Settings as SettingsIcon,
   Notifications as NotificationsIcon,
-  Search as SearchIcon,
   Home as HomeIcon,
   Store as StoreIcon,
-  Help as HelpIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
 import './Navbar.css';

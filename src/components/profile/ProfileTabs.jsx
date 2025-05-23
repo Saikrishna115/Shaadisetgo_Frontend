@@ -20,7 +20,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,7 +64,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
                 icon={User}
                 defaultValue={user?.fullName}
                 placeholder="Enter your full name"
-                error={errors.fullName}
               />
             </div>
 
@@ -76,7 +74,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
                 type="email"
                 defaultValue={user?.email}
                 placeholder="Enter your email"
-                error={errors.email}
               />
             </div>
 
@@ -87,7 +84,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
                 type="tel"
                 defaultValue={user?.phone}
                 placeholder="Enter your phone number"
-                error={errors.phone}
               />
             </div>
 
@@ -97,7 +93,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
                 icon={MapPin}
                 defaultValue={user?.location}
                 placeholder="Enter your location"
-                error={errors.location}
               />
             </div>
 
@@ -119,7 +114,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
             <Input
               type="password"
               placeholder="Enter your current password"
-              error={errors.currentPassword}
             />
           </div>
 
@@ -128,7 +122,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
             <Input
               type="password"
               placeholder="Enter your new password"
-              error={errors.newPassword}
             />
           </div>
 
@@ -137,7 +130,6 @@ const ProfileTabs = ({ user, onUpdate, onLogout, onDeleteAccount }) => {
             <Input
               type="password"
               placeholder="Confirm your new password"
-              error={errors.confirmPassword}
             />
           </div>
 

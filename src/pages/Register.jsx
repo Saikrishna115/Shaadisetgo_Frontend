@@ -10,7 +10,6 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Paper,
   Stepper,
   Step,
   StepLabel,

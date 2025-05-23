@@ -14,10 +14,6 @@ const VendorList = () => {
     rating: ''
   });
 
-  useEffect(() => {
-    fetchVendors();
-  }, [fetchVendors]);
-
   const fetchVendors = useCallback(async () => {
     try {
       setLoading(true);
@@ -26,11 +22,14 @@ const VendorList = () => {
       setError(null);
     } catch (err) {
       setError('Failed to fetch vendors. Please try again later.');
-      console.error('Error fetching vendors:', err);
     } finally {
       setLoading(false);
     }
   }, [filters]);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

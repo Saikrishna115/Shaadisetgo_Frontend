@@ -33,7 +33,7 @@ const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, loading, isAuthenticated } = useSelector((state) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -58,7 +58,6 @@ const Login = () => {
           break;
         default:
           setErrorMessage(`Invalid user role: ${user.role}`);
-          console.error('Invalid user role:', user.role);
       }
     }
   }, [isAuthenticated, user, navigate]);
@@ -69,11 +68,6 @@ const Login = () => {
       dispatch(clearError());
     };
   }, [dispatch]);
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +86,6 @@ const Login = () => {
         setErrorMessage(result.message || 'Login failed');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setErrorMessage(err.message || 'An error occurred during login');
       // Clear any stored data in case of error
       localStorage.removeItem('token');
@@ -103,9 +96,12 @@ const Login = () => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleEmailChange = (e) => {
     setEmail(e.target.value);
     setEmailError('');
+  };
+
+  const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     setPasswordError('');
   };
@@ -200,7 +196,7 @@ const Login = () => {
                   autoComplete="email"
                   autoFocus
                   value={email}
-                  onChange={handleChange}
+                  onChange={handleEmailChange}
                   disabled={loading}
                   error={!!emailError}
                   helperText={emailError}
@@ -228,7 +224,7 @@ const Login = () => {
                   id="password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={handleChange}
+                  onChange={handlePasswordChange}
                   disabled={loading}
                   error={!!passwordError}
                   helperText={passwordError}

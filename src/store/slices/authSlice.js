@@ -21,7 +21,6 @@ const getUserFromStorage = () => {
     }
     return null;
   } catch (error) {
-    console.error('Error parsing stored user:', error);
     return null;
   }
 };
