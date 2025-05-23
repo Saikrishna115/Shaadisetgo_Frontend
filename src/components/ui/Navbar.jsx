@@ -137,7 +137,7 @@ const Navbar = () => {
     }
   };
 
-  const getDashboardPath = () => {
+  
     if (!user) return '/login';
     
     const userRole = user.role || localStorage.getItem('userRole');
@@ -491,6 +491,6 @@ const Navbar = () => {
       </AppBar>
     </HideOnScroll>
   );
-};
+;
 
-export default Navbar; 
+export default Navbar;

@@ -10,7 +10,6 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Paper,
   InputAdornment,
   IconButton,
   Divider,
@@ -25,7 +24,6 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Login as LoginIcon,
-  LockOutlined as LockOutlinedIcon
 } from '@mui/icons-material';
 import './Login.css';
 

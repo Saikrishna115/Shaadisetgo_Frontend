@@ -26,7 +26,7 @@ import {
   Chip
 } from '@mui/material';
 import { Check as CheckIcon } from '@mui/icons-material';
-import { LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
+
 
 const Register = () => {
   const theme = useTheme();
@@ -724,4 +724,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;
