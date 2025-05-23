@@ -1,22 +1,18 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Paper,
   Typography,
   IconButton,
-  Grid,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Button
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import './BookingCalendar.css';
 
 const BookingCalendar = ({ bookings }) => {
   const navigate = useNavigate();
@@ -63,33 +59,16 @@ const BookingCalendar = ({ bookings }) => {
     // Add day names
     for (let i = 0; i < 7; i++) {
       days.push(
-        <Box
-          key={`day-${i}`}
-          sx={{
-            p: 1,
-            textAlign: 'center',
-            fontWeight: 'bold',
-            borderBottom: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
+        <div key={`day-${i}`} className="day-header">
           {dayNames[i]}
-        </Box>
+        </div>
       );
     }
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(
-        <Box
-          key={`empty-${i}`}
-          sx={{
-            p: 1,
-            height: 100,
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        />
+        <div key={`empty-${i}`} className="calendar-day" />
       );
     }
 
@@ -104,43 +83,33 @@ const BookingCalendar = ({ bookings }) => {
         );
       });
 
+      const isToday = 
+        day === new Date().getDate() &&
+        currentDate.getMonth() === new Date().getMonth() &&
+        currentDate.getFullYear() === new Date().getFullYear();
+
       days.push(
-        <Box
+        <div
           key={day}
           onClick={() => handleDateClick(day)}
-          sx={{
-            p: 1,
-            height: 100,
-            border: '1px solid',
-            borderColor: 'divider',
-            cursor: 'pointer',
-            '&:hover': {
-              backgroundColor: 'action.hover'
-            }
-          }}
+          className={`calendar-day ${isToday ? 'today' : ''}`}
         >
           <Typography variant="body2" sx={{ mb: 1 }}>
             {day}
           </Typography>
           {dayBookings.map((booking) => (
-            <Chip
+            <div
               key={booking._id}
-              label={booking.customerName}
-              size="small"
-              color={
-                booking.status === 'pending' ? 'warning' :
-                booking.status === 'confirmed' ? 'success' :
-                booking.status === 'rejected' ? 'error' :
-                'default'
-              }
-              sx={{ mb: 0.5, width: '100%', justifyContent: 'flex-start' }}
+              className={`event-chip status-${booking.status}`}
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/bookings/${booking._id}`);
               }}
-            />
+            >
+              {booking.customerName}
+            </div>
           ))}
-        </Box>
+        </div>
       );
     }
 
@@ -148,24 +117,22 @@ const BookingCalendar = ({ bookings }) => {
   };
 
   return (
-    <Box>
-      <Paper sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <IconButton onClick={handlePrevMonth}>
-            <ChevronLeftIcon />
-          </IconButton>
-          <Typography variant="h6">
-            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-          </Typography>
-          <IconButton onClick={handleNextMonth}>
-            <ChevronRightIcon />
-          </IconButton>
-        </Box>
+    <div className="calendar-container">
+      <div className="calendar-header">
+        <IconButton onClick={handlePrevMonth}>
+          <ChevronLeftIcon />
+        </IconButton>
+        <Typography variant="h6">
+          {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </Typography>
+        <IconButton onClick={handleNextMonth}>
+          <ChevronRightIcon />
+        </IconButton>
+      </div>
 
-        <Grid container columns={7} sx={{ border: '1px solid', borderColor: 'divider' }}>
-          {renderCalendar()}
-        </Grid>
-      </Paper>
+      <div className="calendar-grid">
+        {renderCalendar()}
+      </div>
 
       <Dialog
         open={dialogOpen}
@@ -176,19 +143,10 @@ const BookingCalendar = ({ bookings }) => {
         <DialogTitle>
           Bookings for {selectedDate?.toLocaleDateString()}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent className="booking-dialog">
           {selectedBookings.length > 0 ? (
             selectedBookings.map((booking) => (
-              <Box
-                key={booking._id}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1
-                }}
-              >
+              <div key={booking._id} className="booking-item">
                 <Typography variant="subtitle1">
                   {booking.customerName}
                 </Typography>
@@ -198,32 +156,14 @@ const BookingCalendar = ({ bookings }) => {
                 <Typography variant="body2" color="text.secondary">
                   Budget: ₹{booking.budget}
                 </Typography>
-                <Chip
-                  label={booking.status}
-                  color={
-                    booking.status === 'pending' ? 'warning' :
-                    booking.status === 'confirmed' ? 'success' :
-                    booking.status === 'rejected' ? 'error' :
-                    'default'
-                  }
-                  size="small"
-                  sx={{ mt: 1 }}
-                />
-              </Box>
+              </div>
             ))
           ) : (
-            <Typography color="text.secondary">
-              No bookings for this date
-            </Typography>
+            <Typography>No bookings for this date</Typography>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
       </Dialog>
-    </Box>
+    </div>
   );
 };
 
