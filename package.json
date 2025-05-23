@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "puppeteer": "^22.3.0",
+    "puppeteer-core": "^22.3.0",
     "@babel/plugin-transform-optional-chaining": "^7.27.1",
     "@babel/plugin-transform-private-methods": "^7.27.1",
     "@babel/plugin-transform-private-property-in-object": "^7.21.11",
@@ -71,6 +73,7 @@
     ]
   },
   "devDependencies": {
+    "@types/puppeteer": "^7.0.4",
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.17",
