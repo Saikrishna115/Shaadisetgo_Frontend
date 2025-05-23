@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { register } from '../store/slices/authSlice';
 import {
   Container,
   Box,
@@ -25,11 +27,12 @@ import {
   Chip
 } from '@mui/material';
 import { Check as CheckIcon } from '@mui/icons-material';
-import api from '../services/api/config';
+import { LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
 
 const Register = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -60,7 +63,7 @@ const Register = () => {
     phone: false
   });
 
-  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const serviceCategories = [
@@ -152,95 +155,20 @@ const Register = () => {
     setActiveStep(prev => prev - 1);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage('');
+
     try {
-      setError('');
-      setLoading(true);
-
-      // Validate required fields
-      const requiredFields = ['fullName', 'email', 'password', 'phone'];
-      const missingFields = requiredFields.filter(field => !formData[field]);
-      
-      if (missingFields.length > 0) {
-        throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      }
-
-      // Validate password match
-      if (formData.password !== formData.confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-
-      // Validate password strength
-      if (!validatePassword(formData.password)) {
-        throw new Error('Password must be at least 8 characters long and contain uppercase, lowercase, number and special character');
-      }
-
-      // Validate email format
-      if (!validateEmail(formData.email)) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      // Validate phone format
-      if (!validatePhone(formData.phone)) {
-        throw new Error('Please enter a valid 10-digit phone number');
-      }
-
-      // Validate fullName format
-      const nameRegex = /^[a-zA-Z\s]{3,100}$/;
-      if (!nameRegex.test(formData.fullName)) {
-        throw new Error('Full name must be between 3 and 100 characters and contain only letters and spaces');
-      }
-
-      // Validate that fullName has at least two parts
-      const nameParts = formData.fullName.trim().split(' ');
-      if (nameParts.length < 2) {
-        throw new Error('Please enter both first name and last name');
-      }
-
-      // Format the registration data
-      const userData = {
-        fullName: formData.fullName.trim(),
-        email: formData.email.toLowerCase().trim(),
-        phone: formData.phone.trim(),
-        password: formData.password,
-        role: formData.role
-      };
-
-      console.log('Sending registration data:', userData);
-
-      const response = await api.post('/api/auth/register', userData);
-      console.log('Registration response:', response.data);
-
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userRole', formData.role);
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-
-        if (formData.role === 'vendor') {
-          const vendorData = {
-            businessName: formData.businessName,
-            ownerName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            serviceCategory: formData.serviceCategory,
-            location: formData.location,
-            serviceDescription: formData.serviceDescription
-          };
-
-          const vendorResponse = await api.post('/api/vendors', vendorData);
-          localStorage.setItem('user', JSON.stringify({
-            ...response.data.user,
-            vendorProfile: vendorResponse.data.vendor
-          }));
-          navigate('/vendor/dashboard');
-        } else {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          navigate('/dashboard');
-        }
+      const result = await dispatch(register(formData)).unwrap();
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setErrorMessage(result.message || 'Registration failed');
       }
     } catch (err) {
-      console.error('Registration error:', err);
-      setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
+      setErrorMessage(err.message || 'An error occurred during registration');
     } finally {
       setLoading(false);
     }
@@ -721,7 +649,7 @@ const Register = () => {
             ))}
           </Stepper>
 
-          {error && (
+          {errorMessage && (
             <Alert 
               severity="error" 
               sx={{ 
@@ -730,7 +658,7 @@ const Register = () => {
                 fontSize: { xs: '0.875rem', sm: '1rem' }
               }}
             >
-              {error}
+              {errorMessage}
             </Alert>
           )}
 

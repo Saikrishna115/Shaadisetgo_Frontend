@@ -78,10 +78,20 @@ const Home = () => {
         <h2>Browse by Category</h2>
         <div className="categories-grid">
           {categories.map((category, index) => (
-            <div key={index} className="category-card" onClick={() => navigate('/vendors')}>
-              <img src={category.image} alt={category.name} className="category-image" />
+            <button
+              key={index}
+              className="category-card"
+              onClick={() => navigate('/vendors')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  navigate('/vendors');
+                }
+              }}
+              aria-label={`Browse ${category.name} vendors`}
+            >
+              <img src={category.image} alt="" className="category-image" />
               <div className="category-overlay">{category.name}</div>
-            </div>
+            </button>
           ))}
         </div>
       </section>

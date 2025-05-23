@@ -24,7 +24,8 @@ import {
   Lock as LockIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
-  Login as LoginIcon
+  Login as LoginIcon,
+  LockOutlined as LockOutlinedIcon
 } from '@mui/icons-material';
 import './Login.css';
 
@@ -37,7 +38,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -56,7 +57,7 @@ const Login = () => {
           navigate('/dashboard', { replace: true });
           break;
         default:
-          setError(`Invalid user role: ${user.role}`);
+          setErrorMessage(`Invalid user role: ${user.role}`);
           console.error('Invalid user role:', user.role);
       }
     }
@@ -76,54 +77,23 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting || loading) return;
-    
-    // Reset errors
-    setError('');
-    setEmailError('');
-    setPasswordError('');
-    
-    // Trim and validate credentials
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
-    
-    // Validate email
-    if (!trimmedEmail) {
-      setEmailError('Email is required');
-      return;
-    }
-    if (!validateEmail(trimmedEmail)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-    
-    // Validate password
-    if (!trimmedPassword) {
-      setPasswordError('Password is required');
-      return;
-    }
-    if (trimmedPassword.length < 6) {
-      setPasswordError('Password must be at least 6 characters long');
-      return;
-    }
-    
     setIsSubmitting(true);
-    
+    setErrorMessage('');
+
     try {
-      // Use the login action from authSlice with trimmed credentials
       const result = await dispatch(login({ 
-        email: trimmedEmail.toLowerCase(), 
-        password: trimmedPassword 
+        email: email.toLowerCase(), 
+        password: password 
       })).unwrap();
       
-      if (!result.user || !result.user.role) {
-        throw new Error('Invalid user data received');
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setErrorMessage(result.message || 'Login failed');
       }
-
-      // Role-based navigation will be handled by the useEffect above
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || 'Login failed. Please try again.');
+      setErrorMessage(err.message || 'An error occurred during login');
       // Clear any stored data in case of error
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');
@@ -131,6 +101,13 @@ const Login = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleChange = (e) => {
+    setEmail(e.target.value);
+    setEmailError('');
+    setPassword(e.target.value);
+    setPasswordError('');
   };
 
   return (
@@ -223,10 +200,7 @@ const Login = () => {
                   autoComplete="email"
                   autoFocus
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setEmailError('');
-                  }}
+                  onChange={handleChange}
                   disabled={loading}
                   error={!!emailError}
                   helperText={emailError}
@@ -254,10 +228,7 @@ const Login = () => {
                   id="password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setPasswordError('');
-                  }}
+                  onChange={handleChange}
                   disabled={loading}
                   error={!!passwordError}
                   helperText={passwordError}

@@ -3,62 +3,50 @@ import api from './api/config';
 const authService = {
   login: async (credentials) => {
     try {
-      // Destructure email and password from credentials
-      const { email, password } = credentials;
-      
-      // Validate credentials
-      if (!email || !password) {
-        throw new Error('Email and password are required');
+      const response = await api.post('/api/auth/login', credentials);
+      const { token, user } = response.data;
+
+      if (!token || !user) {
+        throw new Error('Invalid response from server');
       }
 
-      // Make the login request with correct endpoint
-      const response = await api.post('/api/auth/login', { email, password });
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        if (response.data.user) {
-          localStorage.setItem('userRole', response.data.user.role);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-        }
-      }
-      return response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      return { success: true, user };
     } catch (error) {
-      console.error('Login error:', error);
-      if (error.response?.status === 401) {
-        throw { message: 'Invalid email or password' };
-      }
-      throw error.response?.data || { message: error.message || 'An error occurred during login' };
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   },
 
   register: async (userData) => {
     try {
       const response = await api.post('/api/auth/register', userData);
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        if (response.data.user) {
-          localStorage.setItem('userRole', response.data.user.role);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-        }
+      const { token, user } = response.data;
+
+      if (!token || !user) {
+        throw new Error('Invalid response from server');
       }
-      return response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      return { success: true, user };
     } catch (error) {
-      console.error('Registration error:', error);
-      throw error.response?.data || { message: 'An error occurred during registration' };
+      throw new Error(error.response?.data?.message || 'Registration failed');
     }
   },
 
   logout: async () => {
     try {
-      await api.post('/api/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Always clear local storage and redirect
       localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      delete api.defaults.headers.common['Authorization'];
+      return { success: true };
+    } catch (error) {
+      throw new Error('Failed to logout');
     }
   },
 

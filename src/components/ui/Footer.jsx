@@ -108,15 +108,15 @@ const Footer = () => {
               © {new Date().getFullYear()} ShaadiSetGo. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-pink-500">
+              <Link to="/terms" className="text-gray-400 hover:text-pink-500">
                 Terms of Service
-              </a>
-              <a href="#" className="text-gray-400 hover:text-pink-500">
+              </Link>
+              <Link to="/privacy" className="text-gray-400 hover:text-pink-500">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-pink-500">
+              </Link>
+              <Link to="/cookies" className="text-gray-400 hover:text-pink-500">
                 Cookie Policy
-              </a>
+              </Link>
             </div>
           </div>
         </div>

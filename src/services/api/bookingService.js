@@ -1,67 +1,59 @@
 import api from './config';
 
-class BookingService {
-  async getAllBookings(filters = {}) {
+const bookingService = {
+  createBooking: async (bookingData) => {
     try {
-      const response = await api.get('/bookings', { params: filters });
+      const response = await api.post('/api/bookings', bookingData);
       return response.data;
     } catch (error) {
-      throw this.handleError(error);
+      throw new Error(error.response?.data?.message || 'Failed to create booking');
     }
-  }
+  },
 
-  async getBookingById(id) {
+  getBookings: async (filters = {}) => {
     try {
-      const response = await api.get(`/bookings/${id}`);
+      const response = await api.get('/api/bookings', { params: filters });
       return response.data;
     } catch (error) {
-      throw this.handleError(error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch bookings');
     }
-  }
+  },
 
-  async createBooking(bookingData) {
+  getBookingById: async (id) => {
     try {
-      const response = await api.post('/bookings', bookingData);
+      const response = await api.get(`/api/bookings/${id}`);
       return response.data;
     } catch (error) {
-      throw this.handleError(error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch booking');
     }
-  }
+  },
 
-  async updateBooking(id, bookingData) {
+  updateBooking: async (id, updateData) => {
     try {
-      const response = await api.put(`/bookings/${id}`, bookingData);
+      const response = await api.put(`/api/bookings/${id}`, updateData);
       return response.data;
     } catch (error) {
-      throw this.handleError(error);
+      throw new Error(error.response?.data?.message || 'Failed to update booking');
     }
-  }
+  },
 
-  async updateBookingStatus(id, status) {
+  deleteBooking: async (id) => {
+    try {
+      const response = await api.delete(`/api/bookings/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to delete booking');
+    }
+  },
+
+  updateBookingStatus: async (id, status) => {
     try {
       const response = await api.patch(`/bookings/${id}/status`, { status });
       return response.data;
     } catch (error) {
-      throw this.handleError(error);
+      throw new Error(error.response?.data?.message || 'Failed to update booking status');
     }
   }
+};
 
-  async deleteBooking(id) {
-    try {
-      const response = await api.delete(`/bookings/${id}`);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  handleError(error) {
-    return {
-      message: error.response?.data?.message || 'An error occurred',
-      status: error.response?.status,
-      data: error.response?.data
-    };
-  }
-}
-
-export default new BookingService(); 
+export default bookingService; 

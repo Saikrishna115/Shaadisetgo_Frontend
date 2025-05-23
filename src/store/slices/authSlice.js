@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import authService from '../../services/auth';
+import { login as loginService, register as registerService, logout as logoutService } from '../../services/auth';
 
 // Initialize state from localStorage with proper role handling
 const getUserFromStorage = () => {
@@ -30,10 +30,10 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-      const data = await authService.register(userData);
-      return data;
+      const response = await registerService(userData);
+      return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: error.message || 'Registration failed' });
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -42,21 +42,10 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      // Validate credentials
-      if (!credentials?.email || !credentials?.password) {
-        return rejectWithValue({ message: 'Email and password are required' });
-      }
-
-      const data = await authService.login(credentials);
-      
-      if (!data.user || !data.user.role) {
-        return rejectWithValue({ message: 'Invalid user data received' });
-      }
-
-      return data;
+      const response = await loginService(credentials);
+      return response;
     } catch (error) {
-      console.error('Login thunk error:', error);
-      return rejectWithValue(error.response?.data || { message: error.message || 'Login failed' });
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -65,10 +54,10 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await authService.logout();
-      return null;
+      const response = await logoutService();
+      return response;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -138,7 +127,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Login failed';
+        state.error = action.payload;
         state.user = null;
         state.isAuthenticated = false;
         // Clear any stored data in case of error
@@ -159,13 +148,16 @@ const authSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Registration failed';
+        state.error = action.payload;
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
         state.error = null;
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.error = action.payload;
       })
       // Get Current User
       .addCase(getCurrentUser.pending, (state) => {

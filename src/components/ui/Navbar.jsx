@@ -118,14 +118,12 @@ const Navbar = () => {
   const handleDashboard = () => {
     handleClose();
     if (!user) {
-      console.error('User is not defined');
       navigate('/login', { replace: true });
       return;
     }
 
     const userRole = user.role || localStorage.getItem('userRole');
     if (!userRole) {
-      console.error('User role is not defined');
       navigate('/login', { replace: true });
       return;
     }
@@ -141,7 +139,6 @@ const Navbar = () => {
         navigate('/dashboard', { replace: true });
         break;
       default:
-        console.error('Invalid user role:', userRole);
         navigate('/login', { replace: true });
     }
   };
