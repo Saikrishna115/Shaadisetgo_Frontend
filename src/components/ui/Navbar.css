@@ -9,11 +9,13 @@
   left: 0;
   right: 0;
   z-index: 1100;
+  background-color: #f5f5dc; /* lite ivory */
 }
 
 .navbar.scrolled {
   box-shadow: 0 2px 12px rgba(147, 112, 219, 0.2);
   background: linear-gradient(to right, rgba(147, 112, 219, 0.98), rgba(183, 132, 167, 0.98));
+  background-color: #f5f5dc; /* lite ivory */
 }
 
 /* Main content adjustment */
