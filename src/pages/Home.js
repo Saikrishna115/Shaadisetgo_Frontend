@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaHeart, FaSearch, FaCalendar } from 'react-icons/fa';
+import { FaHeart, FaSearch, FaCalendar, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette } from 'react-icons/fa';
 import heroBg from '../assets/hero-bg.jpg';  // Ensure the image path is correct
 import './Home.css';
 
@@ -8,12 +8,12 @@ const Home = () => {
   const navigate = useNavigate();
 
   const categories = [
-    { name: 'Venues', image: '/images/venue.jpg' },
-    { name: 'Photography', image: '/images/photography.jpg' },
-    { name: 'Catering', image: '/images/catering.jpg' },
-    { name: 'Decoration', image: '/images/decoration.jpg' },
-    { name: 'Music', image: '/images/music.jpg' },
-    { name: 'Makeup', image: '/images/makeup.jpg' }
+    { name: 'Venues', icon: <FaBuilding className="text-5xl text-pink-500" /> },
+    { name: 'Photography', icon: <FaCamera className="text-5xl text-pink-500" /> },
+    { name: 'Catering', icon: <FaUtensils className="text-5xl text-pink-500" /> },
+    { name: 'Decoration', icon: <FaPaintBrush className="text-5xl text-pink-500" /> },
+    { name: 'Music', icon: <FaMusic className="text-5xl text-pink-500" /> },
+    { name: 'Makeup', icon: <FaPalette className="text-5xl text-pink-500" /> }
   ];
 
   const features = [
@@ -89,8 +89,8 @@ const Home = () => {
               }}
               aria-label={`Browse ${category.name} vendors`}
             >
-              <img src={category.image} alt="" className="category-image" />
-              <div className="category-overlay">{category.name}</div>
+              <div className="category-icon">{category.icon}</div>
+              <div className="category-name">{category.name}</div>
             </button>
           ))}
         </div>

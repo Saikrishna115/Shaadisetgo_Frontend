@@ -9,11 +9,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <img
-                className="h-8 w-auto"
-                src="/logo.png"
-                alt="ShaadiSetGo"
-              />
+              <span className="text-2xl font-bold text-pink-500">💒</span>
               <span className="ml-2 text-xl font-bold text-pink-500">ShaadiSetGo</span>
             </div>
             <p className="text-gray-300 text-sm">
@@ -125,4 +121,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;
