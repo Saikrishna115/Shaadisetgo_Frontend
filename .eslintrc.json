@@ -13,7 +13,7 @@
     "no-unused-vars": "warn",
     "react/prop-types": "off",
     "react-hooks/exhaustive-deps": "warn",
-    "no-console": "warn",
+    "no-console": ["warn", { "allow": ["error", "warn"] }],
     "no-debugger": "warn",
     "no-var": "error",
     "prefer-const": "error",
@@ -32,4 +32,4 @@
       "version": "detect"
     }
   }
-} 
+}

@@ -5,7 +5,9 @@ const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.on
 
 // Validate the API URL format
 if (!baseURL.startsWith('http')) {
-  console.error('Invalid API URL format. Please check your environment variables.');
+  const errorMessage = 'Invalid API URL format. Please check your environment variables.';
+  console.error(errorMessage);
+  throw new Error(errorMessage);
 }
 
 const api = axios.create({
