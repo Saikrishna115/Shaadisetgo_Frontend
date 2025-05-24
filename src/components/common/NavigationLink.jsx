@@ -13,7 +13,18 @@ const NavigationLink = ({ to, children, className, prefetchOnHover = true, ...pr
 
   // Prefetch likely next routes when the current route changes
   useEffect(() => {
-    prefetchLikelyRoutes(location.pathname);
+    const controller = new AbortController();
+    const prefetch = async () => {
+      try {
+        await prefetchLikelyRoutes(location.pathname);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.warn('Failed to prefetch routes:', error);
+        }
+      }
+    };
+    prefetch();
+    return () => controller.abort();
   }, [location.pathname]);
 
   return (
@@ -28,4 +39,4 @@ const NavigationLink = ({ to, children, className, prefetchOnHover = true, ...pr
   );
 };
 
-export default NavigationLink; 
+export default NavigationLink;

@@ -6,11 +6,14 @@ const VendorDetails = ({ vendorId }) => {
   const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchVendorDetails = async () => {
       try {
         const response = await api.get('/vendors/profile');
-        console.log('Vendor details:', response.data);
-        setVendor(response.data);
+        if (isMounted) {
+          setVendor(response.data);
+        }
       } catch (error) {
         console.error('Error fetching vendor details:', error);
       }
@@ -19,8 +22,9 @@ const VendorDetails = ({ vendorId }) => {
     const fetchVendorBookings = async () => {
       try {
         const response = await api.get('/bookings/vendor');
-        console.log('Vendor bookings:', response.data);
-        setBookings(response.data);
+        if (isMounted) {
+          setBookings(response.data);
+        }
       } catch (error) {
         console.error('Error fetching bookings:', error);
       }
@@ -28,6 +32,10 @@ const VendorDetails = ({ vendorId }) => {
 
     fetchVendorDetails();
     fetchVendorBookings();
+
+    return () => {
+      isMounted = false;
+    };
   }, [vendorId]);
 
   return (

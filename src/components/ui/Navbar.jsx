@@ -72,14 +72,19 @@ const Navbar = () => {
     if (isAuthenticated && !user && localStorage.getItem('token')) {
       dispatch(getCurrentUser());
     }
+  }, [isAuthenticated, user, dispatch]);
 
+  useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const shouldBeScrolled = window.scrollY > 20;
+      if (shouldBeScrolled !== isScrolled) {
+        setIsScrolled(shouldBeScrolled);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isAuthenticated, user, dispatch]);
+  }, [isScrolled]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
