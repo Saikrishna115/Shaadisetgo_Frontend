@@ -1,14 +1,24 @@
 import axios from 'axios';
 
+// Ensure we have a valid API URL
 const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
+
+// Validate the API URL format
+if (!baseURL.startsWith('http')) {
+  console.error('Invalid API URL format. Please check your environment variables.');
+}
 
 const api = axios.create({
   baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
   },
   withCredentials: true,
+  timeout: 10000, // 10 second timeout
+  validateStatus: status => status >= 200 && status < 500 // Handle all responses
 });
 
 let isRefreshing = false;
@@ -53,21 +63,21 @@ api.interceptors.response.use(
 
     // If the error is 401 and we haven't tried refreshing yet
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Don't try to refresh if this is a login request
-      if (originalRequest.url.includes('/api/auth/login')) {
+      // Skip token refresh for auth-related endpoints
+      const skipRefreshEndpoints = [
+        '/api/auth/login',
+        '/api/auth/refresh-token',
+        '/api/auth/logout'
+      ];
+
+      if (skipRefreshEndpoints.some(endpoint => originalRequest.url.includes(endpoint))) {
         return Promise.reject(error);
       }
 
       if (isRefreshing) {
-        try {
-          const token = await new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          });
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        } catch (err) {
-          return Promise.reject(err);
-        }
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve: () => resolve(api(originalRequest)), reject });
+        });
       }
 
       originalRequest._retry = true;
@@ -75,28 +85,30 @@ api.interceptors.response.use(
 
       try {
         const response = await api.post('/api/auth/refresh-token');
-        const { token } = response.data;
+        const { token, user } = response.data;
         
-        if (token) {
+        if (token && user) {
+          // Update all auth data
           localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem('userRole', user.role);
           api.defaults.headers.common.Authorization = `Bearer ${token}`;
           originalRequest.headers.Authorization = `Bearer ${token}`;
           
           processQueue(null, token);
           return api(originalRequest);
         } else {
-          processQueue(new Error('No token received'), null);
-          throw new Error('No token received');
+          throw new Error('Invalid refresh token response');
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
+        isRefreshing = false;
         
-        // Clear auth data if refresh token is invalid
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userRole');
+        // Clear all auth data
+        localStorage.clear();
+        delete api.defaults.headers.common.Authorization;
         
-        // Only redirect to login if we're not already there
+        // Redirect to login if not already there
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
         }
@@ -111,4 +123,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+export default api;

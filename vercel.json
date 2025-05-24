@@ -7,12 +7,27 @@
         "installCommand": "npm install",
         "buildCommand": "CI=false npm run build",
         "outputDirectory": "build",
-        "framework": "create-react-app"
+        "framework": "create-react-app",
+        "maxLambdaSize": "50mb"
       }
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "https://shaadisetgo-frontend.vercel.app",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "continue": true
+    },
     { "handle": "filesystem" },
+    { "src": "/static/(.*)", "headers": { "cache-control": "public,max-age=31536000,immutable" } },
     { "src": "/[^.]+", "dest": "/index.html" }
-  ]
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://shaadisetgo-backend.onrender.com"
+  }
 }

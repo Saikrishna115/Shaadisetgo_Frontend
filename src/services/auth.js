@@ -2,6 +2,11 @@ import api from './api/config';
 
 export const login = async (credentials) => {
   try {
+    // Clear any existing auth data before login attempt
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
+
     const response = await api.post('/api/auth/login', credentials);
     const { token, user } = response.data;
 
@@ -9,12 +14,19 @@ export const login = async (credentials) => {
       throw new Error('Invalid response from server');
     }
 
+    // Store new auth data
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('userRole', user.role);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     return { success: true, user };
   } catch (error) {
+    // Ensure no partial auth data remains on error
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    delete api.defaults.headers.common['Authorization'];
     throw new Error(error.response?.data?.message || 'Login failed');
   }
 };

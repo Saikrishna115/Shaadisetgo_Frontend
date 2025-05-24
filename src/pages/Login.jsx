@@ -42,23 +42,21 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (isAuthenticated && user && user.role) {
-      // Ensure proper role-based navigation
-      switch (user.role) {
-        case 'vendor':
-          navigate('/vendor/dashboard', { replace: true });
-          break;
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'customer':
-          navigate('/dashboard', { replace: true });
-          break;
-        default:
-          setErrorMessage(`Invalid user role: ${user.role}`);
+    if (!loading && isAuthenticated && user?.role) {
+      const roleRoutes = {
+        vendor: '/vendor/dashboard',
+        admin: '/admin',
+        customer: '/dashboard'
+      };
+      
+      const route = roleRoutes[user.role];
+      if (route) {
+        navigate(route, { replace: true });
+      } else {
+        setErrorMessage(`Invalid user role: ${user.role}`);
       }
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user?.role, loading, navigate]);
 
   // Clear error when component unmounts
   useEffect(() => {
