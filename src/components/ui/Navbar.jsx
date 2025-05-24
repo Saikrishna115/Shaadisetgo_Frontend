@@ -341,27 +341,10 @@ const Navbar = () => {
             <Toolbar disableGutters>
               <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
                 <Link to="/" className="logo-link">
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <img
-                    src="/logo.png"
-                    alt="ShaadiSetGo"
-                    className="logo-image"
-                  />
-                  <Typography
-                    variant="h6"
-                    noWrap
-                    sx={{
-                      ml: 1,
-                      fontFamily: 'monospace',
-                      fontWeight: 700,
-                      color: 'inherit',
-                      textDecoration: 'none',
-                    }}
-                  >
+                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
                     ShaadiSetGo
                   </Typography>
-                </Box>
-              </Link>
+                </Link>
 
               {!isMobile && (
                 <Box sx={{ ml: 4, display: 'flex' }}>

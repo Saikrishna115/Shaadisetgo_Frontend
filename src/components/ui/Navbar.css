@@ -27,20 +27,7 @@
   }
 }
 
-/* Logo styles */
-.navbar-brand {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  transition: transform 0.3s ease;
-  color: white;
-}
 
-.navbar-brand:hover {
-  transform: translateY(-1px);
-}
 
 /* Navigation Links */
 .nav-links {
@@ -284,4 +271,4 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
-} 
+}
