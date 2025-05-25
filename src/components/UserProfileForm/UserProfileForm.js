@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const UserProfileForm = ({ initialData, onSubmit }) => {
@@ -25,15 +25,15 @@ const UserProfileForm = ({ initialData, onSubmit }) => {
     }
   }, [initialData]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
-  };
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     try {
       await onSubmit(formData);
@@ -43,7 +43,7 @@ const UserProfileForm = ({ initialData, onSubmit }) => {
       setError(err.message || 'Failed to update profile');
       setSuccess('');
     }
-  };
+  }, [formData, onSubmit]);
 
   return (
     <div className="container mt-4">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
@@ -69,13 +69,13 @@ const BookingDetails = () => {
     fetchBookingDetails();
   }, [id]);
 
-  const handleResponse = (type) => {
+  const handleResponse = useCallback((type) => {
     setResponseType(type);
     setResponseMessage('');
     setResponseDialog(true);
-  };
+  }, []);
 
-  const submitResponse = async () => {
+  const submitResponse = useCallback(async () => {
     if (actionLoading) return;
 
     try {
@@ -97,7 +97,7 @@ const BookingDetails = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [actionLoading, id, responseType, responseMessage]);
 
   if (loading) {
     return (
@@ -389,4 +389,4 @@ const BookingDetails = () => {
   );
 };
 
-export default BookingDetails; 
+export default BookingDetails;

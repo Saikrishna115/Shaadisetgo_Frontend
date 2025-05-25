@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -47,7 +47,7 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     
     // Handle nested location fields
@@ -90,14 +90,14 @@ const VendorProfileForm = ({ initialData, onSubmit }) => {
         [name]: ''
       }));
     }
-  };
+  }, [errors]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     if (validateForm()) {
       onSubmit(formData);
     }
-  };
+  }, [formData, onSubmit]);
 
   const categories = [
     'Venues',

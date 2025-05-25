@@ -77,14 +77,17 @@ const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       const shouldBeScrolled = window.scrollY > 20;
-      if (shouldBeScrolled !== isScrolled) {
-        setIsScrolled(shouldBeScrolled);
-      }
+      setIsScrolled(prev => {
+        if (prev !== shouldBeScrolled) {
+          return shouldBeScrolled;
+        }
+        return prev;
+      });
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isScrolled]);
+  }, []);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);

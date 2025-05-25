@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { register } from '../store/slices/authSlice';
@@ -76,19 +76,21 @@ const Register = () => {
 
   const steps = ['Basic Information', 'Account Setup', formData.role === 'vendor' ? 'Business Details' : 'Preferences'];
 
-  const validateEmail = (email) => {
+  const validateEmail = useCallback((email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setValidations(prev => ({ ...prev, email: emailRegex.test(email) }));
-    return emailRegex.test(email);
-  };
+    const isValid = emailRegex.test(email);
+    setValidations(prev => ({ ...prev, email: isValid }));
+    return isValid;
+  }, []);
 
-  const validatePhone = (phone) => {
+  const validatePhone = useCallback((phone) => {
     const phoneRegex = /^\d{10}$/;
-    setValidations(prev => ({ ...prev, phone: phoneRegex.test(phone) }));
-    return phoneRegex.test(phone);
-  };
+    const isValid = phoneRegex.test(phone);
+    setValidations(prev => ({ ...prev, phone: isValid }));
+    return isValid;
+  }, []);
 
-  const validatePassword = (password) => {
+  const validatePassword = useCallback((password) => {
     const validations = {
       hasUpperCase: /[A-Z]/.test(password),
       hasLowerCase: /[a-z]/.test(password),
@@ -98,9 +100,9 @@ const Register = () => {
     };
     setValidations(prev => ({ ...prev, password: validations }));
     return Object.values(validations).every(Boolean);
-  };
+  }, []);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     if (name.startsWith('location.')) {
       const locationField = name.split('.')[1];
@@ -122,14 +124,14 @@ const Register = () => {
       if (name === 'phone') validatePhone(value);
       if (name === 'password') validatePassword(value);
     }
-  };
+  }, [validateEmail, validatePhone, validatePassword]);
 
-  const validateStep = () => {
+  const isStepValid = useMemo(() => {
     switch (activeStep) {
       case 0:
-        return formData.fullName && validateEmail(formData.email) && validatePhone(formData.phone);
+        return formData.fullName && validations.email && validations.phone;
       case 1:
-        return validatePassword(formData.password) && formData.password === formData.confirmPassword;
+        return Object.values(validations.password).every(Boolean) && formData.password === formData.confirmPassword;
       case 2:
         if (formData.role === 'vendor') {
           return formData.businessName && formData.serviceCategory && formData.location.city && formData.location.state;
@@ -138,24 +140,24 @@ const Register = () => {
       default:
         return false;
     }
-  };
+  }, [activeStep, formData, validations]);
 
-  const handleNext = () => {
-    if (validateStep()) {
+  const handleNext = useCallback(() => {
+    if (isStepValid) {
       if (activeStep === steps.length - 1) {
         handleSubmit();
       } else {
         setActiveStep(prev => prev + 1);
       }
     }
-  };
+  }, [isStepValid, activeStep, steps.length]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setActiveStep(prev => prev - 1);
-  };
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async (e) => {
+    if (e) e.preventDefault();
     setLoading(true);
     setErrorMessage('');
 
@@ -171,7 +173,7 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch, formData, navigate]);
 
   const renderStepContent = (step) => {
     const commonBoxStyles = {
