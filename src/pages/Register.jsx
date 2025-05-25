@@ -146,20 +146,6 @@ const Register = () => {
     return isStepValid;
   }, [isStepValid]);
 
-  const handleNext = useCallback(() => {
-    if (isStepValid) {
-      if (activeStep === steps.length - 1) {
-        handleSubmit();
-      } else {
-        setActiveStep(prev => prev + 1);
-      }
-    }
-  }, [isStepValid, activeStep, steps.length, handleSubmit]);
-
-  const handleBack = useCallback(() => {
-    setActiveStep(prev => prev - 1);
-  }, []);
-
   const handleSubmit = useCallback(async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
@@ -178,6 +164,20 @@ const Register = () => {
       setLoading(false);
     }
   }, [dispatch, formData, navigate]);
+
+  const handleNext = useCallback(() => {
+    if (isStepValid) {
+      if (activeStep === steps.length - 1) {
+        handleSubmit();
+      } else {
+        setActiveStep(prev => prev + 1);
+      }
+    }
+  }, [isStepValid, activeStep, steps.length, handleSubmit]);
+
+  const handleBack = useCallback(() => {
+     setActiveStep(prev => prev - 1);
+   }, []);
 
   const renderStepContent = (step) => {
     const commonBoxStyles = {
