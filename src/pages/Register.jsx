@@ -154,7 +154,7 @@ const Register = () => {
         setActiveStep(prev => prev + 1);
       }
     }
-  }, [isStepValid, activeStep, steps.length]);
+  }, [isStepValid, activeStep, steps.length, handleSubmit]);
 
   const handleBack = useCallback(() => {
     setActiveStep(prev => prev - 1);
