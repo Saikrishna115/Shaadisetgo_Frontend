@@ -39,7 +39,7 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'customer',
+    role: '',
     businessName: '',
     serviceCategory: '',
     location: {
@@ -141,6 +141,10 @@ const Register = () => {
         return false;
     }
   }, [activeStep, formData, validations]);
+
+  const validateStep = useCallback(() => {
+    return isStepValid;
+  }, [isStepValid]);
 
   const handleNext = useCallback(() => {
     if (isStepValid) {
