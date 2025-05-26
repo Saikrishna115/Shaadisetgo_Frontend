@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Ensure we have a valid API URL
-const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com/api';
+const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
 
 // Validate the API URL format
 if (!baseURL.startsWith('http')) {
@@ -19,7 +19,7 @@ const api = axios.create({
     'Pragma': 'no-cache'
   },
   withCredentials: true,
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout
   validateStatus: status => status >= 200 && status < 500 // Handle all responses
 });
 
@@ -45,11 +45,6 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Ensure URL format is correct
-    if (!config.url.startsWith('/')) {
-      config.url = '/' + config.url;
-    }
-    
     return config;
   },
   (error) => {
@@ -67,9 +62,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Skip token refresh for auth-related endpoints
       const skipRefreshEndpoints = [
-        '/api/auth/login',
-        '/api/auth/refresh-token',
-        '/api/auth/logout'
+        '/auth/login',
+        '/auth/refresh-token',
+        '/auth/logout'
       ];
 
       if (skipRefreshEndpoints.some(endpoint => originalRequest.url.includes(endpoint))) {
@@ -86,7 +81,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post('/api/auth/refresh-token');
+        const response = await api.post('/auth/refresh-token');
         const { token, user } = response.data;
         
         if (token && user) {
@@ -99,26 +94,23 @@ api.interceptors.response.use(
           
           processQueue(null, token);
           return api(originalRequest);
-        } else {
-          throw new Error('Invalid refresh token response');
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
-        isRefreshing = false;
-        
-        // Clear all auth data
-        localStorage.clear();
+        // Clear all auth data on refresh failure
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
         delete api.defaults.headers.common.Authorization;
-        
-        // Redirect to login if not already there
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
-        
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // Handle network errors
+    if (!error.response) {
+      return Promise.reject(new Error('Network error. Please check your internet connection.'));
     }
 
     return Promise.reject(error);

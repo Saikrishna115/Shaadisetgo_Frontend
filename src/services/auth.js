@@ -7,7 +7,7 @@ export const login = async (credentials) => {
     localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];
 
-    const response = await api.post('/api/auth/login', credentials);
+    const response = await api.post('/auth/login', credentials);
     const { token, user } = response.data;
 
     if (!token || !user) {
@@ -33,7 +33,15 @@ export const login = async (credentials) => {
 
 export const register = async (userData) => {
   try {
-    const response = await api.post('/api/auth/register', userData);
+    // Transform name fields to match backend expectation
+    const transformedData = {
+      ...userData,
+      name: `${userData.firstName} ${userData.lastName}`
+    };
+    delete transformedData.firstName;
+    delete transformedData.lastName;
+
+    const response = await api.post('/auth/register', transformedData);
     const { token, user } = response.data;
 
     if (!token || !user) {
@@ -42,6 +50,7 @@ export const register = async (userData) => {
 
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('userRole', user.role);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     return { success: true, user };
@@ -52,18 +61,25 @@ export const register = async (userData) => {
 
 export const logout = async () => {
   try {
+    await api.post('/auth/logout');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
     delete api.defaults.headers.common['Authorization'];
     return { success: true };
   } catch (error) {
+    // Still clear local auth data even if server logout fails
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    delete api.defaults.headers.common['Authorization'];
     throw new Error('Failed to logout');
   }
 };
 
 export const getCurrentUser = async () => {
   try {
-    const response = await api.get('/api/auth/me');
+    const response = await api.get('/auth/me');
     // Update local storage with latest user data
     if (response.data.user) {
       localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -77,12 +93,14 @@ export const getCurrentUser = async () => {
 };
 
 export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  return !!(token && user);
 };
 
 export const refreshToken = async () => {
   try {
-    const response = await api.post('/api/auth/refresh-token');
+    const response = await api.post('/auth/refresh-token');
     const { token, user } = response.data;
 
     if (!token || !user) {
@@ -91,6 +109,7 @@ export const refreshToken = async () => {
 
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('userRole', user.role);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     return { success: true, user };
