@@ -5,6 +5,7 @@ export const login = async (credentials) => {
     // Clear any existing auth data before login attempt
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
     delete api.defaults.headers.common['Authorization'];
 
     const response = await api.post('/auth/login', credentials);
@@ -22,6 +23,7 @@ export const login = async (credentials) => {
 
     return { success: true, user };
   } catch (error) {
+    console.error('Login error:', error.response?.data || error.message);
     // Ensure no partial auth data remains on error
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -33,15 +35,21 @@ export const login = async (credentials) => {
 
 export const register = async (userData) => {
   try {
+    console.log('Registration data before transform:', userData);
     // Transform name fields to match backend expectation
     const transformedData = {
       ...userData,
-      name: `${userData.firstName} ${userData.lastName}`
+      name: `${userData.firstName} ${userData.lastName}`,
+      role: userData.role || 'user' // Ensure role is set
     };
     delete transformedData.firstName;
     delete transformedData.lastName;
 
+    console.log('Transformed registration data:', transformedData);
+
     const response = await api.post('/auth/register', transformedData);
+    console.log('Registration response:', response.data);
+    
     const { token, user } = response.data;
 
     if (!token || !user) {
@@ -55,6 +63,7 @@ export const register = async (userData) => {
 
     return { success: true, user };
   } catch (error) {
+    console.error('Registration error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
@@ -68,6 +77,7 @@ export const logout = async () => {
     delete api.defaults.headers.common['Authorization'];
     return { success: true };
   } catch (error) {
+    console.error('Logout error:', error);
     // Still clear local auth data even if server logout fails
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -83,9 +93,11 @@ export const getCurrentUser = async () => {
     // Update local storage with latest user data
     if (response.data.user) {
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('userRole', response.data.user.role);
     }
     return response.data.user;
   } catch (error) {
+    console.error('Get current user error:', error);
     // If the API call fails, fall back to local storage
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
@@ -114,6 +126,7 @@ export const refreshToken = async () => {
 
     return { success: true, user };
   } catch (error) {
+    console.error('Token refresh error:', error);
     throw new Error(error.response?.data?.message || 'Failed to refresh token');
   }
 };

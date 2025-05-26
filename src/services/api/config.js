@@ -10,6 +10,8 @@ if (!baseURL.startsWith('http')) {
   throw new Error(errorMessage);
 }
 
+console.log('API Base URL:', baseURL); // Log the base URL being used
+
 const api = axios.create({
   baseURL: baseURL,
   headers: {
@@ -44,73 +46,89 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+    console.log(`API Request to ${config.url}:`, {
+      method: config.method,
+      headers: config.headers,
+      data: config.data
+    });
     return config;
   },
   (error) => {
+    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor for handling token refresh
+// Response interceptor for handling errors and token refresh
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`API Response from ${response.config.url}:`, {
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   async (error) => {
+    console.error('API Response Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+
     const originalRequest = error.config;
 
-    // If the error is 401 and we haven't tried refreshing yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // Skip token refresh for auth-related endpoints
-      const skipRefreshEndpoints = [
-        '/auth/login',
-        '/auth/refresh-token',
-        '/auth/logout'
-      ];
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network Error - No response received');
+      return Promise.reject(new Error('Network error - Please check your internet connection'));
+    }
 
-      if (skipRefreshEndpoints.some(endpoint => originalRequest.url.includes(endpoint))) {
-        return Promise.reject(error);
-      }
-
+    // Handle 401 Unauthorized errors and token refresh
+    if (error.response.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve: () => resolve(api(originalRequest)), reject });
-        });
+        try {
+          const token = await new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          });
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        } catch (err) {
+          return Promise.reject(err);
+        }
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const response = await api.post('/auth/refresh-token');
-        const { token, user } = response.data;
-        
-        if (token && user) {
-          // Update all auth data
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(user));
-          localStorage.setItem('userRole', user.role);
-          api.defaults.headers.common.Authorization = `Bearer ${token}`;
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          
-          processQueue(null, token);
-          return api(originalRequest);
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
         }
+
+        const response = await api.post('/auth/refresh-token');
+        const { token } = response.data;
+
+        localStorage.setItem('token', token);
+        api.defaults.headers.common.Authorization = `Bearer ${token}`;
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+
+        processQueue(null, token);
+        return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Clear all auth data on refresh failure
+        // Clear auth data on refresh token failure
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('refreshToken');
         delete api.defaults.headers.common.Authorization;
-        return Promise.reject(refreshError);
+        console.error('Token refresh failed:', refreshError);
+        return Promise.reject(new Error('Authentication expired - Please login again'));
       } finally {
         isRefreshing = false;
       }
-    }
-
-    // Handle network errors
-    if (!error.response) {
-      return Promise.reject(new Error('Network error. Please check your internet connection.'));
     }
 
     return Promise.reject(error);

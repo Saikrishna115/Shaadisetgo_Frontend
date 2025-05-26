@@ -1,15 +1,38 @@
-import React, { useState, } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { register } from '../store/slices/authSlice';
-import { Container, Box, Typography, TextField, Button, Alert, CircularProgress, Grid } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  CircularProgress,
+  Stepper,
+  Step,
+  StepLabel,
+  Grid,
+  Card,
+  CardContent,
+  Fade,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Divider,
+  useTheme,
+  Chip
+} from '@mui/material';
+import { Check as CheckIcon } from '@mui/icons-material';
+
 
 const Register = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  
+  const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,7 +40,7 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'user',  // Default role
+    role: '',
     businessName: '',
     serviceCategory: '',
     location: {
@@ -28,40 +51,123 @@ const Register = () => {
     serviceDescription: ''
   });
 
-  const validateEmail = (email) => {
+  const [validations, setValidations] = useState({
+    password: {
+      hasUpperCase: false,
+      hasLowerCase: false,
+      hasNumber: false,
+      hasSpecial: false,
+      hasLength: false
+    },
+    email: false,
+    phone: false
+  });
+
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const serviceCategories = [
+    'Venue',
+    'Catering',
+    'Photography',
+    'DJ',
+    'Decor',
+    'Other'
+  ];
+
+  const steps = ['Basic Information', 'Account Setup', formData.role === 'vendor' ? 'Business Details' : 'Preferences'];
+
+  const validateEmail = useCallback((email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+    const isValid = emailRegex.test(email);
+    setValidations(prev => ({ ...prev, email: isValid }));
+    return isValid;
+  }, []);
 
-  const validatePhone = (phone) => {
+  const validatePhone = useCallback((phone) => {
     const phoneRegex = /^\d{10}$/;
-    return phoneRegex.test(phone);
-  };
+    const isValid = phoneRegex.test(phone);
+    setValidations(prev => ({ ...prev, phone: isValid }));
+    return isValid;
+  }, []);
 
-  const validatePassword = (password) => {
-    return [
-      /[A-Z]/.test(password),  // Uppercase
-      /[a-z]/.test(password),  // Lowercase
-      /\d/.test(password),     // Number
-      /[@$!%*?&]/.test(password),  // Special characters matching backend
-      password.length >= 8     // Length
-    ].every(Boolean);
-  };
+  const validatePassword = useCallback((password) => {
+    const validations = {
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecial: /[@$!%*?&]/.test(password),  // Updated to match backend validation
+      hasLength: password.length >= 8
+    };
+    setValidations(prev => ({ ...prev, password: validations }));
+    return Object.values(validations).every(Boolean);
+  }, []);
 
-  const handleInputChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    if (name.startsWith('location.')) {
+      const locationField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          [locationField]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
 
-  const handleSubmit = async (e) => {
+      // Validate fields as they change
+      if (name === 'email') validateEmail(value);
+      if (name === 'phone') validatePhone(value);
+      if (name === 'password') validatePassword(value);
+    }
+  }, [validateEmail, validatePhone, validatePassword]);
+
+  const isStepValid = useMemo(() => {
+    switch (activeStep) {
+      case 0:
+        return formData.firstName && formData.lastName && validations.email && validations.phone;
+      case 1:
+        return Object.values(validations.password).every(Boolean) && formData.password === formData.confirmPassword;
+      case 2:
+        if (formData.role === 'vendor') {
+          return formData.businessName && formData.serviceCategory && formData.location.city && formData.location.state;
+        }
+        return true;
+      default:
+        return false;
+    }
+  }, [activeStep, formData, validations]);
+
+  const validateStep = useCallback(() => {
+    switch (activeStep) {
+      case 0:
+        return formData.firstName && formData.lastName && validations.email && validations.phone;
+      case 1:
+        return Object.values(validations.password).every(Boolean) && formData.password === formData.confirmPassword;
+      case 2:
+        if (formData.role === 'vendor') {
+          return formData.businessName && formData.serviceCategory && formData.location.city && formData.location.state;
+        }
+        return true;
+      default:
+        return false;
+    }
+  }, [activeStep, formData, validations]);
+
+  const handleSubmit = useCallback(async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
     setErrorMessage('');
-
+  
     try {
+      console.log('Starting registration with form data:', formData);
+
+      // Validate all required fields
       if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.role) {
         throw new Error('Please fill in all required fields');
       }
@@ -81,131 +187,592 @@ const Register = () => {
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
-
+  
+      // Additional validation for vendor
       if (formData.role === 'vendor' && (!formData.businessName || !formData.serviceCategory)) {
         throw new Error('Please complete all business information');
       }
-
+  
+      console.log('All validations passed, dispatching register action');
       const result = await dispatch(register(formData)).unwrap();
+      console.log('Registration result:', result);
+
       if (result.success) {
+        console.log('Registration successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
+        console.error('Registration failed:', result.message);
         setErrorMessage(result.message || 'Registration failed');
       }
     } catch (err) {
-      setErrorMessage(err.message || 'An error occurred during registration');
+      console.error('Registration error:', err);
+      setErrorMessage(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
+    }
+  }, [formData, dispatch, navigate, validateEmail, validatePhone, validatePassword]);
+
+  const handleNext = useCallback(() => {
+    if (isStepValid) {
+      if (activeStep === steps.length - 1) {
+        handleSubmit();
+      } else {
+        setActiveStep(prev => prev + 1);
+      }
+    }
+  }, [isStepValid, activeStep, steps.length, handleSubmit]);
+
+  const handleBack = useCallback(() => {
+     setActiveStep(prev => prev - 1);
+   }, []);
+
+  const renderStepContent = (step) => {
+    const commonBoxStyles = {
+      p: { xs: 1.5, sm: 2 },
+      bgcolor: theme.palette.background.default,
+      borderRadius: 1,
+      mb: { xs: 2, sm: 3 }
+    };
+
+    const commonTypographyStyles = {
+      fontSize: { xs: '0.875rem', sm: '1rem' }
+    };
+
+    const commonInputProps = {
+      sx: { 
+        bgcolor: 'white',
+        '& .MuiInputLabel-root': {
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        },
+        '& .MuiInputBase-input': {
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        }
+      }
+    };
+
+    switch (step) {
+      case 0:
+        return (
+          <Fade in={true}>
+            <Box>
+              <Typography 
+                variant="h6" 
+                gutterBottom 
+                sx={{ 
+                  mb: { xs: 2, sm: 3 }, 
+                  color: theme.palette.primary.main,
+                  fontSize: { xs: '1.125rem', sm: '1.25rem' }
+                }}
+              >
+                Tell us about yourself
+              </Typography>
+              
+              <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }}>
+                <Grid item xs={12}>
+                  <Box sx={commonBoxStyles}>
+                    <Typography 
+                      variant="subtitle1" 
+                      gutterBottom 
+                      sx={{ 
+                        color: theme.palette.text.secondary,
+                        ...commonTypographyStyles
+                      }}
+                    >
+                      Personal Information
+                    </Typography>
+                    <Grid container spacing={{ xs: 1.5, sm: 2 }}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Full Name"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          placeholder="Enter your full name"
+                          InputProps={commonInputProps}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          placeholder="Enter your email address"
+                          error={formData.email && !validations.email}
+                          helperText={formData.email && !validations.email ? 'Please enter a valid email address' : ''}
+                          InputProps={commonInputProps}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Phone Number"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          placeholder="Enter your 10-digit phone number"
+                          error={formData.phone && !validations.phone}
+                          helperText={formData.phone && !validations.phone ? 'Please enter a valid 10-digit phone number' : ''}
+                          InputProps={commonInputProps}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box sx={commonBoxStyles}>
+                    <Typography 
+                      variant="subtitle1" 
+                      gutterBottom 
+                      sx={{ 
+                        color: theme.palette.text.secondary,
+                        ...commonTypographyStyles
+                      }}
+                    >
+                      Account Type
+                    </Typography>
+                    <FormControl fullWidth variant="outlined">
+                      <InputLabel sx={commonTypographyStyles}>I am a</InputLabel>
+                      <Select
+                        value={formData.role}
+                        onChange={handleChange}
+                        name="role"
+                        label="I am a"
+                        sx={{ 
+                          bgcolor: 'white',
+                          '& .MuiSelect-select': {
+                            fontSize: { xs: '0.875rem', sm: '1rem' }
+                          }
+                        }}
+                      >
+                        <MenuItem value="customer">
+                          <Box sx={{ py: { xs: 0.5, sm: 1 } }}>
+                            <Typography variant="subtitle2" sx={commonTypographyStyles}>
+                              Customer
+                            </Typography>
+                            <Typography 
+                              variant="caption" 
+                              color="text.secondary"
+                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
+                              Looking to book wedding services
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="vendor">
+                          <Box sx={{ py: { xs: 0.5, sm: 1 } }}>
+                            <Typography variant="subtitle2" sx={commonTypographyStyles}>
+                              Vendor
+                            </Typography>
+                            <Typography 
+                              variant="caption" 
+                              color="text.secondary"
+                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
+                              Offering wedding services
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Fade>
+        );
+
+      case 1:
+        return (
+          <Fade in={true}>
+            <Box>
+              <Typography variant="h6" gutterBottom sx={{ mb: 3, color: theme.palette.primary.main }}>
+                Secure your account
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Box sx={{ 
+                    p: 2, 
+                    bgcolor: theme.palette.background.default,
+                    borderRadius: 1
+                  }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                      Password Setup
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Password"
+                          name="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          InputProps={{
+                            sx: { bgcolor: 'white' }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Confirm Password"
+                          name="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          error={formData.confirmPassword && formData.password !== formData.confirmPassword}
+                          helperText={formData.confirmPassword && formData.password !== formData.confirmPassword ? 'Passwords do not match' : ''}
+                          InputProps={{
+                            sx: { bgcolor: 'white' }
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Card variant="outlined" sx={{ bgcolor: theme.palette.background.default }}>
+                    <CardContent>
+                      <Typography variant="subtitle2" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                        Password Requirements
+                      </Typography>
+                      <Grid container spacing={1}>
+                        {Object.entries(validations.password).map(([key, valid]) => (
+                          <Grid item xs={12} sm={6} key={key}>
+                            <Box display="flex" alignItems="center">
+                              <Chip
+                                size="small"
+                                icon={valid ? <CheckIcon /> : undefined}
+                                label={key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                                color={valid ? 'success' : 'default'}
+                                variant={valid ? 'filled' : 'outlined'}
+                                sx={{ width: '100%', justifyContent: 'flex-start' }}
+                              />
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+          </Fade>
+        );
+
+      case 2:
+        return formData.role === 'vendor' ? (
+          <Fade in={true}>
+            <Box>
+              <Typography variant="h6" gutterBottom sx={{ mb: 3, color: theme.palette.primary.main }}>
+                Tell us about your business
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Box sx={{ 
+                    p: 2, 
+                    bgcolor: theme.palette.background.default,
+                    borderRadius: 1
+                  }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                      Business Information
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Business Name"
+                          name="businessName"
+                          value={formData.businessName}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          placeholder="Enter your business name"
+                          InputProps={{
+                            sx: { bgcolor: 'white' }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth variant="outlined">
+                          <InputLabel>Service Category</InputLabel>
+                          <Select
+                            value={formData.serviceCategory}
+                            onChange={handleChange}
+                            name="serviceCategory"
+                            label="Service Category"
+                            required
+                            sx={{ bgcolor: 'white' }}
+                          >
+                            {serviceCategories.map((category) => (
+                              <MenuItem key={category} value={category}>
+                                {category}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box sx={{ 
+                    p: 2, 
+                    bgcolor: theme.palette.background.default,
+                    borderRadius: 1
+                  }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                      Location Details
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="City"
+                          name="location.city"
+                          value={formData.location.city}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          placeholder="Enter city"
+                          InputProps={{
+                            sx: { bgcolor: 'white' }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="State"
+                          name="location.state"
+                          value={formData.location.state}
+                          onChange={handleChange}
+                          required
+                          variant="outlined"
+                          placeholder="Enter state"
+                          InputProps={{
+                            sx: { bgcolor: 'white' }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Business Address"
+                          name="location.address"
+                          value={formData.location.address}
+                          onChange={handleChange}
+                          variant="outlined"
+                          multiline
+                          rows={2}
+                          placeholder="Enter complete business address"
+                          InputProps={{
+                            sx: { bgcolor: 'white' }
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box sx={{ 
+                    p: 2, 
+                    bgcolor: theme.palette.background.default,
+                    borderRadius: 1
+                  }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+                      Service Details
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      label="Service Description"
+                      name="serviceDescription"
+                      value={formData.serviceDescription}
+                      onChange={handleChange}
+                      variant="outlined"
+                      multiline
+                      rows={4}
+                      placeholder="Describe your services, experience, and what makes your business unique..."
+                      InputProps={{
+                        sx: { bgcolor: 'white' }
+                      }}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Fade>
+        ) : (
+          <Fade in={true}>
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                🎉 Almost there!
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Your account is ready to be created. Click 'Complete' to finish registration and start planning your dream wedding!
+              </Typography>
+            </Box>
+          </Fade>
+        );
+
+      default:
+        return null;
     }
   };
 
   return (
-    <Container component="main" maxWidth="md">
-      <Box
+    <Container 
+      maxWidth="sm" 
+      sx={{ 
+        py: { xs: 8, sm: 12 },  // Add padding top and bottom
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}
+    >
+      <Card 
+        elevation={8}
         sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          borderRadius: 2,
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)'
         }}
       >
-        <Typography component="h1" variant="h5">
-          Register
-        </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography 
+            variant="h4" 
+            align="center" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 600,
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
+            }}
+          >
+            Create Your Account
+          </Typography>
+          
+          <Stepper 
+            activeStep={activeStep} 
+            sx={{ 
+              mt: { xs: 2, sm: 3, md: 4 }, 
+              mb: { xs: 2, sm: 3, md: 4 },
+              '& .MuiStepLabel-root .Mui-completed': {
+                color: theme.palette.success.main
+              },
+              '& .MuiStepLabel-root .Mui-active': {
+                color: theme.palette.primary.main
+              },
+              // Mobile stepper adjustments
+              '& .MuiStepLabel-label': {
+                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
+              },
+              // Hide step numbers on mobile, show only labels
+              '& .MuiStepIcon-root': {
+                display: { xs: 'none', sm: 'block' }
+              }
+            }}
+            alternativeLabel  // Better for mobile
+          >
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
           {errorMessage && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: { xs: 2, sm: 3 },
+                borderRadius: 1,
+                fontSize: { xs: '0.875rem', sm: '1rem' }
+              }}
+            >
               {errorMessage}
             </Alert>
           )}
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="phone"
-                label="Phone Number"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                name="confirmPassword"
-                label="Confirm Password"
-                type="password"
-                id="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </Grid>
-          </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
-          >
-            {loading ? <CircularProgress size={24} /> : 'Register'}
-          </Button>
-        </Box>
-      </Box>
+
+          <Box sx={{ mt: { xs: 2, sm: 3, md: 4 } }}>
+            {renderStepContent(activeStep)}
+            
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              mt: { xs: 2, sm: 3, md: 4 },
+              px: { xs: 0, sm: 2 }
+            }}>
+              <Button
+                onClick={handleBack}
+                disabled={activeStep === 0 || loading}
+                sx={{
+                  px: { xs: 2, sm: 3, md: 4 },
+                  '&.Mui-disabled': {
+                    opacity: 0
+                  }
+                }}
+              >
+                Back
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={!validateStep() || loading}
+                endIcon={loading && <CircularProgress size={20} />}
+                sx={{ 
+                  px: { xs: 2, sm: 3, md: 4 },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                {activeStep === steps.length - 1 ? 'Complete' : 'Next'}
+              </Button>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: { xs: 2, sm: 3, md: 4 } }} />
+
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography 
+              variant="body2" 
+              color="textSecondary"
+              sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+            >
+              Already have an account?{' '}
+              <Link 
+                to="/login" 
+                style={{ 
+                  textDecoration: 'none', 
+                  color: theme.palette.primary.main,
+                  fontWeight: 500
+                }}
+              >
+                Login here
+              </Link>
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     </Container>
   );
 };
