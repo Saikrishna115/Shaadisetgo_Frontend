@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Ensure we have a valid API URL
-const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com';
+const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.onrender.com/api';
 
 // Validate the API URL format
 if (!baseURL.startsWith('http')) {
@@ -45,9 +45,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Ensure URL starts with /api
-    if (!config.url.startsWith('/api/')) {
-      config.url = '/api' + (config.url.startsWith('/') ? config.url : '/' + config.url);
+    // Ensure URL format is correct
+    if (!config.url.startsWith('/')) {
+      config.url = '/' + config.url;
     }
     
     return config;

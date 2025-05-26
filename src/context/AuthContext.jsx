@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        const response = await api.get('/auth/me');
+        const response = await api.get('/api/auth/me');
         setUser(response.data.user);
       }
     } catch (error) {
@@ -30,11 +30,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await api.post('/auth/login', credentials);
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setUser(user);
-      return user;
+      const response = await api.post('/api/auth/login', credentials);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        if (response.data.user.role) {
+          localStorage.setItem('userRole', response.data.user.role);
+        }
+        setUser(response.data.user);
+        return response.data.user;
+      }
+      throw new Error('Login failed');
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -42,11 +48,17 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setUser(user);
-      return user;
+      const response = await api.post('/api/auth/register', userData);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        if (response.data.user.role) {
+          localStorage.setItem('userRole', response.data.user.role);
+        }
+        setUser(response.data.user);
+        return response.data.user;
+      }
+      throw new Error('Registration failed');
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -80,4 +92,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};

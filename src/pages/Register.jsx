@@ -95,7 +95,7 @@ const Register = () => {
       hasUpperCase: /[A-Z]/.test(password),
       hasLowerCase: /[a-z]/.test(password),
       hasNumber: /\d/.test(password),
-      hasSpecial: /[^a-zA-Z0-9]/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
       hasLength: password.length >= 8
     };
     setValidations(prev => ({ ...prev, password: validations }));
@@ -152,6 +152,16 @@ const Register = () => {
     setErrorMessage('');
 
     try {
+      // Validate all required fields
+      if (!formData.fullName || !formData.email || !formData.password || !formData.role) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      // Additional validation for vendor
+      if (formData.role === 'vendor' && (!formData.businessName || !formData.serviceCategory)) {
+        throw new Error('Please complete all business information');
+      }
+
       const result = await dispatch(register(formData)).unwrap();
       if (result.success) {
         navigate('/dashboard');

@@ -3,7 +3,7 @@ import api from './config';
 class AuthService {
   async login(credentials) {
     try {
-      const response = await api.post('/api/auth/login', credentials);
+      const response = await api.post('/auth/login', credentials);
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         if (response.data.user) {
@@ -32,28 +32,26 @@ class AuthService {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
 
-      // Format the request data
+      // Format the request data to match backend expectations
       const formattedData = {
-        firstName: userData.firstName.trim(),
-        lastName: userData.lastName.trim(),
+        name: `${userData.firstName} ${userData.lastName}`.trim(),
         email: userData.email.toLowerCase().trim(),
         password: userData.password,
-        role: userData.role,
-        phone: userData.phone || ''
+        role: userData.role || 'user'
       };
 
-      const response = await api.post('/api/auth/register', formattedData);
+      const response = await api.post('/auth/register', formattedData);
       console.log('Registration response:', response.data);
 
-      if (response.data.success && response.data.data.token) {
-        localStorage.setItem('token', response.data.data.token);
-        if (response.data.data.user) {
-          localStorage.setItem('user', JSON.stringify(response.data.data.user));
-          if (response.data.data.user.role) {
-            localStorage.setItem('userRole', response.data.data.user.role);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          if (response.data.user.role) {
+            localStorage.setItem('userRole', response.data.user.role);
           }
         }
-        return response.data.data;
+        return response.data;
       } else {
         throw new Error(response.data.message || 'Registration failed');
       }
@@ -132,4 +130,4 @@ class AuthService {
   }
 }
 
-export default new AuthService(); 
+export default new AuthService();

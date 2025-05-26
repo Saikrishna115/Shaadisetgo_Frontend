@@ -71,18 +71,23 @@ const Login = () => {
     setErrorMessage('');
 
     try {
+      if (!email || !password) {
+        throw new Error('Please enter both email and password');
+      }
+
       const result = await dispatch(login({ 
-        email: email.toLowerCase(), 
-        password: password 
+        email: email.toLowerCase().trim(), 
+        password 
       })).unwrap();
       
       if (result.success) {
-        navigate('/dashboard');
+        const role = localStorage.getItem('userRole');
+        navigate(role === 'vendor' ? '/vendor/dashboard' : '/dashboard');
       } else {
         setErrorMessage(result.message || 'Login failed');
       }
     } catch (err) {
-      setErrorMessage(err.message || 'An error occurred during login');
+      setErrorMessage(err.message || 'Login failed. Please check your credentials.');
       // Clear any stored data in case of error
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');
