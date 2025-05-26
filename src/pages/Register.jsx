@@ -1,34 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { register } from '../store/slices/authSlice';
-import {
-  Container,
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  CircularProgress,
-  Stepper,
-  Step,
-  StepLabel,
-  Grid,
-  Card,
-  CardContent,
-  Fade,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Divider,
-  useTheme,
-  Chip
-} from '@mui/material';
-import { Check as CheckIcon } from '@mui/icons-material';
+import { Container } from '@mui/material';
 
 const Register = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [activeStep, setActiveStep] = useState(0);
@@ -60,20 +36,6 @@ const Register = () => {
     email: false,
     phone: false
   });
-
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const serviceCategories = [
-    'Venue',
-    'Catering',
-    'Photography',
-    'DJ',
-    'Decor',
-    'Other'
-  ];
-
-  const steps = ['Basic Information', 'Account Setup', formData.role === 'vendor' ? 'Business Details' : 'Preferences'];
 
   const validateEmail = useCallback((email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -142,8 +104,6 @@ const Register = () => {
 
   const handleSubmit = useCallback(async (e) => {
     if (e) e.preventDefault();
-    setLoading(true);
-    setErrorMessage('');
 
     try {
       if (!formData.fullName || !formData.email || !formData.password || !formData.role) {
@@ -158,24 +118,22 @@ const Register = () => {
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setErrorMessage(result.message || 'Registration failed');
+        console.error(result.message || 'Registration failed');
       }
     } catch (err) {
-      setErrorMessage(err.message || 'An error occurred during registration');
-    } finally {
-      setLoading(false);
+      console.error(err.message || 'An error occurred during registration');
     }
   }, [dispatch, formData, navigate]);
 
   const handleNext = useCallback(() => {
     if (isStepValid) {
-      if (activeStep === steps.length - 1) {
+      if (activeStep === 2) {
         handleSubmit();
       } else {
         setActiveStep(prev => prev + 1);
       }
     }
-  }, [isStepValid, activeStep, steps.length, handleSubmit]);
+  }, [isStepValid, activeStep, handleSubmit]);
 
   const handleBack = useCallback(() => {
     setActiveStep(prev => prev - 1);
