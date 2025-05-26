@@ -181,12 +181,9 @@ const Register = () => {
     setActiveStep(prev => prev - 1);
   }, []);
 
-  // UI rendering logic omitted for brevity
-  // (You can reuse the `renderStepContent` and layout from your last working version)
-
   return (
     <Container>
-      {/* Render form, stepper, error messages, and navigation buttons here */}
+      {/* Registration form JSX goes here */}
     </Container>
   );
 };
