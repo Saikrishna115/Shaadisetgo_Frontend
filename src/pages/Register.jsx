@@ -1,37 +1,30 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { register } from '../store/slices/authSlice';
 import {
   Container,
-  Box,
+  Paper,
   Typography,
   TextField,
   Button,
-  Alert,
-  CircularProgress,
+  Grid,
   Stepper,
   Step,
   StepLabel,
-  Grid,
-  Card,
-  CardContent,
-  Fade,
+  FormControl,
+  InputLabel,
   Select,
   MenuItem,
-  InputLabel,
-  FormControl,
-  Divider,
-  useTheme,
-  Chip
+  CircularProgress,
+  Box,
 } from '@mui/material';
-import { Check as CheckIcon } from '@mui/icons-material';
-
 
 const Register = () => {
-  const theme = useTheme();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
+
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -40,739 +33,295 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: '',
+    role: 'user',
     businessName: '',
-    serviceCategory: '',
-    location: {
-      city: '',
-      state: '',
-      address: ''
-    },
-    serviceDescription: ''
+    businessType: '',
+    businessAddress: '',
   });
 
-  const [validations, setValidations] = useState({
-    password: {
-      hasUpperCase: false,
-      hasLowerCase: false,
-      hasNumber: false,
-      hasSpecial: false,
-      hasLength: false
-    },
-    email: false,
-    phone: false
-  });
+  const [validationErrors, setValidationErrors] = useState({});
 
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+  const steps = ['Personal Information', 'Contact Details', 'Account Setup', 'Business Details'];
 
-  const serviceCategories = [
-    'Venue',
-    'Catering',
-    'Photography',
-    'DJ',
-    'Decor',
-    'Other'
-  ];
+  const validateEmail = (email) => {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(email);
+  };
 
-  const steps = ['Basic Information', 'Account Setup', formData.role === 'vendor' ? 'Business Details' : 'Preferences'];
+  const validatePhone = (phone) => {
+    const re = /^[0-9]{10}$/;
+    return re.test(phone);
+  };
 
-  const validateEmail = useCallback((email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isValid = emailRegex.test(email);
-    setValidations(prev => ({ ...prev, email: isValid }));
-    return isValid;
-  }, []);
+  const validatePassword = (password) => {
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return re.test(password);
+  };
 
-  const validatePhone = useCallback((phone) => {
-    const phoneRegex = /^\d{10}$/;
-    const isValid = phoneRegex.test(phone);
-    setValidations(prev => ({ ...prev, phone: isValid }));
-    return isValid;
-  }, []);
-
-  const validatePassword = useCallback((password) => {
-    const validations = {
-      hasUpperCase: /[A-Z]/.test(password),
-      hasLowerCase: /[a-z]/.test(password),
-      hasNumber: /\d/.test(password),
-      hasSpecial: /[@$!%*?&]/.test(password),  // Updated to match backend validation
-      hasLength: password.length >= 8
-    };
-    setValidations(prev => ({ ...prev, password: validations }));
-    return Object.values(validations).every(Boolean);
-  }, []);
-
-  const handleChange = useCallback((e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name.startsWith('location.')) {
-      const locationField = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        location: {
-          ...prev.location,
-          [locationField]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+    setFormData({ ...formData, [name]: value });
+    setValidationErrors({ ...validationErrors, [name]: '' });
+  };
 
-      // Validate fields as they change
-      if (name === 'email') validateEmail(value);
-      if (name === 'phone') validatePhone(value);
-      if (name === 'password') validatePassword(value);
-    }
-  }, [validateEmail, validatePhone, validatePassword]);
-
-  const isStepValid = useMemo(() => {
-    switch (activeStep) {
-      case 0:
-        return formData.firstName && formData.lastName && validations.email && validations.phone;
-      case 1:
-        return Object.values(validations.password).every(Boolean) && formData.password === formData.confirmPassword;
-      case 2:
-        if (formData.role === 'vendor') {
-          return formData.businessName && formData.serviceCategory && formData.location.city && formData.location.state;
-        }
-        return true;
-      default:
-        return false;
-    }
-  }, [activeStep, formData, validations]);
-
-  const validateStep = useCallback(() => {
-    switch (activeStep) {
-      case 0:
-        return formData.firstName && formData.lastName && validations.email && validations.phone;
-      case 1:
-        return Object.values(validations.password).every(Boolean) && formData.password === formData.confirmPassword;
-      case 2:
-        if (formData.role === 'vendor') {
-          return formData.businessName && formData.serviceCategory && formData.location.city && formData.location.state;
-        }
-        return true;
-      default:
-        return false;
-    }
-  }, [activeStep, formData, validations]);
-
-  const handleSubmit = useCallback(async (e) => {
-    if (e) e.preventDefault();
-    setLoading(true);
-    setErrorMessage('');
-  
-    try {
-      console.log('Starting registration with form data:', formData);
-
-      // Validate all required fields
-      if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.role) {
-        throw new Error('Please fill in all required fields');
-      }
-
-      if (!validateEmail(formData.email)) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      if (!validatePhone(formData.phone)) {
-        throw new Error('Please enter a valid 10-digit phone number');
-      }
-
-      if (!validatePassword(formData.password)) {
-        throw new Error('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character (@$!%*?&)');
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-  
-      // Additional validation for vendor
-      if (formData.role === 'vendor' && (!formData.businessName || !formData.serviceCategory)) {
-        throw new Error('Please complete all business information');
-      }
-  
-      console.log('All validations passed, dispatching register action');
-      const result = await dispatch(register(formData)).unwrap();
-      console.log('Registration result:', result);
-
-      if (result.success) {
-        console.log('Registration successful, navigating to dashboard');
-        navigate('/dashboard');
-      } else {
-        console.error('Registration failed:', result.message);
-        setErrorMessage(result.message || 'Registration failed');
-      }
-    } catch (err) {
-      console.error('Registration error:', err);
-      setErrorMessage(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, dispatch, navigate, validateEmail, validatePhone, validatePassword]);
-
-  const handleNext = useCallback(() => {
-    if (isStepValid) {
-      if (activeStep === steps.length - 1) {
-        handleSubmit();
-      } else {
-        setActiveStep(prev => prev + 1);
-      }
-    }
-  }, [isStepValid, activeStep, steps.length, handleSubmit]);
-
-  const handleBack = useCallback(() => {
-     setActiveStep(prev => prev - 1);
-   }, []);
-
-  const renderStepContent = (step) => {
-    const commonBoxStyles = {
-      p: { xs: 1.5, sm: 2 },
-      bgcolor: theme.palette.background.default,
-      borderRadius: 1,
-      mb: { xs: 2, sm: 3 }
-    };
-
-    const commonTypographyStyles = {
-      fontSize: { xs: '0.875rem', sm: '1rem' }
-    };
-
-    const commonInputProps = {
-      sx: { 
-        bgcolor: 'white',
-        '& .MuiInputLabel-root': {
-          fontSize: { xs: '0.875rem', sm: '1rem' }
-        },
-        '& .MuiInputBase-input': {
-          fontSize: { xs: '0.875rem', sm: '1rem' }
-        }
-      }
-    };
+  const validateStep = (step) => {
+    const errors = {};
 
     switch (step) {
       case 0:
+        if (!formData.firstName.trim()) errors.firstName = 'First name is required';
+        if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
+        break;
+      case 1:
+        if (!formData.email) errors.email = 'Email is required';
+        else if (!validateEmail(formData.email)) errors.email = 'Invalid email format';
+        if (!formData.phone) errors.phone = 'Phone number is required';
+        else if (!validatePhone(formData.phone)) errors.phone = 'Invalid phone number';
+        break;
+      case 2:
+        if (!formData.password) errors.password = 'Password is required';
+        else if (!validatePassword(formData.password)) {
+          errors.password =
+            'Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character (@$!%*?&)';
+        }
+        if (!formData.confirmPassword) errors.confirmPassword = 'Please confirm your password';
+        else if (formData.password !== formData.confirmPassword) {
+          errors.confirmPassword = 'Passwords do not match';
+        }
+        if (!formData.role) errors.role = 'Please select a role';
+        break;
+      case 3:
+        if (formData.role === 'vendor') {
+          if (!formData.businessName) errors.businessName = 'Business name is required';
+          if (!formData.businessType) errors.businessType = 'Business type is required';
+          if (!formData.businessAddress) errors.businessAddress = 'Business address is required';
+        }
+        break;
+      default:
+        break;
+    }
+
+    return errors;
+  };
+
+  const isStepValid = (step) => {
+    const errors = validateStep(step);
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (isStepValid(activeStep)) {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isStepValid(activeStep)) return;
+
+    try {
+      const result = await dispatch(register(formData)).unwrap();
+      if (result) {
+        navigate('/login');
+      }
+    } catch (err) {
+      const errorMessage = err.message || 'Registration failed';
+      setValidationErrors({ submit: errorMessage });
+    }
+  };
+
+  const renderStepContent = (step) => {
+    switch (step) {
+      case 0:
         return (
-          <Fade in={true}>
-            <Box>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
-                  mb: { xs: 2, sm: 3 }, 
-                  color: theme.palette.primary.main,
-                  fontSize: { xs: '1.125rem', sm: '1.25rem' }
-                }}
-              >
-                Tell us about yourself
-              </Typography>
-              
-              <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }}>
-                <Grid item xs={12}>
-                  <Box sx={commonBoxStyles}>
-                    <Typography 
-                      variant="subtitle1" 
-                      gutterBottom 
-                      sx={{ 
-                        color: theme.palette.text.secondary,
-                        ...commonTypographyStyles
-                      }}
-                    >
-                      Personal Information
-                    </Typography>
-                    <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Full Name"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          placeholder="Enter your full name"
-                          InputProps={commonInputProps}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          placeholder="Enter your email address"
-                          error={formData.email && !validations.email}
-                          helperText={formData.email && !validations.email ? 'Please enter a valid email address' : ''}
-                          InputProps={commonInputProps}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Phone Number"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          placeholder="Enter your 10-digit phone number"
-                          error={formData.phone && !validations.phone}
-                          helperText={formData.phone && !validations.phone ? 'Please enter a valid 10-digit phone number' : ''}
-                          InputProps={commonInputProps}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Box sx={commonBoxStyles}>
-                    <Typography 
-                      variant="subtitle1" 
-                      gutterBottom 
-                      sx={{ 
-                        color: theme.palette.text.secondary,
-                        ...commonTypographyStyles
-                      }}
-                    >
-                      Account Type
-                    </Typography>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel sx={commonTypographyStyles}>I am a</InputLabel>
-                      <Select
-                        value={formData.role}
-                        onChange={handleChange}
-                        name="role"
-                        label="I am a"
-                        sx={{ 
-                          bgcolor: 'white',
-                          '& .MuiSelect-select': {
-                            fontSize: { xs: '0.875rem', sm: '1rem' }
-                          }
-                        }}
-                      >
-                        <MenuItem value="customer">
-                          <Box sx={{ py: { xs: 0.5, sm: 1 } }}>
-                            <Typography variant="subtitle2" sx={commonTypographyStyles}>
-                              Customer
-                            </Typography>
-                            <Typography 
-                              variant="caption" 
-                              color="text.secondary"
-                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                            >
-                              Looking to book wedding services
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="vendor">
-                          <Box sx={{ py: { xs: 0.5, sm: 1 } }}>
-                            <Typography variant="subtitle2" sx={commonTypographyStyles}>
-                              Vendor
-                            </Typography>
-                            <Typography 
-                              variant="caption" 
-                              color="text.secondary"
-                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                            >
-                              Offering wedding services
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </Fade>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="First Name"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                error={!!validationErrors.firstName}
+                helperText={validationErrors.firstName}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Last Name"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                error={!!validationErrors.lastName}
+                helperText={validationErrors.lastName}
+              />
+            </Grid>
+          </Grid>
         );
-
       case 1:
         return (
-          <Fade in={true}>
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3, color: theme.palette.primary.main }}>
-                Secure your account
-              </Typography>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 1
-                  }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
-                      Password Setup
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Password"
-                          name="password"
-                          type="password"
-                          value={formData.password}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Confirm Password"
-                          name="confirmPassword"
-                          type="password"
-                          value={formData.confirmPassword}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          error={formData.confirmPassword && formData.password !== formData.confirmPassword}
-                          helperText={formData.confirmPassword && formData.password !== formData.confirmPassword ? 'Passwords do not match' : ''}
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Card variant="outlined" sx={{ bgcolor: theme.palette.background.default }}>
-                    <CardContent>
-                      <Typography variant="subtitle2" gutterBottom sx={{ color: theme.palette.text.secondary }}>
-                        Password Requirements
-                      </Typography>
-                      <Grid container spacing={1}>
-                        {Object.entries(validations.password).map(([key, valid]) => (
-                          <Grid item xs={12} sm={6} key={key}>
-                            <Box display="flex" alignItems="center">
-                              <Chip
-                                size="small"
-                                icon={valid ? <CheckIcon /> : undefined}
-                                label={key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                                color={valid ? 'success' : 'default'}
-                                variant={valid ? 'filled' : 'outlined'}
-                                sx={{ width: '100%', justifyContent: 'flex-start' }}
-                              />
-                            </Box>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              </Grid>
-            </Box>
-          </Fade>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                error={!!validationErrors.email}
+                helperText={validationErrors.email}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Phone Number"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                error={!!validationErrors.phone}
+                helperText={validationErrors.phone}
+              />
+            </Grid>
+          </Grid>
         );
-
       case 2:
-        return formData.role === 'vendor' ? (
-          <Fade in={true}>
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3, color: theme.palette.primary.main }}>
-                Tell us about your business
-              </Typography>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 1
-                  }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
-                      Business Information
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Business Name"
-                          name="businessName"
-                          value={formData.businessName}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          placeholder="Enter your business name"
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <FormControl fullWidth variant="outlined">
-                          <InputLabel>Service Category</InputLabel>
-                          <Select
-                            value={formData.serviceCategory}
-                            onChange={handleChange}
-                            name="serviceCategory"
-                            label="Service Category"
-                            required
-                            sx={{ bgcolor: 'white' }}
-                          >
-                            {serviceCategories.map((category) => (
-                              <MenuItem key={category} value={category}>
-                                {category}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 1
-                  }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
-                      Location Details
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="City"
-                          name="location.city"
-                          value={formData.location.city}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          placeholder="Enter city"
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="State"
-                          name="location.state"
-                          value={formData.location.state}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          placeholder="Enter state"
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Business Address"
-                          name="location.address"
-                          value={formData.location.address}
-                          onChange={handleChange}
-                          variant="outlined"
-                          multiline
-                          rows={2}
-                          placeholder="Enter complete business address"
-                          InputProps={{
-                            sx: { bgcolor: 'white' }
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 1
-                  }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
-                      Service Details
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      label="Service Description"
-                      name="serviceDescription"
-                      value={formData.serviceDescription}
-                      onChange={handleChange}
-                      variant="outlined"
-                      multiline
-                      rows={4}
-                      placeholder="Describe your services, experience, and what makes your business unique..."
-                      InputProps={{
-                        sx: { bgcolor: 'white' }
-                      }}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </Fade>
-        ) : (
-          <Fade in={true}>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography variant="h6" gutterBottom color="primary">
-                🎉 Almost there!
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                Your account is ready to be created. Click 'Complete' to finish registration and start planning your dream wedding!
-              </Typography>
-            </Box>
-          </Fade>
+        return (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                error={!!validationErrors.password}
+                helperText={validationErrors.password}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                error={!!validationErrors.confirmPassword}
+                helperText={validationErrors.confirmPassword}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!validationErrors.role}>
+                <InputLabel>Role</InputLabel>
+                <Select name="role" value={formData.role} onChange={handleInputChange}>
+                  <MenuItem value="user">User</MenuItem>
+                  <MenuItem value="vendor">Vendor</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
         );
-
+      case 3:
+        return formData.role === 'vendor' ? (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Business Name"
+                name="businessName"
+                value={formData.businessName}
+                onChange={handleInputChange}
+                error={!!validationErrors.businessName}
+                helperText={validationErrors.businessName}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Business Type"
+                name="businessType"
+                value={formData.businessType}
+                onChange={handleInputChange}
+                error={!!validationErrors.businessType}
+                helperText={validationErrors.businessType}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Business Address"
+                name="businessAddress"
+                value={formData.businessAddress}
+                onChange={handleInputChange}
+                error={!!validationErrors.businessAddress}
+                helperText={validationErrors.businessAddress}
+              />
+            </Grid>
+          </Grid>
+        ) : null;
       default:
         return null;
     }
   };
 
   return (
-    <Container 
-      maxWidth="sm" 
-      sx={{ 
-        py: { xs: 8, sm: 12 },  // Add padding top and bottom
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-      }}
-    >
-      <Card 
-        elevation={8}
-        sx={{
-          borderRadius: 2,
-          background: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)'
-        }}
-      >
-        <CardContent sx={{ p: 4 }}>
-          <Typography 
-            variant="h4" 
-            align="center" 
-            gutterBottom 
-            sx={{ 
-              fontWeight: 600,
-              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-            }}
-          >
-            Create Your Account
-          </Typography>
-          
-          <Stepper 
-            activeStep={activeStep} 
-            sx={{ 
-              mt: { xs: 2, sm: 3, md: 4 }, 
-              mb: { xs: 2, sm: 3, md: 4 },
-              '& .MuiStepLabel-root .Mui-completed': {
-                color: theme.palette.success.main
-              },
-              '& .MuiStepLabel-root .Mui-active': {
-                color: theme.palette.primary.main
-              },
-              // Mobile stepper adjustments
-              '& .MuiStepLabel-label': {
-                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
-              },
-              // Hide step numbers on mobile, show only labels
-              '& .MuiStepIcon-root': {
-                display: { xs: 'none', sm: 'block' }
-              }
-            }}
-            alternativeLabel  // Better for mobile
-          >
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-
-          {errorMessage && (
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: { xs: 2, sm: 3 },
-                borderRadius: 1,
-                fontSize: { xs: '0.875rem', sm: '1rem' }
-              }}
-            >
-              {errorMessage}
-            </Alert>
-          )}
-
-          <Box sx={{ mt: { xs: 2, sm: 3, md: 4 } }}>
-            {renderStepContent(activeStep)}
-            
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              mt: { xs: 2, sm: 3, md: 4 },
-              px: { xs: 0, sm: 2 }
-            }}>
-              <Button
-                onClick={handleBack}
-                disabled={activeStep === 0 || loading}
-                sx={{
-                  px: { xs: 2, sm: 3, md: 4 },
-                  '&.Mui-disabled': {
-                    opacity: 0
-                  }
-                }}
-              >
-                Back
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                disabled={!validateStep() || loading}
-                endIcon={loading && <CircularProgress size={20} />}
-                sx={{ 
-                  px: { xs: 2, sm: 3, md: 4 },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                {activeStep === steps.length - 1 ? 'Complete' : 'Next'}
-              </Button>
-            </Box>
-          </Box>
-
-          <Divider sx={{ my: { xs: 2, sm: 3, md: 4 } }} />
-
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography 
-              variant="body2" 
-              color="textSecondary"
-              sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
-            >
-              Already have an account?{' '}
-              <Link 
-                to="/login" 
-                style={{ 
-                  textDecoration: 'none', 
-                  color: theme.palette.primary.main,
-                  fontWeight: 500
-                }}
-              >
-                Login here
-              </Link>
+    <Container component="main" maxWidth="sm">
+      <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
+        <Typography component="h1" variant="h5" align="center" gutterBottom>
+          Register
+        </Typography>
+        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <form onSubmit={handleSubmit}>
+          {renderStepContent(activeStep)}
+          {validationErrors.submit && (
+            <Typography color="error" align="center" sx={{ mt: 2 }}>
+              {validationErrors.submit}
             </Typography>
+          )}
+          {error && (
+            <Typography color="error" align="center" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+            <Button onClick={handleBack} disabled={activeStep === 0}>
+              Back
+            </Button>
+            <div>
+              {activeStep === steps.length - 1 ? (
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                  endIcon={loading && <CircularProgress size={20} />}
+                >
+                  Register
+                </Button>
+              ) : (
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  Next
+                </Button>
+              )}
+            </div>
           </Box>
-        </CardContent>
-      </Card>
+        </form>
+      </Paper>
     </Container>
   );
 };

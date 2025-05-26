@@ -6,11 +6,8 @@ const baseURL = process.env.REACT_APP_API_URL || 'https://shaadisetgo-backend.on
 // Validate the API URL format
 if (!baseURL.startsWith('http')) {
   const errorMessage = 'Invalid API URL format. Please check your environment variables.';
-  console.error(errorMessage);
   throw new Error(errorMessage);
 }
-
-console.log('API Base URL:', baseURL); // Log the base URL being used
 
 const api = axios.create({
   baseURL: baseURL,
@@ -46,41 +43,21 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log(`API Request to ${config.url}:`, {
-      method: config.method,
-      headers: config.headers,
-      data: config.data
-    });
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for handling errors and token refresh
 api.interceptors.response.use(
-  (response) => {
-    console.log(`API Response from ${response.config.url}:`, {
-      status: response.status,
-      data: response.data
-    });
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    console.error('API Response Error:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
-
     const originalRequest = error.config;
 
     // Handle network errors
     if (!error.response) {
-      console.error('Network Error - No response received');
       return Promise.reject(new Error('Network error - Please check your internet connection'));
     }
 
@@ -124,7 +101,6 @@ api.interceptors.response.use(
         localStorage.removeItem('userRole');
         localStorage.removeItem('refreshToken');
         delete api.defaults.headers.common.Authorization;
-        console.error('Token refresh failed:', refreshError);
         return Promise.reject(new Error('Authentication expired - Please login again'));
       } finally {
         isRefreshing = false;
