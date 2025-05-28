@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock } from 'react-icons/fa';
+import { FaSearch, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock, FaHeart, FaStar } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { Box, Container, TextField, Button, Grid, Card, CardContent, Typography, IconButton } from '@mui/material';
+import { Box, Container, TextField, Button, Grid, Card, CardContent, Typography, IconButton, Paper, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import heroBg from '../assets/wedding-bg.jpg';
+import heroBg from '../assets/hero-bg.jpg';
 import './Home.css';
 
 const StyledCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
   transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
   '&:hover': {
     transform: 'translateY(-8px)',
@@ -19,7 +22,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 const SearchField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: theme.shape.borderRadius,
     '&:hover': {
       backgroundColor: '#ffffff',
@@ -27,156 +30,177 @@ const SearchField = styled(TextField)(({ theme }) => ({
   },
 }));
 
+const IconWrapper = styled(Box)(({ theme }) => ({
+  fontSize: '2.5rem',
+  marginBottom: theme.spacing(2),
+  color: theme.palette.primary.main,
+}));
+
 const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [
-    { name: 'Venues', icon: <FaBuilding className="text-5xl" color="#FFC1CC" /> },
-    { name: 'Photography', icon: <FaCamera className="text-5xl" color="#FFC1CC" /> },
-    { name: 'Catering', icon: <FaUtensils className="text-5xl" color="#FFC1CC" /> },
-    { name: 'Decoration', icon: <FaPaintBrush className="text-5xl" color="#FFC1CC" /> },
-    { name: 'Music', icon: <FaMusic className="text-5xl" color="#FFC1CC" /> },
-    { name: 'Makeup', icon: <FaPalette className="text-5xl" color="#FFC1CC" /> }
+    { name: 'Venues', icon: <FaBuilding />, description: 'Find perfect wedding venues' },
+    { name: 'Photography', icon: <FaCamera />, description: 'Capture your special moments' },
+    { name: 'Catering', icon: <FaUtensils />, description: 'Delicious wedding cuisine' },
+    { name: 'Decoration', icon: <FaPaintBrush />, description: 'Beautiful wedding decor' },
+    { name: 'Music', icon: <FaMusic />, description: 'Set the perfect mood' },
+    { name: 'Makeup', icon: <FaPalette />, description: 'Look your absolute best' }
   ];
 
   const howItWorks = [
     {
       icon: <FaSearch />,
       title: 'Discover',
-      description: 'Search top-rated photographers, caterers & decorators in your city.'
+      description: 'Browse our curated selection of top-rated wedding vendors in your city'
     },
     {
       icon: <FaMoneyBillWave />,
       title: 'Compare',
-      description: 'Get instant, transparent quotes—no hidden fees.'
+      description: 'Get transparent quotes and compare services side by side'
     },
     {
       icon: <FaLock />,
-      title: 'Book',
-      description: 'Secure your vendor with built-in escrow and relax.'
+      title: 'Book Securely',
+      description: 'Book with confidence using our secure payment system'
     }
   ];
-
-  const features = [
-    {
-      icon: <FaClock />,
-      title: 'Save Time & Effort',
-      description: 'Browse 300+ vetted vendors in one place—stop toggling between sites.'
-    },
-    {
-      icon: <FaMoneyBillWave />,
-      title: 'Transparent Pricing',
-      description: 'View real quotes upfront. No surprises, ever.'
-    },
-    {
-      icon: <FaUserCheck />,
-      title: 'Trusted Pros',
-      description: 'Every vendor is background-checked and rated by real couples.'
-    },
-    {
-      icon: <FaLock />,
-      title: 'Hassle-Free Payments',
-      description: 'Secure, escrow-backed transactions protect your deposit until your big day.'
-    }
-  ];
-
-  const testimonials = [
-    {
-      title: 'Geo-Detect & Prefill',
-      description: 'Start planning instantly—location detected for you.'
-    },
-    {
-      title: 'Smart Search',
-      description: 'Type once; get service + city suggestions in real time.'
-    },
-    {
-      title: 'Live Chat & Support',
-      description: 'Got questions? Chat with our wedding experts anytime.'
-    }
-  ];
-
 
   return (
     <Box className="home-container">
       {/* Hero Section */}
-      <Box className="hero-section" style={{ backgroundImage: `url(${heroBg})` }}>
+      <Box 
+        className="hero-section"
+        sx={{
+          position: 'relative',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${heroBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: 'white',
+        }}
+      >
         <Container maxWidth="lg">
-          <Box className="hero-content">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
+          <Box 
+            sx={{
+              textAlign: 'center',
+              maxWidth: '800px',
+              mx: 'auto',
+              p: 4,
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              variant="h1" className="hero-title" gutterBottom
+              transition={{ duration: 0.8 }}
             >
-              Plan Your Dream Wedding in Minutes
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              variant="h5" className="hero-subtitle" gutterBottom
-            >
-              Connect instantly with handpicked, verified local vendors—no endless searches, no surprises.
-            </motion.p>
-            
-            {/* Search Bar */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="search-container" mt={4}
-            >
-              <SearchField
-                fullWidth
-                variant="outlined"
-                placeholder="Search for venues, photographers, or caterers in your city"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton>
-                      <FaSearch />
-                    </IconButton>
-                  ),
+              <Typography 
+                variant="h1" 
+                sx={{ 
+                  fontSize: { xs: '2.5rem', md: '4rem' },
+                  fontWeight: 800,
+                  mb: 3,
+                  fontFamily: '"Playfair Display", serif',
+                  background: 'linear-gradient(120deg, #FFC1CC, #D4AF37)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                 }}
-              />
-              <button className="search-button" onClick={() => navigate('/vendors')}>
-                <FaSearch /> Find Vendors
-              </button>
-            </motion.div>
+              >
+                Your Dream Wedding Starts Here
+              </Typography>
+              <Typography 
+                variant="h5"
+                sx={{ 
+                  mb: 4,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: { xs: '1.1rem', md: '1.5rem' },
+                }}
+              >
+                Connect with top wedding vendors and plan your perfect day with ease
+              </Typography>
 
-            {/* Social Proof */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="social-proof"
-            >
-              <p>⭐️⭐️⭐️⭐️⭐️ 4.9/5 average vendor rating • Trusted by 12,000+ couples nationwide</p>
+              <Box sx={{ maxWidth: '600px', mx: 'auto', mb: 4 }}>
+                <SearchField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Search for venues, photographers, or caterers"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <Button 
+                        variant="contained" 
+                        sx={{ 
+                          height: '100%',
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                        }}
+                      >
+                        <FaSearch />
+                        <Box component="span" sx={{ ml: 1, display: { xs: 'none', sm: 'block' } }}>
+                          Search
+                        </Box>
+                      </Button>
+                    ),
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FaStar style={{ color: '#FFD700' }} /> 4.9/5 Rating
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FaHeart style={{ color: '#FFC1CC' }} /> 10,000+ Happy Couples
+                </Typography>
+              </Box>
             </motion.div>
           </Box>
         </Container>
       </Box>
 
       {/* Categories Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h2" align="center" gutterBottom>
-          Browse by Category
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+        <Typography 
+          variant="h2" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            mb: 6,
+            fontFamily: '"Playfair Display", serif',
+            fontSize: { xs: '2rem', md: '3rem' },
+          }}
+        >
+          Discover Our Services
         </Typography>
-        <Grid container spacing={4} mt={2}>
+        <Grid container spacing={4}>
           {categories.map((category, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
               >
                 <StyledCard>
-                  <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                    {category.icon}
-                    <Typography variant="h6" mt={2}>
+                  <CardContent sx={{ p: 4, textAlign: 'center', flex: 1 }}>
+                    <IconWrapper>{category.icon}</IconWrapper>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
                       {category.name}
                     </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {category.description}
+                    </Typography>
+                    <Button 
+                      variant="outlined" 
+                      sx={{ mt: 3 }}
+                      onClick={() => navigate(`/services/${category.name.toLowerCase()}`)}
+                    >
+                      Learn More
+                    </Button>
                   </CardContent>
                 </StyledCard>
               </motion.div>
@@ -186,91 +210,47 @@ const Home = () => {
       </Container>
 
       {/* How It Works Section */}
-      <Box sx={{ bgcolor: '#B2DFDB', py: 8 }}>
+      <Box sx={{ bgcolor: 'background.default', py: { xs: 6, md: 10 } }}>
         <Container maxWidth="lg">
-          <Typography variant="h2" align="center" gutterBottom>
+          <Typography 
+            variant="h2" 
+            align="center" 
+            gutterBottom
+            sx={{ 
+              mb: 6,
+              fontFamily: '"Playfair Display", serif',
+              fontSize: { xs: '2rem', md: '3rem' },
+            }}
+          >
             How It Works
           </Typography>
-          <Grid container spacing={4} mt={2}>
+          <Grid container spacing={4}>
             {howItWorks.map((step, index) => (
               <Grid item xs={12} md={4} key={index}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.2 }}
+                  viewport={{ once: true }}
                 >
-                  <StyledCard>
-                    <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                      {step.icon}
-                      <Typography variant="h5" mt={2}>
-                        {step.title}
-                      </Typography>
-                      <Typography variant="body1" mt={1}>
-                        {step.description}
-                      </Typography>
-                    </CardContent>
-                  </StyledCard>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h2" align="center" gutterBottom>
-          Why Choose ShaadiSetGo
-        </Typography>
-        <Grid container spacing={4} mt={2}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} key={index}>
-              <motion.div
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <StyledCard>
-                  <CardContent sx={{ p: 4 }}>
-                    {feature.icon}
-                    <Typography variant="h5" mt={2}>
-                      {feature.title}
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 4, 
+                      height: '100%',
+                      textAlign: 'center',
+                      bgcolor: 'background.paper',
+                      borderRadius: 2,
+                    }}
+                  >
+                    <IconWrapper>{step.icon}</IconWrapper>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                      {step.title}
                     </Typography>
-                    <Typography variant="body1" mt={1}>
-                      {feature.description}
+                    <Typography variant="body1" color="text.secondary">
+                      {step.description}
                     </Typography>
-                  </CardContent>
-                </StyledCard>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      {/* Testimonials Section */}
-      <Box sx={{ bgcolor: '#FFF8F0', py: 8 }}>
-        <Container maxWidth="lg">
-          <Typography variant="h2" align="center" gutterBottom>
-            What Couples Say
-          </Typography>
-          <Grid container spacing={4} mt={2}>
-            {testimonials.map((testimonial, index) => (
-              <Grid item xs={12} md={6} key={index}>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.2 }}
-                >
-                  <StyledCard>
-                    <CardContent sx={{ p: 4 }}>
-                      <Typography variant="body1" sx={{ fontStyle: 'italic' }}>
-                        {testimonial.content}
-                      </Typography>
-                      <Typography variant="subtitle1" mt={2} sx={{ color: 'primary.main' }}>
-                        {testimonial.author}
-                      </Typography>
-                    </CardContent>
-                  </StyledCard>
+                  </Paper>
                 </motion.div>
               </Grid>
             ))}
@@ -279,39 +259,84 @@ const Home = () => {
       </Box>
 
       {/* CTA Section */}
-      <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Typography variant="h2" gutterBottom>
-            Ready to Start Planning?
-          </Typography>
-          <Typography variant="h5" gutterBottom sx={{ color: 'text.secondary' }}>
-            Join thousands of happy couples who planned their perfect day with ShaadiSetGo
-          </Typography>
-          <Box mt={4}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              sx={{ mr: 2 }}
-              onClick={() => navigate('/signup')}
+      <Box 
+        sx={{ 
+          bgcolor: 'primary.main', 
+          color: 'white',
+          py: { xs: 6, md: 10 },
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="md">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Typography 
+              variant="h2" 
+              gutterBottom
+              sx={{ 
+                fontFamily: '"Playfair Display", serif',
+                fontSize: { xs: '2rem', md: '3rem' },
+                mb: 3,
+              }}
             >
-              Get Started Free
-            </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="large"
-              onClick={() => navigate('/contact')}
+              Ready to Start Planning?
+            </Typography>
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ 
+                mb: 4,
+                opacity: 0.9,
+                fontSize: { xs: '1.1rem', md: '1.5rem' },
+              }}
             >
-              Contact Sales
-            </Button>
-          </Box>
-        </motion.div>
-      </Container>
+              Join thousands of happy couples who planned their perfect day with us
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                onClick={() => navigate('/signup')}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                  backgroundColor: '#FFF',
+                  color: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: '#F3F3F3',
+                  }
+                }}
+              >
+                Get Started Free
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={() => navigate('/contact')}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                  borderColor: '#FFF',
+                  color: '#FFF',
+                  '&:hover': {
+                    borderColor: '#F3F3F3',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  }
+                }}
+              >
+                Contact Sales
+              </Button>
+            </Box>
+          </motion.div>
+        </Container>
+      </Box>
     </Box>
   );
 };

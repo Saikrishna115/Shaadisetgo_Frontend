@@ -3,12 +3,9 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../assets/hero-bg.jpg') no-repeat center center;
   background-size: cover;
-  background-attachment: fixed;
+  background-position: center;
   color: white;
-  text-align: center;
   overflow: hidden;
 }
 
@@ -73,32 +70,49 @@
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.card-hover {
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.5rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.2rem;
-  }
-
-  .search-container {
-    padding: 0 0.5rem;
+  .hero-section {
+    min-height: 80vh;
+    padding: 4rem 0;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-
-  .search-button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+  .hero-section {
+    min-height: 70vh;
+    padding: 3rem 0;
   }
 }
   .grid-container {
