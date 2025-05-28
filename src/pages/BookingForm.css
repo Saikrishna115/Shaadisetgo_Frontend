@@ -1,0 +1,142 @@
+.booking-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Progress Stepper */
+.MuiStepper-root {
+  margin-bottom: 40px !important;
+}
+
+.MuiStepLabel-label {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+
+.MuiStepLabel-label.Mui-active {
+  color: #2e7d32 !important;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section-title {
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+/* Summary Card */
+.summary-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: #666;
+}
+
+.summary-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.total-amount {
+  font-size: 1.5rem;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* Payment Section */
+.payment-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.security-note {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 16px;
+  border-radius: 4px;
+  margin: 24px 0;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.security-note svg {
+  color: #2e7d32;
+}
+
+/* Form Controls */
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+.back-button {
+  color: #666 !important;
+}
+
+.next-button,
+.submit-button {
+  background: #2e7d32 !important;
+  color: white !important;
+  padding: 12px 32px !important;
+  font-size: 1rem !important;
+}
+
+.next-button:hover,
+.submit-button:hover {
+  background: #1b5e20 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .booking-form-container {
+    padding: 20px 16px;
+  }
+
+  .form-section-title {
+    font-size: 1.25rem;
+  }
+
+  .summary-card,
+  .payment-section {
+    padding: 16px;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .back-button,
+  .next-button,
+  .submit-button {
+    width: 100%;
+  }
+}

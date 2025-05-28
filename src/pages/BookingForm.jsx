@@ -11,26 +11,38 @@ import {
   TextField,
   CircularProgress,
   Paper,
-  Divider
+  Divider,
+  Stepper,
+  Step,
+  StepLabel,
+  Alert
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LockOutlined as LockIcon } from '@mui/icons-material';
 import api from '../services/api/config';
+import './BookingForm.css';
 
 const BookingForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [activeStep, setActiveStep] = useState(0);
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
     eventDate: null,
-    guestCount: '',
-    eventType: '',
-    message: '',
-    budget: ''
+    selectedPackage: null,
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvv: ''
   });
+
+  const steps = ['Details', 'Review', 'Payment'];
 
   useEffect(() => {
     const fetchVendorDetails = async () => {
@@ -70,6 +82,14 @@ const BookingForm = () => {
     }));
   };
 
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -86,170 +106,201 @@ const BookingForm = () => {
     }
   };
 
+  const renderStepContent = (step) => {
+    switch (step) {
+      case 0:
+        return (
+          <div className="form-section">
+            <Typography variant="h6" className="form-section-title">Tell us about yourself</Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Full Name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+            </Grid>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="form-section">
+            <Typography variant="h6" className="form-section-title">Booking Summary</Typography>
+            <Card className="summary-card">
+              <CardContent>
+                <div className="summary-row">
+                  <span className="summary-label">Vendor</span>
+                  <span className="summary-value">{vendor?.businessName}</span>
+                </div>
+                <div className="summary-row">
+                  <span className="summary-label">Package</span>
+                  <span className="summary-value">{formData.selectedPackage?.name}</span>
+                </div>
+                <div className="summary-row">
+                  <span className="summary-label">Event Date</span>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      label="Select Date"
+                      value={formData.eventDate}
+                      onChange={handleDateChange}
+                      renderInput={(params) => <TextField {...params} fullWidth required />}
+                      minDate={new Date()}
+                    />
+                  </LocalizationProvider>
+                </div>
+                <div className="summary-row">
+                  <span className="summary-label">Total Amount</span>
+                  <span className="total-amount">₹{formData.selectedPackage?.price.toLocaleString('en-IN') || 0}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="form-section">
+            <Typography variant="h6" className="form-section-title">Payment Details</Typography>
+            <div className="payment-section">
+              <Typography variant="subtitle1" gutterBottom>Secure your booking with a small deposit</Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Card Number"
+                    name="cardNumber"
+                    value={formData.cardNumber}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Expiry Date"
+                    name="cardExpiry"
+                    placeholder="MM/YY"
+                    value={formData.cardExpiry}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="CVV"
+                    name="cardCvv"
+                    type="password"
+                    value={formData.cardCvv}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+              </Grid>
+              <div className="security-note">
+                <LockIcon />
+                <Typography variant="body2">
+                  Your money is held in escrow until after your event. Payment processed securely via PCI‑Compliant gateway.
+                </Typography>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-        <CircularProgress />
-      </Box>
+      <Container>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Paper sx={{ p: 3, textAlign: 'center' }}>
-          <Typography color="error" variant="h6">{error}</Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            onClick={() => navigate('/vendors')}
-          >
-            Back to Vendors
-          </Button>
-        </Paper>
+      <Container>
+        <Alert severity="error" sx={{ mt: 3 }}>{error}</Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button
-        variant="outlined"
-        onClick={() => navigate(`/vendors/${id}`)}
-        sx={{ mb: 3 }}
-      >
-        Back to Vendor Details
-      </Button>
+    <Container className="booking-form-container">
+      <Typography variant="h4" align="center" gutterBottom>Confirm Your Booking</Typography>
+      
+      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={8}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Book {vendor?.businessName || 'Vendor'}
-              </Typography>
-              <Divider sx={{ mb: 3 }} />
+      <form onSubmit={handleSubmit}>
+        {renderStepContent(activeStep)}
 
-              <form onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                      <DatePicker
-                        label="Event Date"
-                        value={formData.eventDate}
-                        onChange={handleDateChange}
-                        renderInput={(params) => <TextField {...params} fullWidth required />}
-                        minDate={new Date()}
-                      />
-                    </LocalizationProvider>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      required
-                      fullWidth
-                      label="Guest Count"
-                      name="guestCount"
-                      type="number"
-                      value={formData.guestCount}
-                      onChange={handleInputChange}
-                      InputProps={{ inputProps: { min: 1 } }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      required
-                      fullWidth
-                      label="Event Type"
-                      name="eventType"
-                      value={formData.eventType}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Wedding, Birthday, Corporate"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      required
-                      fullWidth
-                      label="Budget"
-                      name="budget"
-                      type="number"
-                      value={formData.budget}
-                      onChange={handleInputChange}
-                      InputProps={{ inputProps: { min: 0 } }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Message to Vendor"
-                      name="message"
-                      multiline
-                      rows={4}
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      placeholder="Describe your requirements or any special requests"
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      size="large"
-                      fullWidth
-                      disabled={loading}
-                    >
-                      {loading ? 'Sending Request...' : 'Send Booking Request'}
-                    </Button>
-                  </Grid>
-                </Grid>
-              </form>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Vendor Details</Typography>
-              <Divider sx={{ mb: 2 }} />
-              
-              <Typography variant="subtitle1" gutterBottom>
-                {vendor?.businessName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {vendor?.serviceType}
-              </Typography>
-              
-              {vendor?.priceRange && (
-                <Typography variant="body2" gutterBottom>
-                  Price Range: ₹{vendor.priceRange.min || 0} - ₹{vendor.priceRange.max || 0}
-                </Typography>
-              )}
-              
-              {vendor?.location && (
-                <Typography variant="body2" gutterBottom>
-                  Location: {[vendor.location.city, vendor.location.state].filter(Boolean).join(', ')}
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-
-          {vendor?.availability && (
-            <Card sx={{ mt: 3 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Availability</Typography>
-                <Typography variant="body2">
-                  {vendor.availability}
-                </Typography>
-              </CardContent>
-            </Card>
+        <div className="form-buttons">
+          <Button
+            className="back-button"
+            disabled={activeStep === 0}
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+          {activeStep === steps.length - 1 ? (
+            <Button
+              type="submit"
+              variant="contained"
+              className="submit-button"
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Pay & Confirm Booking'}
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              className="next-button"
+              onClick={handleNext}
+            >
+              Next
+            </Button>
           )}
-        </Grid>
-      </Grid>
+        </div>
+      </form>
     </Container>
   );
 };
 
-export default BookingForm; 
+export default BookingForm;

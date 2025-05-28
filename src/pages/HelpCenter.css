@@ -1,0 +1,91 @@
+.MuiAccordion-root {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px !important;
+  margin-bottom: 16px;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+}
+
+.MuiAccordion-root:before {
+  display: none;
+}
+
+.MuiAccordion-root:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.MuiAccordionSummary-root {
+  padding: 16px 24px;
+}
+
+.MuiAccordionSummary-content {
+  margin: 8px 0 !important;
+}
+
+.MuiAccordionDetails-root {
+  padding: 0 24px 24px;
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+  background-color: white;
+  border-radius: 12px;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-width: 2px;
+}
+
+.search-icon {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.contact-paper {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+}
+
+.contact-paper:hover {
+  transform: translateY(-4px);
+}
+
+.MuiButton-root {
+  text-transform: none;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 8px;
+}
+
+.MuiButton-contained {
+  background: linear-gradient(45deg, #FF4B2B 0%, #FF416C 100%);
+  box-shadow: 0 4px 15px rgba(255, 75, 43, 0.2);
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(45deg, #FF416C 0%, #FF4B2B 100%);
+  box-shadow: 0 6px 20px rgba(255, 75, 43, 0.3);
+}
+
+.MuiButton-outlined {
+  border-width: 2px;
+}
+
+@media (max-width: 600px) {
+  .MuiAccordionSummary-root {
+    padding: 12px 16px;
+  }
+
+  .MuiAccordionDetails-root {
+    padding: 0 16px 16px;
+  }
+
+  .MuiButton-root {
+    padding: 6px 16px;
+  }
+}

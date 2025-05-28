@@ -7,41 +7,56 @@
 .vendor-list-container h1 {
   text-align: center;
   color: #333;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
-.filters-section {
-  display: flex;
-  gap: 1rem;
+.results-header {
+  text-align: center;
+  color: #666;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  background: #f5f5f5;
-  padding: 1rem;
-  border-radius: 8px;
+  font-size: 1.2rem;
 }
 
-.filters-section select {
-  padding: 0.5rem;
+.filters-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.filter-section h3 {
+  color: #333;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.filter-section select {
+  width: 100%;
+  padding: 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  min-width: 150px;
-  font-size: 1rem;
-}
-
-.apply-filters-btn {
-  padding: 0.5rem 1rem;
-  background-color: #e91e63;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #444;
+  background-color: #f8f8f8;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.apply-filters-btn:hover {
-  background-color: #d81b60;
+.filter-section select:hover {
+  border-color: #999;
+}
+
+.filter-section select:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
 .vendors-grid {
@@ -51,16 +66,16 @@
 }
 
 .vendor-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
-  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .vendor-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .vendor-image {
@@ -75,86 +90,108 @@
 }
 
 .vendor-info {
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
-.vendor-info h3 {
-  margin: 0 0 0.5rem;
+.vendor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.vendor-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
   color: #333;
 }
 
-.vendor-category,
-.vendor-location {
-  color: #666;
-  margin: 0.25rem 0;
+.verified-badge {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
 }
 
 .vendor-rating {
-  margin: 0.5rem 0;
-}
-
-.stars {
-  color: #ffd700;
-  margin-right: 0.5rem;
-}
-
-.rating-count {
+  margin-bottom: 1rem;
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
-.price-range {
+.vendor-price {
   color: #2196f3;
-  font-weight: bold;
-  margin: 0.5rem 0;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  font-size: 1.1rem;
 }
 
-.view-details-btn {
-  display: block;
-  text-align: center;
+.quote-btn {
+  width: 100%;
   padding: 0.75rem;
-  background-color: #e91e63;
+  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
   color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  margin-top: 1rem;
-  transition: background-color 0.3s;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.view-details-btn:hover {
-  background-color: #d81b60;
+.quote-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.no-vendors {
+  text-align: center;
+  padding: 3rem;
+  background: #f8f8f8;
+  border-radius: 12px;
+  grid-column: 1 / -1;
+}
+
+.no-vendors h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.no-vendors p {
+  color: #666;
+  font-size: 1.1rem;
 }
 
 .loading,
 .error {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   font-size: 1.2rem;
+  color: #666;
 }
 
 .error {
-  color: #f44336;
-}
-
-.no-vendors {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-  grid-column: 1 / -1;
+  color: #e74c3c;
 }
 
 @media (max-width: 768px) {
-  .filters-section {
-    flex-direction: column;
-    align-items: stretch;
+  .vendor-list-container {
+    padding: 1rem;
   }
 
-  .filters-section select,
-  .apply-filters-btn {
-    width: 100%;
+  .vendor-list-container h1 {
+    font-size: 2rem;
+  }
+
+  .filters-panel {
+    grid-template-columns: 1fr;
+    padding: 1rem;
   }
 
   .vendors-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-} 
+}

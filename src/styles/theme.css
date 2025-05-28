@@ -1,23 +1,48 @@
 :root {
-  /* Primary Colors */
-  --primary-color: #FF4B91;
-  --secondary-color: #FF9EAA;
-  --accent-color: #FFD0D0;
-  --background-color: #FFF5E4;
+  /* Brand Colors */
+  --primary-color: #E76F51;
+  --primary-hover: #EA7A5E;
+  --secondary-color: #F4A261;
+  --neutral-dark: #264653;
+  --neutral-light: #F0F3F4;
+  --soft-blush: #FFDDD2;
   
   /* Text Colors */
-  --text-color: #333333;
-  --heading-color: #222222;
+  --text-primary: #264653;
+  --text-secondary: rgba(38, 70, 83, 0.9);
+  --text-muted: rgba(38, 70, 83, 0.7);
+  --text-metadata: #4A5A6A;
+  --text-placeholder: #A0AAB2;
   
-  /* State Colors */
-  --error-color: #dc3545;
-  --success-color: #28a745;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
+  /* Background Colors */
+  --bg-page: #F0F3F4;
+  --bg-card: #FFFFFF;
+  --bg-header: #FFFFFF;
+  --bg-footer: #264653;
+  --bg-disabled: #F0F3F4;
+  --bg-hero-overlay: linear-gradient(to bottom, #FFDDD2, #F0F3F4);
+  --bg-alternate: rgba(255, 221, 210, 0.15);
   
-  /* Form Colors */
-  --input-border: #ddd;
-  --input-focus-shadow: rgba(255, 75, 145, 0.2);
+  /* Border Colors */
+  --border-light: #D1D5D9;
+  --border-header: #E1E5E9;
+  
+  /* Interactive Colors */
+  --focus-ring: rgba(231, 111, 81, 0.3);
+  --star-rating: #FFC300;
+  --verified-badge: #F4A261;
+  --hover-link: #FFC300;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-focus: 0 0 0 3px rgba(231, 111, 81, 0.3);
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -26,21 +51,16 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   
-  /* Border Radius */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  
-  /* Container Widths */
-  --container-max-width: 1200px;
-  
-  /* Transitions */
-  --transition-speed: 0.3s;
-  
-  /* Font Sizes */
+  /* Typography */
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.5rem;
-} 
+  
+  /* Transitions */
+  --transition-speed: 0.3s;
+  
+  /* Container */
+  --container-max-width: 1200px;
+}

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaHeart, FaSearch, FaCalendar, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette } from 'react-icons/fa';
-import heroBg from '../assets/hero-bg.jpg';  // Ensure the image path is correct
+import { FaHeart, FaSearch, FaCalendar, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import heroBg from '../assets/hero-bg.jpg';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [
     { name: 'Venues', icon: <FaBuilding className="text-5xl text-pink-500" /> },
@@ -16,36 +18,70 @@ const Home = () => {
     { name: 'Makeup', icon: <FaPalette className="text-5xl text-pink-500" /> }
   ];
 
-  const features = [
+  const howItWorks = [
     {
       icon: <FaSearch />,
-      title: 'Easy Search',
-      description: 'Find the perfect wedding vendors in your area with our advanced search filters.'
+      title: 'Discover',
+      description: 'Search top-rated photographers, caterers & decorators in your city.'
     },
     {
-      icon: <FaHeart />,
-      title: 'Trusted Vendors',
-      description: 'All our vendors are carefully vetted to ensure the highest quality of service.'
+      icon: <FaMoneyBillWave />,
+      title: 'Compare',
+      description: 'Get instant, transparent quotes—no hidden fees.'
     },
     {
-      icon: <FaCalendar />,
-      title: 'Simple Booking',
-      description: 'Book and manage all your wedding vendors in one place, hassle-free.'
+      icon: <FaLock />,
+      title: 'Book',
+      description: 'Secure your vendor with built-in escrow and relax.'
+    }
+  ];
+
+  const features = [
+    {
+      icon: <FaClock />,
+      title: 'Save Time & Effort',
+      description: 'Browse 300+ vetted vendors in one place—stop toggling between sites.'
+    },
+    {
+      icon: <FaMoneyBillWave />,
+      title: 'Transparent Pricing',
+      description: 'View real quotes upfront. No surprises, ever.'
+    },
+    {
+      icon: <FaUserCheck />,
+      title: 'Trusted Pros',
+      description: 'Every vendor is background-checked and rated by real couples.'
+    },
+    {
+      icon: <FaLock />,
+      title: 'Hassle-Free Payments',
+      description: 'Secure, escrow-backed transactions protect your deposit until your big day.'
+    }
+  ];
+
+  const featureHighlights = [
+    {
+      title: 'Geo-Detect & Prefill',
+      description: 'Start planning instantly—location detected for you.'
+    },
+    {
+      title: 'Smart Search',
+      description: 'Type once; get service + city suggestions in real time.'
+    },
+    {
+      title: 'Live Chat & Support',
+      description: 'Got questions? Chat with our wedding experts anytime.'
     }
   ];
 
   const testimonials = [
     {
-      content: 'ShaadiSetGo made planning our wedding so much easier. We found amazing vendors all in one place!',
-      author: 'Muni & Sai'
+      content: 'ShaadiSetGo made finding my photographer a breeze. I compared 5 quotes and booked within 24 hours!',
+      author: 'Priya & Rohit, Delhi'
     },
     {
-      content: 'The platform is user-friendly and the vendors are top-notch. Highly recommended!',
-      author: 'Lakshmi & Krishna'
-    },
-    {
-      content: 'Thanks to ShaadiSetGo, we had our dream wedding within our budget.',
-      author: 'Meera & Arun'
+      content: 'I saved hours and Rs.10,000 by comparing caterers side by side. Highly recommend!',
+      author: 'Ananya & Karan, Bangalore'
     }
   ];
 
@@ -54,21 +90,106 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero-section" style={{ backgroundImage: `url(${heroBg})` }}>
         <div className="hero-content">
-          <h1 className="hero-title">Plan Your Perfect Wedding</h1>
-          <p className="hero-subtitle">Find and book the best wedding vendors all in one place</p>
-          <button className="cta-button" onClick={() => navigate('/vendors')}>Find Your Wedding Vendor</button>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="hero-title"
+          >
+            Plan Your Dream Wedding in Minutes
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="hero-subtitle"
+          >
+            Connect instantly with handpicked, verified local vendors—no endless searches, no surprises.
+          </motion.p>
+          
+          {/* Search Bar */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="search-bar-container"
+          >
+            <input
+              type="text"
+              placeholder="e.g. Photographer • Mumbai"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <button className="search-button" onClick={() => navigate('/vendors')}>
+              Find Vendors
+            </button>
+          </motion.div>
+
+          {/* Social Proof */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="social-proof"
+          >
+            <p>⭐️⭐️⭐️⭐️⭐️ 4.9/5 average vendor rating • Trusted by 12,000+ couples nationwide</p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="how-it-works-section">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          How It Works
+        </motion.h2>
+        <div className="steps-grid">
+          {howItWorks.map((step, index) => (
+            <motion.div
+              key={index}
+              className="step-card"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="step-icon">{step.icon}</div>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
       {/* Features Section */}
       <section className="features-section">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          Core Benefits
+        </motion.h2>
         <div className="features-grid">
           {features.map((feature, index) => (
-            <div key={index} className="feature-card">
+            <motion.div
+              key={index}
+              className="feature-card"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.2 }}
+              viewport={{ once: true }}
+            >
               <div className="feature-icon">{feature.icon}</div>
               <h3>{feature.title}</h3>
               <p>{feature.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -109,20 +230,75 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="newsletter-section">
-        <h2>Stay Updated</h2>
-        <p>Subscribe to receive wedding planning tips and vendor recommendations</p>
-        <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="newsletter-input"
-            aria-label="Email for newsletter"
-          />
-          <button type="submit" className="cta-button">Subscribe</button>
-        </form>
+      {/* Feature Highlights Section */}
+      <section className="feature-highlights-section">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          Feature Highlights
+        </motion.h2>
+        <div className="highlights-grid">
+          {featureHighlights.map((highlight, index) => (
+            <motion.div
+              key={index}
+              className="highlight-card"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.2 }}
+              viewport={{ once: true }}
+            >
+              <h3>{highlight.title}</h3>
+              <p>{highlight.description}</p>
+            </motion.div>
+          ))}
+        </div>
       </section>
+
+      {/* Trust & Security Section */}
+      <section className="trust-section">
+        <motion.div
+          className="trust-content"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <div className="trust-badges">
+            <span>✔️ PCI-Compliant Payments</span>
+            <span>✔️ SSL Secured</span>
+            <span>✔️ 24/7 Customer Support</span>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="final-cta-section">
+        <motion.div
+          className="cta-content"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h2>Ready to Start Planning?</h2>
+          <p>Get free, no-obligation quotes from top wedding pros today.</p>
+          <button className="cta-button" onClick={() => navigate('/vendors')}>Get My Quotes →</button>
+        </motion.div>
+      </section>
+
+      {/* Footer Links */}
+      <footer className="footer-section">
+        <div className="footer-links">
+          <a href="/about">About</a>
+          <a href="/how-it-works">How It Works</a>
+          <a href="/help">Help Center</a>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Service</a>
+        </div>
+      </footer>
     </div>
   );
 };
