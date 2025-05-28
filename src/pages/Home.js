@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import heroBg from '../assets/hero-bg.jpg';
+import heroBg from '../assets/wedding-bg.jpg';
 import './Home.css';
 
 const Home = () => {
