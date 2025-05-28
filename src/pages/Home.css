@@ -410,7 +410,7 @@
 
 @media (max-width: 100px) {
   .hero-section {
-    height: 80vh;
+    height: 20vh;
     background-attachment: scroll;
     background-size: contain;
   }
