@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock, FaHeart, FaStar } from 'react-icons/fa';
+import { FaSearch, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaMoneyBillWave, FaLock, FaHeart, FaStar } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { Box, Container, TextField, Button, Grid, Card, CardContent, Typography, IconButton, Paper, Divider } from '@mui/material';
+import { Box, Container, TextField, Button, Grid, Card, CardContent, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import heroBg from '../assets/hero-bg.jpg';
 import './Home.css';
