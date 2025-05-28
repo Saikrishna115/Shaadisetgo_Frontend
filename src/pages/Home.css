@@ -412,7 +412,7 @@
   .hero-section {
     height: 20vh;
     background-attachment: scroll;
-    background-size: contain;
+    background-size: flex;
   }
 
   .hero-content {
