@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaHeart, FaSearch, FaCalendar, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock } from 'react-icons/fa';
+import { FaSearch, FaBuilding, FaCamera, FaUtensils, FaPaintBrush, FaMusic, FaPalette, FaClock, FaMoneyBillWave, FaUserCheck, FaLock } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import heroBg from '../assets/hero-bg.jpg';
 import './Home.css';
