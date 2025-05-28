@@ -19,7 +19,7 @@
 }
 
 .hero-content {
-  max-width: 250px;
+  max-width: 1000px;
   padding: 2rem;
   z-index: 1;
 }
@@ -410,6 +410,7 @@
   .hero-section {
     height: 80vh;
     background-attachment: scroll;
+    background-size: contain;
   }
 
   .hero-content {
