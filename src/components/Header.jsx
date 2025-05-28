@@ -6,9 +6,11 @@ import { styled } from '@mui/material/styles';
 const NavLink = styled(Link)(({ theme }) => ({
   color: theme.palette.text.primary,
   textDecoration: 'none',
-  padding: theme.spacing(1),
+  padding: theme.spacing(1.5),
   position: 'relative',
-  fontWeight: 500,
+  fontWeight: 600,
+  fontSize: '1rem',
+  letterSpacing: '0.5px',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -23,33 +25,53 @@ const NavLink = styled(Link)(({ theme }) => ({
   '&:hover::after': {
     width: '100%',
   },
+  '&:hover': {
+    color: theme.palette.primary.main,
+  },
 }));
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: theme.spacing(2),
+  padding: theme.spacing(1.5),
   transition: 'all 0.3s ease',
+  height: '80px',
   [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(1, 2),
+    padding: theme.spacing(1, 3),
   },
 }));
 
 const Logo = styled('img')({
-  height: '40px',
+  height: '48px',
   cursor: 'pointer',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
 });
 
 const NavContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
-  gap: theme.spacing(4),
+  gap: theme.spacing(3),
   alignItems: 'center',
 }));
 
 const ButtonContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(2),
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1, 3),
+  textTransform: 'none',
+  fontSize: '1rem',
+  fontWeight: 600,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+  },
 }));
 
 const Header = () => {
@@ -77,7 +99,9 @@ const Header = () => {
       sx={{
         bgcolor: 'background.default',
         transition: 'all 0.3s ease',
-        py: isScrolled ? 0 : 1,
+        py: isScrolled ? 0 : 0.5,
+        borderBottom: '1px solid',
+        borderColor: trigger ? 'divider' : 'transparent',
       }}
     >
       <Container maxWidth="xl">
@@ -97,36 +121,29 @@ const Header = () => {
           </NavContainer>
 
           <ButtonContainer>
-            <Button
+            <StyledButton
               variant="outlined"
               color="primary"
               onClick={() => navigate('/login')}
               sx={{
-                borderRadius: '50px',
-                px: 3,
+                borderWidth: '2px',
                 '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  borderWidth: '2px',
                 },
               }}
             >
               Login
-            </Button>
-            <Button
+            </StyledButton>
+            <StyledButton
               variant="contained"
               color="primary"
-              onClick={() => navigate('/get-quotes')}
+              onClick={() => navigate('/signup')}
               sx={{
-                borderRadius: '50px',
-                px: 3,
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                },
+                boxShadow: '0 4px 14px 0 rgba(0, 118, 255, 0.39)',
               }}
             >
               Get Free Quotes
-            </Button>
+            </StyledButton>
           </ButtonContainer>
         </StyledToolbar>
       </Container>
