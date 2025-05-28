@@ -22,6 +22,8 @@
   max-width: 1000px;
   padding: 2rem;
   z-index: 1;
+  background-attachment: scroll;
+  background-size: auto;
 }
 
 .hero-title {
@@ -406,7 +408,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 100px) {
   .hero-section {
     height: 80vh;
     background-attachment: scroll;
