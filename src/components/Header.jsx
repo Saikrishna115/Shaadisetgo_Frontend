@@ -1,153 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Button, Box, Container, useScrollTrigger } from '@mui/material';
-import { styled } from '@mui/material/styles';
-
-const NavLink = styled(Link)(({ theme }) => ({
-  color: theme.palette.text.primary,
-  textDecoration: 'none',
-  padding: theme.spacing(1.5),
-  position: 'relative',
-  fontWeight: 600,
-  fontSize: '1rem',
-  letterSpacing: '0.5px',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    width: '0%',
-    height: '2px',
-    bottom: '0',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: theme.palette.primary.main,
-    transition: 'width 0.3s ease-in-out',
-  },
-  '&:hover::after': {
-    width: '100%',
-  },
-  '&:hover': {
-    color: theme.palette.primary.main,
-  },
-}));
-
-const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: theme.spacing(1),
-  transition: 'all 0.3s ease',
-  height: '64px',
-  [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(0.75, 3),
-  },
-}));
-
-const Logo = styled('img')({
-  height: '40px',
-  cursor: 'pointer',
-  transition: 'transform 0.3s ease',
-  '&:hover': {
-    transform: 'scale(1.05)',
-  },
-});
-
-const NavContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(3),
-  alignItems: 'center',
-}));
-
-const ButtonContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(1, 3),
-  textTransform: 'none',
-  fontSize: '1rem',
-  fontWeight: 600,
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-2px)',
-  },
-}));
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Menu as MenuIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Header = () => {
   const navigate = useNavigate();
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 100,
-  });
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const navItems = [
+    { label: 'Home', path: '/' },
+    { label: 'Services', path: '/vendors' },
+    { label: 'About', path: '/about' },
+    { label: 'Contact', path: '/contact' }
+  ];
 
   return (
-    <AppBar
-      position="fixed"
-      elevation={trigger ? 4 : 0}
-      sx={{
-        bgcolor: 'background.default',
-        transition: 'all 0.3s ease',
-        py: isScrolled ? 0 : 0.25,
-        borderBottom: '1px solid',
-        borderColor: trigger ? 'divider' : 'transparent',
-      }}
-    >
-      <Container maxWidth="xl">
-        <StyledToolbar>
-          <Logo
-            src="/logo.svg"
-            alt="ShaadiSetGo"
-            onClick={() => navigate('/')}
-          />
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <div className="mr-4 flex">
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/logo.svg" alt="ShaadiSetGo" className="h-8 w-auto" />
+          </Link>
+        </div>
 
-          <NavContainer sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/services">Services</NavLink>
-            <NavLink to="/how-it-works">How it Works</NavLink>
-            <NavLink to="/testimonials">Testimonials</NavLink>
-            <NavLink to="/contact">Contact</NavLink>
-          </NavContainer>
+        {/* Mobile Navigation */}
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <MenuIcon className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+            <nav className="flex flex-col space-y-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="text-lg font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
 
-          <ButtonContainer>
-            <StyledButton
-              variant="outlined"
-              color="primary"
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex md:flex-1 md:items-center md:justify-between">
+          <ul className="flex items-center space-x-6">
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <Link
+                  to={item.path}
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              className="text-sm font-medium transition-colors hover:text-primary"
               onClick={() => navigate('/login')}
-              sx={{
-                borderWidth: '2px',
-                '&:hover': {
-                  borderWidth: '2px',
-                },
-              }}
             >
-              Login
-            </StyledButton>
-            <StyledButton
-              variant="contained"
-              color="primary"
-              onClick={() => navigate('/signup')}
-              sx={{
-                boxShadow: '0 4px 14px 0 rgba(0, 118, 255, 0.39)',
-              }}
+              Sign In
+            </Button>
+            <Button
+              className="text-sm font-medium"
+              onClick={() => navigate('/register')}
             >
-              Get Free Quotes
-            </StyledButton>
-          </ButtonContainer>
-        </StyledToolbar>
-      </Container>
-    </AppBar>
+              Get Started
+            </Button>
+          </div>
+        </nav>
+      </div>
+    </header>
   );
 };
 
