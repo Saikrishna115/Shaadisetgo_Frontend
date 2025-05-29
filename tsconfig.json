@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "baseUrl": "src", // Use "src" directly as the base URL
+    "paths": {
+      "@/*": ["./*"] // When baseUrl is "src", then "@/components" refers to "src/components"
+    },
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -18,10 +16,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "baseUrl": "src"  // <--- ADD THIS LINE
+    "jsx": "react-jsx"
   },
   "include": [
     "src"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json" // If you have a separate tsconfig for Node.js environments (like Vite itself)
+    }
   ]
 }

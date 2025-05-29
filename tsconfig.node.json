@@ -1,0 +1,20 @@
+// tsconfig.node.json
+{
+  "compilerOptions": {
+    "composite": true,       // Add this line
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler", // Or "node", but "bundler" is often preferred with Vite
+    "allowSyntheticDefaultImports": true, // Often needed for 'path', 'url'
+    "strict": true,
+    "isolatedModules": true, // Recommended for Vite
+    "noEmit": false,         // Change this to false, or remove it entirely
+    "jsx": "react-jsx",      // If you're using JSX in vite.config.ts itself (unlikely, but safe)
+    "types": ["node"],       // Ensure Node.js types are included
+    "lib": ["ESNext"]
+  },
+  "include": [
+    "vite.config.ts" // Ensure your vite config is included
+    // Other node-specific files like setupProxy.js if you have them
+  ]
+}
