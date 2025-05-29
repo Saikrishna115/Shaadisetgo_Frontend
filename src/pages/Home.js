@@ -6,7 +6,6 @@ import { Box, Container, TextField, Button, Grid, Card, CardContent, Typography,
 import { styled } from '@mui/material/styles';
 import heroBg from '../assets/hero-bg.jpg';
 import './Home.css';
-import Header from '@/components/Header';
 const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
   display: 'flex',
