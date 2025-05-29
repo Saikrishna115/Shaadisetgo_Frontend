@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Box, Container, TextField, Button, Grid, Card, CardContent, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import heroBg from '../assets/hero-bg.jpg';
+import Header from '@/components/Header';
 import './Home.css';
 const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
@@ -82,6 +83,7 @@ const Home = () => {
           color: 'white',
         }}
       >
+        <Header />
         <Container maxWidth="lg">
           <Box 
             sx={{
