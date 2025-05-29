@@ -74,10 +74,10 @@
     "eslint-plugin-react-hooks": "^4.6.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",              
+  "build": "vite build",       
+  "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0", 
+  "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": ["react-app", "react-app/jest"]
