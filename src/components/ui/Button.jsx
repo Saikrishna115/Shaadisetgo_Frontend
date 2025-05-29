@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { cn } from '../../utils/cn';
+import { cn } from '../../lib/utils';
 
 const Button = React.forwardRef(({
   className,
@@ -53,4 +53,4 @@ const Button = React.forwardRef(({
 
 Button.displayName = 'Button';
 
-export default Button; 
+export default Button;
