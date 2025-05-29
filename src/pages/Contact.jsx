@@ -2,8 +2,8 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 const Contact = () => {
@@ -60,8 +60,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 mb-1">Email</h3>
-                    <p className="text-gray-600">hello@dreamwed.com</p>
-                    <p className="text-gray-600">support@dreamwed.com</p>
+                    <p className="text-gray-600">hello@ShaadiSetGo.com</p>
+                    <p className="text-gray-600">support@ShaadiSetGo.com</p>
                   </div>
                 </div>
 

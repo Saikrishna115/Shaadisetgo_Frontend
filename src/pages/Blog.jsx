@@ -2,7 +2,7 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Calendar, User, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 const Blog = () => {
   const blogPosts = [/* same array as original (omitted here for brevity) */];

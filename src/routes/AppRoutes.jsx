@@ -16,10 +16,10 @@ import NotFound from '../pages/NotFound.js';
 import Blog from '../pages/Blog';
 import FAQ from '../pages/FAQ';
 import Contact from '../pages/Contact';
-
+import Header from '../components/Header';
 // Route Guards
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();  
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
