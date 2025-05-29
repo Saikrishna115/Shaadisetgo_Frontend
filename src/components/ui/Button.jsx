@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
-const Button = React.forwardRef(({
+export const Button = React.forwardRef(({
   className,
   variant = 'primary',
   size = 'default',
