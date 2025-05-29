@@ -16,7 +16,7 @@ const Chat = () => {
       navigate('/login');
     }
   }, [user, navigate]);
-  const { user, profile } = useAuth();
+ 
 
   return (
     <div className="min-h-screen">
