@@ -34,16 +34,16 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: theme.spacing(1.5),
+  padding: theme.spacing(1),
   transition: 'all 0.3s ease',
-  height: '80px',
+  height: '64px',
   [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(1, 3),
+    padding: theme.spacing(0.75, 3),
   },
 }));
 
 const Logo = styled('img')({
-  height: '48px',
+  height: '40px',
   cursor: 'pointer',
   transition: 'transform 0.3s ease',
   '&:hover': {
@@ -99,7 +99,7 @@ const Header = () => {
       sx={{
         bgcolor: 'background.default',
         transition: 'all 0.3s ease',
-        py: isScrolled ? 0 : 0.5,
+        py: isScrolled ? 0 : 0.25,
         borderBottom: '1px solid',
         borderColor: trigger ? 'divider' : 'transparent',
       }}
