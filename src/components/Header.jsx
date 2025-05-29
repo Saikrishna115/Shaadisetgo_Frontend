@@ -13,8 +13,11 @@ const Header = () => {
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'Services', path: '/vendors' },
+    { label: 'Blog', path: '/blog' },
+    { label: 'FAQ', path: '/faq' },
     { label: 'About', path: '/about' },
     { label: 'Contact', path: '/contact' }
+    { label: 'Chat', path: '/chat' }
   ];
 
   return (

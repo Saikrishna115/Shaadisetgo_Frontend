@@ -13,6 +13,10 @@ import Profile from '../pages/Profile.jsx';
 import VendorList from '../pages/Services/VendorList';
 import AdminDashboard from '../pages/AdminDashboard.js';
 import NotFound from '../pages/NotFound.js';
+import Blog from '../pages/Blog';
+import FAQ from '../pages/FAQ';
+import About from '../pages/About';
+import Contact from '../pages/Contact';
 
 // Route Guards
 const PrivateRoute = ({ children }) => {
@@ -38,6 +42,10 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/vendors" element={<VendorList />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         
         {/* Protected Routes */}
         <Route
@@ -66,4 +74,4 @@ const AppRoutes = () => {
   );
 };
 
-export default AppRoutes; 
+export default AppRoutes;
