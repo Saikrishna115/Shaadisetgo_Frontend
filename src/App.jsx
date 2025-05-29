@@ -9,7 +9,7 @@ import theme from './theme';
 import './styles/globals.css';
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Register from "./pages/Register";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import Blog from "./pages/Blog";
