@@ -90,6 +90,7 @@ module.exports = {
       '@components': path.resolve(__dirname, 'src/components'),
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@utils': path.resolve(__dirname, 'src/utils'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
     },
   },
   performance: {
@@ -97,4 +98,4 @@ module.exports = {
     maxEntrypointSize: 512000,
     maxAssetSize: 512000,
   },
-}; 
+};
