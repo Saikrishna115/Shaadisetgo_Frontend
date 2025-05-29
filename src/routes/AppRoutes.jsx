@@ -15,7 +15,6 @@ import AdminDashboard from '../pages/AdminDashboard.js';
 import NotFound from '../pages/NotFound.js';
 import Blog from '../pages/Blog';
 import FAQ from '../pages/FAQ';
-import About from '../pages/About';
 import Contact from '../pages/Contact';
 
 // Route Guards
