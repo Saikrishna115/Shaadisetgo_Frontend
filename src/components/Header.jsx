@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Button } from './ui/Button';
 import { Menu as MenuIcon } from 'lucide-react';
+import Header from './components/Header';
 
 
 
@@ -16,7 +17,7 @@ const Header = () => {
     { label: 'Blog', path: '/blog' },
     { label: 'FAQ', path: '/faq' },
     { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' }
+    { label: 'Contact', path: '/contact' },
     { label: 'Chat', path: '/chat' }
   ];
 
