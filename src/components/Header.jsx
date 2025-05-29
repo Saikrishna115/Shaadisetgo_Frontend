@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
+import { Button } from '../components/ui/button';
 import { Menu as MenuIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+
 
 const Header = () => {
   const navigate = useNavigate();
