@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "*": ["*"]
+      "@/*": ["src/*"]
     },
     "module": "commonjs",
     "moduleResolution": "node",
@@ -11,4 +11,4 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build"]
-} 
+}
