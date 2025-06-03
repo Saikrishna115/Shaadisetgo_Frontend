@@ -21,6 +21,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
+      external: ['lucide-react'],
     },
     commonjsOptions: {
       include: [/node_modules/],
