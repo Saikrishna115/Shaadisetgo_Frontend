@@ -21,7 +21,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      external: ['lucide-react'],
+      external: ['lucide-react', 'class-variance-authority', 'tailwind-merge'],
     },
     commonjsOptions: {
       include: [/node_modules/],

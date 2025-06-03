@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 const Contact = () => {

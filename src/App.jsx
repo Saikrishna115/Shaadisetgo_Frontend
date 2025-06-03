@@ -4,7 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import AppRoutes from './routes/AppRoutes';
 import { AuthProvider } from './context/AuthContext';
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import theme from './theme';
 import './styles/globals.css';
 import Contact from "./pages/Contact";
@@ -18,6 +18,11 @@ const App = () => {
       <CssBaseline />
       <AuthProvider>
         <Header />
+        <Contact />
+        <Login />
+        <Register />
+        <FAQ />
+        <Blog />  
         <AppRoutes />
       </AuthProvider>
     </ThemeProvider>

@@ -6,13 +6,13 @@ import { useAuth } from '../context/AuthContext';
 import MainLayout from '../layouts/MainLayout';
 
 // Pages
-import Home from '../pages/Home.js';
+import Home from '../pages/Home.jsx';
 import Login from '../pages/Login.jsx';
 import Register from '../pages/Register.jsx';
 import Profile from '../pages/Profile.jsx';
 import VendorList from '../pages/Services/VendorList';
-import AdminDashboard from '../pages/AdminDashboard.js';
-import NotFound from '../pages/NotFound.js';
+import AdminDashboard from '../pages/AdminDashboard.jsx';
+import NotFound from '../pages/NotFound.jsx';
 import Blog from '../pages/Blog';
 import FAQ from '../pages/FAQ';
 import Contact from '../pages/Contact';
