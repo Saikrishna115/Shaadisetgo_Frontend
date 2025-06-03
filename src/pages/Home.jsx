@@ -41,29 +41,49 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [
-    { name: 'Venues', icon: <FaBuilding />, description: 'Find perfect wedding venues' },
-    { name: 'Photography', icon: <FaCamera />, description: 'Capture your special moments' },
-    { name: 'Catering', icon: <FaUtensils />, description: 'Delicious wedding cuisine' },
-    { name: 'Decoration', icon: <FaPaintBrush />, description: 'Beautiful wedding decor' },
-    { name: 'Music', icon: <FaMusic />, description: 'Set the perfect mood' },
-    { name: 'Makeup', icon: <FaPalette />, description: 'Look your absolute best' }
+    { name: 'Plan My Wedding Tool', icon: <FaBuilding />, description: 'Tell us about your wedding, and we'll handle the rest.' },
+    { name: 'Vendor Marketplace', icon: <FaCamera />, description: 'Browse curated professionals with availability and pricing.' },
+    { name: 'Wedding Dashboard', icon: <FaUtensils />, description: 'Manage your guests, to-dos, and budget in one place.' }
   ];
 
-  const howItWorks = [
+  const benefits = [
     {
       icon: <FaSearch />,
-      title: 'Discover',
-      description: 'Browse our curated selection of top-rated wedding vendors in your city'
+      title: '💍 Personalized Wedding Planner',
+      description: 'Get a complete wedding blueprint tailored to your date, budget & city.'
     },
     {
       icon: <FaMoneyBillWave />,
-      title: 'Compare',
-      description: 'Get transparent quotes and compare services side by side'
+      title: '📍 Top-Rated Vendors',
+      description: 'Discover decorators, caterers, and venues with real reviews.'
     },
     {
       icon: <FaLock />,
-      title: 'Book Securely',
-      description: 'Book with confidence using our secure payment system'
+      title: '📊 Budget Smart Tools',
+      description: 'Track spending, get alerts, and stay on top of your finances.'
+    },
+    {
+      icon: <FaLock />,
+      title: '📋 Checklist That Thinks Ahead',
+      description: "We'll keep you on schedule, even if you forget."
+    },
+    {
+      icon: <FaLock />,
+      title: '📞 Planner Support (Optional)',
+      description: 'Upgrade to a human assistant when you need that extra help.'
+    }
+  ];
+
+  const testimonials = [
+    {
+      quote: 'Shaadisetgo took the pressure off planning. Our planner even helped us find a last-minute DJ!',
+      couple: 'Aishwarya & Raghav',
+      location: 'Hyderabad'
+    },
+    {
+      quote: 'The platform felt like having a wedding planner in our pocket.',
+      couple: 'Ritika & Jai',
+      location: 'Jaipur'
     }
   ];
 
@@ -110,7 +130,7 @@ const Home = () => {
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                Your Dream Wedding Starts Here
+                Everything You Need. Right Where You Need It.
               </Typography>
               <Typography 
                 variant="h5"
@@ -120,7 +140,7 @@ const Home = () => {
                   fontSize: { xs: '1.1rem', md: '1.5rem' },
                 }}
               >
-                Connect with top wedding vendors and plan your perfect day with ease
+                Why ShaadiSetGo?
               </Typography>
 
               <Box sx={{ maxWidth: '600px', mx: 'auto', mb: 4 }}>
@@ -163,7 +183,7 @@ const Home = () => {
         </Container>
       </Box>
 
-      {/* Categories Section */}
+      {/* Benefits Section */}
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
         <Typography 
           variant="h2" 
@@ -175,7 +195,47 @@ const Home = () => {
             fontSize: { xs: '2rem', md: '3rem' },
           }}
         >
-          Discover Our Services
+          Why ShaadiSetGo?
+        </Typography>
+        <Grid container spacing={4}>
+          {benefits.map((benefit, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <StyledCard>
+                  <CardContent sx={{ p: 4, textAlign: 'center', flex: 1 }}>
+                    <IconWrapper>{benefit.icon}</IconWrapper>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                      {benefit.title}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {benefit.description}
+                    </Typography>
+                  </CardContent>
+                </StyledCard>
+              </motion.div>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Features Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+        <Typography 
+          variant="h2" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            mb: 6,
+            fontFamily: '"Playfair Display", serif',
+            fontSize: { xs: '2rem', md: '3rem' },
+          }}
+        >
+          🛠️ Features Preview
         </Typography>
         <Grid container spacing={4}>
           {categories.map((category, index) => (
@@ -195,9 +255,51 @@ const Home = () => {
                     <Typography variant="body1" color="text.secondary">
                       {category.description}
                     </Typography>
-                    <Button 
-                      variant="outlined" 
-                      sx={{ mt: 3 }}
+                  </CardContent>
+                </StyledCard>
+              </motion.div>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Testimonials Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 }, bgcolor: 'grey.50' }}>
+        <Typography 
+          variant="h2" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            mb: 6,
+            fontFamily: '"Playfair Display", serif',
+            fontSize: { xs: '2rem', md: '3rem' },
+          }}
+        >
+          👰🏽 Real Love. Real Stories.
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          {testimonials.map((testimonial, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: 4,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    bgcolor: 'white',
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography variant="body1" sx={{ mb: 3, fontStyle: 'italic' }}>
+                    
                       onClick={() => navigate(`/services/${category.name.toLowerCase()}`)}
                     >
                       Learn More

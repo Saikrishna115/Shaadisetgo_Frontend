@@ -34,4 +34,4 @@ const StatCard = ({ title, value, icon: Icon, progress, tooltip }) => (
   </Card>
 );
 
-export default StatCard; 
+export default StatCard;

@@ -25,4 +25,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </BrowserRouter>
     </Provider>
   </React.StrictMode>
-); 
+);

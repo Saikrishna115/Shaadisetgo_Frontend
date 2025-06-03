@@ -1,7 +1,8 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
+
+const Loader2 = React.lazy(() => import('lucide-react').then(mod => ({ default: mod.Loader2 })));
 
 export const Button = React.forwardRef(({
   className,

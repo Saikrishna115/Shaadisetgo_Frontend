@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Button } from './ui/Button';
-import { Menu as MenuIcon } from 'lucide-react';
+
+const MenuIcon = React.lazy(() => import('lucide-react/dist/esm/icons/menu').then(mod => ({ default: mod.default })));
 
 
 
@@ -34,7 +35,9 @@ const Header = () => {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="md:hidden">
             <Button variant="ghost" size="icon" className="md:hidden">
-              <MenuIcon className="h-5 w-5" />
+              <Suspense fallback={<div className="h-5 w-5 animate-pulse bg-gray-200 rounded" />}>
+                <MenuIcon className="h-5 w-5" />
+              </Suspense>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">

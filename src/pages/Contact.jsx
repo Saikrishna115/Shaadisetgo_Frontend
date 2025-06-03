@@ -1,10 +1,14 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+
+const Mail = React.lazy(() => import('lucide-react/dist/esm/icons/mail').then(mod => ({ default: mod.default })));
+const Phone = React.lazy(() => import('lucide-react/dist/esm/icons/phone').then(mod => ({ default: mod.default })));
+const MapPin = React.lazy(() => import('lucide-react/dist/esm/icons/map-pin').then(mod => ({ default: mod.default })));
+const Clock = React.lazy(() => import('lucide-react/dist/esm/icons/clock').then(mod => ({ default: mod.default })));
 
 const Contact = () => {
   return (
@@ -56,7 +60,9 @@ const Contact = () => {
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-gold" />
+                    <Suspense fallback={<div className="h-6 w-6 animate-pulse bg-gold/10 rounded" />}>
+                      <Mail className="h-6 w-6 text-gold" />
+                    </Suspense>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 mb-1">Email</h3>
@@ -67,7 +73,9 @@ const Contact = () => {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-gold" />
+                    <Suspense fallback={<div className="h-6 w-6 animate-pulse bg-gold/10 rounded" />}>
+                      <Phone className="h-6 w-6 text-gold" />
+                    </Suspense>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 mb-1">Phone</h3>
@@ -78,7 +86,9 @@ const Contact = () => {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-gold" />
+                    <Suspense fallback={<div className="h-6 w-6 animate-pulse bg-gold/10 rounded" />}>
+                      <MapPin className="h-6 w-6 text-gold" />
+                    </Suspense>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 mb-1">Office</h3>
@@ -89,7 +99,9 @@ const Contact = () => {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center">
-                    <Clock className="h-6 w-6 text-gold" />
+                    <Suspense fallback={<div className="h-6 w-6 animate-pulse bg-gold/10 rounded" />}>
+                      <Clock className="h-6 w-6 text-gold" />
+                    </Suspense>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 mb-1">Hours</h3>
